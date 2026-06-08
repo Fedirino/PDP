@@ -219,18 +219,6 @@
   .addrow button{appearance:none;border:none;background:var(--brand);color:#fff;font:inherit;font-weight:600;
     font-size:14.5px;padding:0 18px;border-radius:11px;cursor:pointer;flex:none;}
   .addrow button:active{background:var(--brand-d);}
-  .addrow-wrap{position:relative;}
-  .sg{position:absolute;left:0;right:0;top:100%;z-index:25;background:var(--surface);border:1px solid var(--line-2);
-    border-radius:0 0 11px 11px;box-shadow:var(--sh);max-height:240px;overflow-y:auto;display:none;}
-  .sg.open{display:block;}
-  .sg-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:11px 14px;
-    border:none;background:none;font:inherit;color:var(--ink);cursor:pointer;border-bottom:1px solid var(--line);}
-  .sg-item:last-child{border-bottom:none;}
-  .sg-item:active{background:var(--brand-tint-2);}
-  .sg-item .sg-name{flex:1;font-size:14px;font-weight:600;letter-spacing:-.005em;min-width:0;}
-  .sg-item .sg-name mark{background:var(--brand-tint);color:var(--brand-ink);border-radius:3px;padding:0 2px;font-weight:700;}
-  .sg-item .sg-code{flex:none;font-size:11px;color:var(--brand-ink);font-weight:700;font-variant-numeric:tabular-nums;}
-  .sg-item .sg-meta{flex:none;font-size:11px;color:var(--ink-3);font-weight:500;}
 
   .grp{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--brand-ink);
     margin:22px 4px 11px;display:flex;align-items:center;gap:10px;}
@@ -611,41 +599,6 @@ function highlight(desc,q){
   return h;
 }
 
-/* ======= Stencil suggest for add-product inputs ======= */
-function wireStencilSuggest(inputId, addFn){
-  const inp=document.getElementById(inputId);
-  const sg=document.getElementById("sg_"+inputId);
-  if(!inp||!sg) return;
-  let blurTimer=null;
-  const showSg=()=>{
-    const q=inp.value.trim();
-    if(q.length<2){ sg.classList.remove("open"); sg.innerHTML=""; return; }
-    const hits=searchStencil(q).slice(0,6);
-    if(!hits.length){ sg.classList.remove("open"); sg.innerHTML=""; return; }
-    sg.innerHTML=hits.map(it=>{
-      const meta=metaStr(it.p,it.u);
-      return `<button class="sg-item" data-sgname="${esc(it.d)}">
-        <div class="sg-name">${highlight(it.d,q)}</div>
-        ${it.c?`<span class="sg-code">#${esc(it.c)}</span>`:""}
-        ${meta?`<span class="sg-meta">${esc(meta)}</span>`:""}
-      </button>`;
-    }).join("");
-    sg.classList.add("open");
-    sg.querySelectorAll(".sg-item").forEach(b=>{
-      b.onpointerdown=e=>e.preventDefault();
-      b.onclick=()=>{
-        inp.value=b.dataset.sgname;
-        sg.classList.remove("open"); sg.innerHTML="";
-        addFn();
-      };
-    });
-  };
-  inp.addEventListener("input",showSg);
-  inp.addEventListener("focus",()=>{ if(inp.value.trim().length>=2) showSg(); });
-  inp.addEventListener("blur",()=>{ blurTimer=setTimeout(()=>{ sg.classList.remove("open"); sg.innerHTML=""; },200); });
-  inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){ sg.classList.remove("open"); sg.innerHTML=""; } });
-}
-
 /* ======= App navigation ======= */
 let tab="home";
 let stencilState={ query:"", showAll:true };
@@ -728,7 +681,7 @@ function renderHome(){
          <div class="go" style="color:var(--ink-3);font-size:10px;font-weight:700;letter-spacing:.06em">SOON</div>
        </div>
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v2.5.0</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v2.4.0</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
 }
 
@@ -865,7 +818,7 @@ function groupedHTML(sec){
           b+=`<div class="item" style="cursor:default"><div class="pn">${esc(p.name)}</div><button class="del" data-delprod="${p.id}" data-psub="${sub.id}">${I.x}</button></div>`;
         } else { const on=isOnList(p.id);
           b+=`<button class="item${on?" on":""}" data-prod="${p.id}" data-psub="${sub.id}"><div class="tick">${I.check}</div><div class="pn">${esc(p.name)}</div></button>`; }});
-      if(ll.edit) b+=`<div class="addrow-wrap"><div class="addrow"><input id="np_${sub.id}" placeholder="Add to ${esc(sub.name)}…" autocomplete="off"><button data-addprod="${sub.id}">Add</button></div><div class="sg" id="sg_np_${sub.id}"></div></div>`;
+      if(ll.edit) b+=`<div class="addrow"><input id="np_${sub.id}" placeholder="Add to ${esc(sub.name)}…" autocomplete="off"><button data-addprod="${sub.id}">Add</button></div>`;
       else if(!sub.products.length) b=`<div class="empty" style="padding:14px 8px">No items yet — tap <b>Edit</b>.</div>`;
       h+=`<div class="endbody">${b}</div>`;
     }});
@@ -882,8 +835,7 @@ function wireGrouped(sec){
       if(confirm(`Delete "${sub.name}"?`)){ state.pull=state.pull.filter(p=>p.subId!==sub.id); sec.subsections=sec.subsections.filter(x=>x.id!==sub.id); save(); render(); } });
     view.querySelectorAll("[data-delprod]").forEach(b=>b.onclick=()=>{ const sub=subById(sec,b.dataset.psub),pid=b.dataset.delprod; sub.products=sub.products.filter(x=>x.id!==pid); state.pull=state.pull.filter(p=>p.productId!==pid); save(); render(); });
     view.querySelectorAll("[data-addprod]").forEach(b=>{ const run=()=>{ const sub=subById(sec,b.dataset.addprod),inp=document.getElementById("np_"+b.dataset.addprod); const v=inp.value.trim(); if(!v) return; sub.products.push({id:uid(),name:v}); save(); render(); const f=document.getElementById("np_"+b.dataset.addprod); if(f) f.focus(); };
-      b.onclick=run; const inp=document.getElementById("np_"+b.dataset.addprod); if(inp) inp.onkeydown=e=>{ if(e.key==="Enter") run(); };
-      wireStencilSuggest("np_"+b.dataset.addprod,run); });
+      b.onclick=run; const inp=document.getElementById("np_"+b.dataset.addprod); if(inp) inp.onkeydown=e=>{ if(e.key==="Enter") run(); }; });
     const ns=document.getElementById("newSub"),as=document.getElementById("addSub");
     const add=()=>{ const v=ns.value.trim(); if(!v) return; sec.subsections.push({id:uid(),name:v,products:[]}); save(); render(); const f=document.getElementById("newSub"); if(f) f.focus(); };
     as.onclick=add; ns.onkeydown=e=>{ if(e.key==="Enter") add(); };
@@ -896,7 +848,7 @@ function productsHTML(sec,cont,subId){
       h+=`<div class="item" style="cursor:default"><div class="pn">${esc(p.name)}</div><button class="del" data-delprod="${p.id}">${I.x}</button></div>`;
     } else { const on=isOnList(p.id);
       h+=`<button class="item${on?" on":""}" data-prod="${p.id}"><div class="tick">${I.check}</div><div class="pn">${esc(p.name)}</div></button>`; }});
-  if(ll.edit) h+=`<div class="addrow-wrap"><div class="addrow"><input id="newProd" placeholder="Add product to ${esc(cont.name)}…" autocomplete="off"><button id="addProd">Add</button></div><div class="sg" id="sg_newProd"></div></div>`;
+  if(ll.edit) h+=`<div class="addrow"><input id="newProd" placeholder="Add product to ${esc(cont.name)}…" autocomplete="off"><button id="addProd">Add</button></div>`;
   if(!cont.products.length&&!ll.edit) h=`<div class="empty"><div class="ei">${I.clip}</div>No products here yet.<br>Tap <b>Edit</b> to add some.</div>`+h;
   return h;
 }
@@ -906,7 +858,6 @@ function wireProducts(sec,cont,subId){
     const np=document.getElementById("newProd"),ap=document.getElementById("addProd");
     const add=()=>{ const v=np.value.trim(); if(!v) return; cont.products.push({id:uid(),name:v}); save(); render(); const f=document.getElementById("newProd"); if(f) f.focus(); };
     ap.onclick=add; np.onkeydown=e=>{ if(e.key==="Enter") add(); };
-    wireStencilSuggest("newProd",add);
   } else view.querySelectorAll("[data-prod]").forEach(b=>b.onclick=()=>{ toggleProduct(sec.id,subId,b.dataset.prod); render(); });
 }
 

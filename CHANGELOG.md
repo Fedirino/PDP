@@ -4,6 +4,54 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [2.5.0] — 2026-06-08
+
+### Added
+- **Stencil search in Edit mode**: When adding products to any Holes list section or subsection, typing 2+ characters triggers a live stencil autocomplete dropdown showing up to 6 matching items with highlighted text, item codes, and pack/unit info. Tap a suggestion to add it instantly — or type a custom name and hit Add as before.
+
+### Changed
+- Service worker cache bumped to `pdp-v2.5.0`
+
+### Files
+- `index.html` — Main app (v2.5.0)
+- `pdp-v2_4_0.html` — Archived previous version
+- `sw.js` — Service worker (cache v2.5.0)
+- `CHANGELOG.md` — This file
+
+---
+
+## [2.4.0] — 2026-06-08
+
+### Added
+- **GEV List tab**: Dedicated page for the GEV checklist — all 24 categories and 73 items from the master manifest PDF. Tap any item to cross it out; state persists on device. Reset button clears all. Accessible from its own tab and a Home tile.
+- **PWA app icon**: The in-app PDP logo is now used as the phone home screen icon (192px and 512px PNG), replacing the SVG favicon
+- **Version number**: App version displayed on home screen (v2.4.0)
+
+### Changed
+- **Renamed "Load List" → "Holes"**: Tab, home tile, topbar, and all internal references updated
+- **Renamed "Unfound" → "Inventory Check"**: Segment control and all related labels
+- **Renamed "3% Claims Calculator" → "Claims Calculator"**: Removed "3%" from the tool name (calculation unchanged)
+- **6-tab layout**: Tab bar now includes Home, Stencil, Holes, GEV, Schedule, Tools
+- Service worker cache bumped to `pdp-v2.4.0`
+
+### Removed
+- **Data Specifications section**: Removed from GEV list (was a PDF formatting artifact)
+- **"Produce Department Master Manifest Lookup Matrix"**: Removed subtitle text
+
+### Storage
+- New localStorage key: `pdp_gev_v1` (GEV crossed-out state)
+
+### Files
+- `index.html` — Main app (v2.4.0)
+- `pdp-v2_3_0.html` — Archived previous version
+- `icon-192.png` — PWA icon (192×192)
+- `icon-512.png` — PWA icon (512×512)
+- `manifest.json` — Updated with PNG icons
+- `sw.js` — Service worker (cache v2.4.0)
+- `CHANGELOG.md` — This file
+
+---
+
 ## [2.3.0] — 2026-06-08
 
 ### Fixed
