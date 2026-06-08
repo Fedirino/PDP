@@ -1,0 +1,18 @@
+{
+  "name": "Produce Department Portal",
+  "short_name": "PDP",
+  "description": "Offline produce department tools — stencil lookup, load lists, schedule, and more.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1e17",
+  "theme_color": "#2d6a2e",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
