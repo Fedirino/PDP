@@ -71,16 +71,17 @@
   .tab.active .ic{background:var(--brand-tint);}
   .tab.active span{font-weight:700;}
 
-  .btn{appearance:none;border:none;cursor:pointer;font:inherit;font-weight:600;font-size:15px;
-    color:#fff;background:var(--brand);border-radius:var(--r);
-    padding:15px 18px;display:flex;align-items:center;justify-content:center;gap:9px;
+  .btn{appearance:none;border:none;cursor:pointer;font:inherit;font-weight:600;font-size:13px;
+    color:#fff;background:var(--brand);border-radius:var(--r-sm);
+    padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:7px;
     box-shadow:var(--sh-sm);transition:transform .08s ease,background .15s ease;}
   .btn:active{transform:scale(.985);background:var(--brand-d);}
   .btn.block{width:100%;}
   .btn.ghost{background:var(--surface);color:var(--brand);border:1px solid var(--line-2);}
   .btn.ghost:active{background:var(--surface-2);}
+  .btn svg{width:14px;height:14px;}
   .btn-danger{appearance:none;border:1px solid var(--danger-line);background:var(--surface);color:var(--danger);
-    font:inherit;font-weight:600;font-size:15px;padding:14px;border-radius:var(--r);cursor:pointer;width:100%;
+    font:inherit;font-weight:600;font-size:13px;padding:10px;border-radius:var(--r-sm);cursor:pointer;width:100%;
     box-shadow:var(--sh-sm);}
   .btn-danger:active{background:var(--danger-tint);}
 
@@ -282,10 +283,24 @@
   .copy:active{background:rgba(255,255,255,.28);}
   .hintline{font-size:12px;color:var(--ink-3);margin-top:13px;line-height:1.55;}
 
+  .ll-actions{margin-top:20px;display:flex;flex-direction:column;gap:8px;padding:14px 0 4px;
+    border-top:1px solid var(--line);}
+  .ll-summary{font-size:11px;font-weight:600;color:var(--ink-3);text-align:center;letter-spacing:.03em;margin-bottom:2px;}
+  .danger-txt{color:var(--danger)!important;border-color:var(--danger-line)!important;}
+
+  .uf-item{padding:10px 13px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);margin-bottom:5px;}
+  .uf-name{font-size:13px;font-weight:600;color:var(--ink);}
+  .uf-meta{font-size:11px;color:var(--ink-3);margin-top:2px;line-height:1.4;}
+
   .sch-section{margin-bottom:18px;}
   .sch-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
-    margin:0 4px 10px;display:flex;align-items:center;gap:8px;}
+    display:flex;align-items:center;gap:8px;}
   .sch-label::before{content:"";width:12px;height:3px;border-radius:2px;background:var(--brand);flex:none;}
+  .sch-lbl-row{display:flex;align-items:center;justify-content:space-between;margin:0 4px 10px;}
+  .sch-sm-btn{appearance:none;border:none;background:none;font:inherit;font-size:11px;font-weight:600;
+    color:var(--ink-3);cursor:pointer;padding:4px 0;display:flex;align-items:center;gap:4px;}
+  .sch-sm-btn svg{width:12px;height:12px;}
+  .sch-sm-btn:active{color:var(--brand);}
 
   .sch-drop{border:1.6px dashed var(--line-2);border-radius:var(--r);background:var(--surface);
     padding:40px 22px;text-align:center;cursor:pointer;transition:border-color .15s ease,background .15s ease;
@@ -305,9 +320,6 @@
     border:none;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;cursor:pointer;
     backdrop-filter:blur(6px);}
   .sch-img-wrap .exp svg{width:19px;height:19px;}
-  .sch-actions{display:flex;gap:9px;padding:13px;border-top:1px solid var(--line);}
-  .sch-actions .btn{flex:1;padding:13px;font-size:14px;}
-  .sch-actions .btn svg{width:18px;height:18px;}
   .sch-note{font-size:12px;color:var(--ink-3);margin:12px 4px 0;line-height:1.55;text-align:center;}
 
   .lb{position:fixed;inset:0;z-index:90;background:rgba(8,18,12,.96);display:none;flex-direction:column;
@@ -460,6 +472,15 @@ let sched;
 })();
 function saveSched(){ return writeK(SCHKEY,JSON.stringify(sched)); }
 
+const UNFOUND_KEY="pdp_unfound_v1";
+let unfound;
+(function loadUnfound(){
+  const raw=readK(UNFOUND_KEY);
+  if(raw){ try{ unfound=JSON.parse(raw); }catch(e){ unfound=[]; } }
+  if(!Array.isArray(unfound)) unfound=[];
+})();
+function saveUnfound(){ writeK(UNFOUND_KEY,JSON.stringify(unfound)); }
+
 /* ======= Helpers ======= */
 function esc(s){ return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 function sectionById(id){ return state.sections.find(s=>s.id===id); }
@@ -547,13 +568,11 @@ function renderTopbar(){
   let title="PDP", right="";
   if(tab==="stencil") title="Stencil";
   else if(tab==="loadlist"){ title="Load List";
-    if(ll.screen==="list" && state.pull.length) right=`<button class="tb-act danger" id="clearAct">Clear</button>`;
-    else if(ll.screen!=="list") right=`<button class="tb-act" id="editAct">${ll.edit?"Done":"Edit"}</button>`;
+    if(ll.screen!=="list"&&ll.screen!=="unfound") right=`<button class="tb-act" id="editAct">${ll.edit?"Done":"Edit"}</button>`;
   } else if(tab==="schedule") title="Schedule";
   else if(tab==="tools") title="Tools";
   topbar.innerHTML=`<div class="brand"><img src="${LOGO_SM}" alt="PDP"></div><div class="tb-tt"><h1>${title}</h1></div>${right}`;
   const ea=document.getElementById("editAct"); if(ea) ea.onclick=()=>{ ll.edit=!ll.edit; render(); };
-  const ca=document.getElementById("clearAct"); if(ca) ca.onclick=clearList;
 }
 
 /* ---- Tab bar ---- */
@@ -601,7 +620,7 @@ function renderHome(){
          <div class="go" style="color:var(--ink-3);font-size:10px;font-weight:700;letter-spacing:.06em">SOON</div>
        </div>
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v2.1.0</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v2.3.0</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
 }
 
@@ -671,12 +690,15 @@ function renderStencil(){
 /* ================= LOAD LIST ================= */
 function renderLoadList(){
   const n=state.pull.length;
+  const un=unfound.length;
   const seg=`<div class="seg">
-      <button class="${ll.screen!=="list"?"on":""}" data-seg="browse">Sections</button>
+      <button class="${ll.screen!=="list"&&ll.screen!=="unfound"?"on":""}" data-seg="browse">Sections</button>
       <button class="${ll.screen==="list"?"on":""}" data-seg="list">List <span class="pill tnum">${n}</span></button>
+      <button class="${ll.screen==="unfound"?"on":""}" data-seg="unfound">Unfound${un?` <span class="pill tnum">${un}</span>`:""}</button>
     </div>`;
   let body="";
   if(ll.screen==="list") body=compiledListHTML();
+  else if(ll.screen==="unfound") body=unfoundHTML();
   else if(ll.screen==="section"){ const sec=sectionById(ll.sectionId);
     if(!sec){ ll.screen="sections"; return renderLoadList(); }
     body=`<button class="backlink" id="llBack">${I.back} All sections</button>`+ (isGrouped(sec)?groupedHTML(sec):productsHTML(sec,sec,null)); }
@@ -684,11 +706,12 @@ function renderLoadList(){
   view.innerHTML=seg+body;
 
   view.querySelectorAll("[data-seg]").forEach(b=>b.onclick=()=>{
-    ll.screen = b.dataset.seg==="list" ? "list" : "sections"; render(); window.scrollTo(0,0); });
+    ll.screen = b.dataset.seg==="list" ? "list" : b.dataset.seg==="unfound" ? "unfound" : "sections"; render(); window.scrollTo(0,0); });
   const bk=document.getElementById("llBack"); if(bk) bk.onclick=()=>{ ll.screen="sections"; ll.edit=false; render(); window.scrollTo(0,0); };
 
   if(ll.screen==="sections") wireSections();
   else if(ll.screen==="section"){ const sec=sectionById(ll.sectionId); isGrouped(sec)?wireGrouped(sec):wireProducts(sec,sec,null); }
+  else if(ll.screen==="unfound") wireUnfound();
   else wireCompiledList();
 }
 
@@ -821,6 +844,13 @@ function compiledListHTML(){
       its.forEach(it=>h+=liHTML(it));
     });
   }
+  const uncheckedCount=state.pull.filter(p=>!p.done).length;
+  const checkedCount=state.pull.length-uncheckedCount;
+  h+=`<div class="ll-actions">
+    <div class="ll-summary">${checkedCount} found · ${uncheckedCount} unfound</div>
+    ${uncheckedCount?`<button class="btn" id="saveUnfound">${I.download} Save Unfound</button>`:""}
+    <button class="btn ghost danger-txt" id="clearAll">${I.x} Clear List</button>
+  </div>`;
   return h;
 }
 function wireCompiledList(){
@@ -828,8 +858,49 @@ function wireCompiledList(){
   view.querySelectorAll("[data-rm]").forEach(el=>el.onclick=()=>{ state.pull=state.pull.filter(p=>p.id!==el.dataset.rm); save(); render(); });
   view.querySelectorAll("[data-note]").forEach(el=>el.onclick=()=>{ const box=document.getElementById("ne_"+el.dataset.note); const open=box.classList.toggle("open"); if(open){ const i=box.querySelector("input"); i.focus(); try{i.setSelectionRange(i.value.length,i.value.length);}catch(e){} } });
   view.querySelectorAll("[data-noteinput]").forEach(inp=>{ inp.oninput=()=>{ const it=state.pull.find(p=>p.id===inp.dataset.noteinput); if(it){ it.note=inp.value; save(); } }; inp.onkeydown=e=>{ if(e.key==="Enter"){ inp.blur(); render(); } }; });
+  const su=document.getElementById("saveUnfound"); if(su) su.onclick=saveUnfoundItems;
+  const ca=document.getElementById("clearAll"); if(ca) ca.onclick=clearList;
 }
 function clearList(){ if(!state.pull.length) return; if(confirm("Clear the entire load list? This can't be undone.")){ state.pull=[]; save(); render(); } }
+function saveUnfoundItems(){
+  const unchecked=state.pull.filter(p=>!p.done);
+  if(!unchecked.length){ alert("No unchecked items to save."); return; }
+  const stamp=new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+  const entry={ date:stamp, ts:Date.now(), items:unchecked.map(p=>({name:p.name,note:p.note||"",code:p.pluCode||"",section:p.sectionName||p.cat||"",sub:p.subName||""})) };
+  unfound.unshift(entry);
+  if(unfound.length>10) unfound=unfound.slice(0,10);
+  saveUnfound();
+  state.pull=[]; save();
+  ll.screen="unfound"; render(); window.scrollTo(0,0);
+}
+
+/* ---- Unfound view ---- */
+function unfoundHTML(){
+  if(!unfound.length) return `<div class="empty"><div class="ei">${I.clip}</div>No saved unfound items yet.<br>Use <b>Save Unfound</b> from the List view to snapshot unchecked items for order adjustments.</div>`;
+  let h="";
+  unfound.forEach((entry,ei)=>{
+    h+=`<div class="grp">${esc(entry.date)}<span class="gc tnum">${entry.items.length} item${entry.items.length!==1?"s":""}</span></div>`;
+    entry.items.forEach(it=>{
+      h+=`<div class="uf-item"><div class="uf-name">${esc(it.name)}</div>`;
+      const meta=[];
+      if(it.code) meta.push("#"+esc(it.code));
+      if(it.section) meta.push(esc(it.section));
+      if(it.sub) meta.push(esc(it.sub));
+      if(it.note) meta.push(esc(it.note));
+      if(meta.length) h+=`<div class="uf-meta">${meta.join(" · ")}</div>`;
+      h+=`</div>`;
+    });
+  });
+  h+=`<button class="btn ghost block" id="clearUnfound" style="margin-top:18px">${I.x} Clear Saved Unfound</button>`;
+  return h;
+}
+function wireUnfound(){
+  const cu=document.getElementById("clearUnfound");
+  if(cu){ cu.addEventListener("click",function(e){
+    e.preventDefault(); e.stopPropagation();
+    if(confirm("Clear all saved unfound items?")){ unfound=[]; saveUnfound(); render(); }
+  }); }
+}
 
 /* ================= SCHEDULE ================= */
 function renderSchedule(){
@@ -837,16 +908,10 @@ function renderSchedule(){
     const data = sched[key];
     if(data){
       return `<div class="sch-section">
-        <div class="sch-label">${label}</div>
+        <div class="sch-lbl-row"><div class="sch-label">${label}</div><button class="sch-sm-btn" data-schrep="${key}">${I.upload} Replace</button></div>
         <div class="sch-view">
-          <div class="sch-img-wrap" data-schopen="${key}"><img src="${data}" alt="${label}">
-            <button class="exp" data-schexp="${key}" aria-label="Full screen">${I.expand}</button></div>
-          <div class="sch-actions">
-            <button class="btn" data-schfull="${key}">${I.expand} Full screen</button>
-            <button class="btn ghost" data-schdl="${key}">${I.download} Download</button>
-          </div>
+          <div class="sch-img-wrap" data-schopen="${key}"><img src="${data}" alt="${label}"></div>
         </div>
-        <button class="btn ghost block" data-schrep="${key}" style="margin-top:8px">${I.upload} Replace</button>
         <input type="file" id="schFile_${key}" accept="image/*" style="display:none">
       </div>`;
     } else {
@@ -862,7 +927,7 @@ function renderSchedule(){
     }
   }
   view.innerHTML= pageBlock("p1","Page 1") + pageBlock("p2","Page 2")
-    + `<div class="sch-note">Both pages stored on this device only · works fully offline.</div>`;
+    + `<div class="sch-note">Tap an image to zoom · stored on device only.</div>`;
 
   ["p1","p2"].forEach(key=>{
     const file=document.getElementById("schFile_"+key);
@@ -872,11 +937,9 @@ function renderSchedule(){
     const rep=view.querySelector(`[data-schrep="${key}"]`); if(rep) rep.onclick=pick;
     if(file) file.onchange=()=>{ const f=file.files&&file.files[0]; if(f){ schPage=key; ingestImage(f); } };
 
-    const openLb=()=>{ if(sched[key]) openLightbox(sched[key], "Schedule · "+(key==="p1"?"Page 1":"Page 2"), key); };
-    const so=view.querySelector(`[data-schopen="${key}"]`); if(so) so.onclick=openLb;
-    const sf=view.querySelector(`[data-schfull="${key}"]`); if(sf) sf.onclick=(e)=>{ e.stopPropagation(); openLb(); };
-    const se=view.querySelector(`[data-schexp="${key}"]`); if(se) se.onclick=(e)=>{ e.stopPropagation(); openLb(); };
-    const sd=view.querySelector(`[data-schdl="${key}"]`); if(sd) sd.onclick=(e)=>{ e.stopPropagation(); downloadImg(sched[key],key); };
+    const so=view.querySelector(`[data-schopen="${key}"]`); if(so) so.onclick=()=>{
+      if(sched[key]) openLightbox(sched[key], "Schedule · "+(key==="p1"?"Page 1":"Page 2"), key);
+    };
   });
 }
 function ingestImage(file){

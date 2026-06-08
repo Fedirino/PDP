@@ -4,6 +4,36 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [2.3.0] — 2026-06-08
+
+### Fixed
+- **Unfound clear button**: Rewired with addEventListener for reliable event binding on mobile
+
+### Changed
+- **Smaller buttons**: All `.btn` elements reduced from 15px/15px to 13px/10px padding — cleaner, more professional on mobile
+- **Schedule simplified**: Removed fullscreen, download, and expand overlay buttons — just the two images stacked with "Replace" as a subtle inline link next to the label. Tap image to zoom.
+- **Load list action bar**: Tighter spacing, smaller summary text
+- **Unfound items**: Slightly smaller cards and text for denser scanning
+
+---
+
+## [2.2.0] — 2026-06-08
+
+### Added
+- **Save Unfound Items**: New action at the bottom of the compiled list saves all unchecked items to persistent storage for order adjustment reference, then clears the list
+- **Unfound tab**: Third segment on the Load List ("Unfound") shows saved unfound snapshots grouped by date — stores up to 10 most recent saves
+- **Action bar**: Compiled list now shows a found/unfound summary with "Save Unfound" and "Clear List" buttons at the bottom
+- **Clear Saved Unfound**: Button on the Unfound tab to wipe saved history
+
+### Changed
+- "Clear" button removed from topbar; list actions now consolidated at the bottom of the compiled list for clearer workflow
+- Service worker cache bumped to v2.2.0
+
+### Storage
+- New localStorage key: `pdp_unfound_v1`
+
+---
+
 ## [2.1.0] — 2026-06-07
 
 ### Changed
