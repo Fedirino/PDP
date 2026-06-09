@@ -501,19 +501,27 @@ const GEV = [
   {cat:"\u{1F954} PR POTATOES",items:["POTATOES_RUSSET_5LB_BAG_CO","POTATOES_RUSSET_LB","POTATOES_RUSSET_MICROWAVE_CO","POTATOES_SWT_POTATO_LB","POTATOES-ASSTD_BABY_24OZ"]},
   {cat:"\u{1F95C} PR PRODUCE NUTS",items:["WONDERFUL_PISTACHIOS_16_OZ","HAMPTON_PEANUTS_48_OZ"]}
 ];
-const GEV_KEY="pdp_gev_v1";
-const GEV_DATA_KEY="pdp_gev_data_v1";
-let gevData;
-let gevCrossed;
-(function loadGev(){
-  /* Load custom GEV data from scan, or fall back to built-in */
-  try{ const raw=localStorage.getItem(GEV_DATA_KEY); if(raw) gevData=JSON.parse(raw); }catch(e){}
-  if(!gevData||!Array.isArray(gevData)||!gevData.length) gevData=GEV.map(g=>({name:g.cat,items:[...g.items]}));
-  const raw=readK(GEV_KEY);
-  if(raw){ try{ gevCrossed=JSON.parse(raw); }catch(e){ gevCrossed={}; } }
-  if(!gevCrossed||typeof gevCrossed!=="object") gevCrossed={};
+const GEV_LISTS_KEY="pdp_gev_lists_v1";
+const GEV_ACTIVE_KEY="pdp_gev_active_v1";
+let gevLists, gevActiveId;
+
+(function loadGevLists(){
+  try{ gevLists=JSON.parse(localStorage.getItem(GEV_LISTS_KEY)); }catch(e){}
+  if(!gevLists||!Array.isArray(gevLists)||!gevLists.length){
+    /* Migrate from old format or create default */
+    let cats;
+    try{ cats=JSON.parse(localStorage.getItem("pdp_gev_data_v1")); }catch(e){}
+    if(!cats||!Array.isArray(cats)||!cats.length) cats=GEV.map(g=>({name:g.cat,items:[...g.items]}));
+    let crossed={};
+    try{ const raw=localStorage.getItem("pdp_gev_v1"); if(raw) crossed=JSON.parse(raw); }catch(e){}
+    gevLists=[{id:"default",name:"Default GEV",categories:cats,crossed:crossed||{}}];
+  }
+  try{ gevActiveId=localStorage.getItem(GEV_ACTIVE_KEY)||gevLists[0].id; }catch(e){ gevActiveId=gevLists[0].id; }
+  if(!gevLists.find(l=>l.id===gevActiveId)) gevActiveId=gevLists[0].id;
 })();
-function saveGev(){ writeK(GEV_KEY,JSON.stringify(gevCrossed)); }
+function saveGevLists(){ try{ localStorage.setItem(GEV_LISTS_KEY,JSON.stringify(gevLists)); }catch(e){} }
+function saveGevActive(){ try{ localStorage.setItem(GEV_ACTIVE_KEY,gevActiveId); }catch(e){} }
+function activeGev(){ return gevLists.find(l=>l.id===gevActiveId)||gevLists[0]; }
 const CAT_ORDER = ["Apples","Pears","Stone Fruit","Berries","Grapes","Melons","Citrus",
   "Tropical & Exotic","Tomatoes","Peppers","Potatoes & Onions","Salads & Greens",
   "Herbs","Vegetables","Other"];
@@ -790,7 +798,7 @@ function renderHome(){
          <div class="go" style="color:var(--ink-3);font-size:10px;font-weight:700;letter-spacing:.06em">SOON</div>
        </div>
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v3.2.0</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v3.3.0</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
 }
 
@@ -1314,27 +1322,76 @@ function calcWeekHrs(emp){
 
 /* ================= GEV LIST ================= */
 function renderGEV(){
-  const totalGev=gevData.reduce((s,g)=>s+g.items.length,0);
-  const crossedGev=Object.keys(gevCrossed).filter(k=>gevCrossed[k]).length;
-  let h=`<div class="gev-summary"><span><b>${totalGev - crossedGev}</b> of <b>${totalGev}</b> remaining</span><button class="btn ghost" id="gevReset" style="padding:6px 12px;font-size:11px;">Reset</button></div>`;
-  gevData.forEach(g=>{
-    h+=`<div class="gev-cat">${esc(g.name)}<span class="gc tnum">${g.items.length}</span></div>`;
-    g.items.forEach(item=>{
-      const crossed=!!gevCrossed[item];
+  const g=activeGev();
+  const totalGev=g.categories.reduce((s,c)=>s+c.items.length,0);
+  const crossedGev=Object.keys(g.crossed).filter(k=>g.crossed[k]).length;
+
+  /* List selector */
+  let listSel=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+    <select id="gevListSel" style="flex:1;font:inherit;font-size:13px;font-weight:600;padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink);">
+      ${gevLists.map(l=>`<option value="${l.id}"${l.id===gevActiveId?" selected":""}>${esc(l.name)}</option>`).join("")}
+    </select>
+    <button class="btn ghost" id="gevAddList" style="flex:none;padding:6px 10px;font-size:11px">${I.plus} New</button>
+  </div>`;
+
+  let h=listSel+`<div class="gev-summary"><span><b>${totalGev - crossedGev}</b> of <b>${totalGev}</b> remaining</span>
+    <div style="display:flex;gap:6px;">
+      <button class="btn ghost" id="gevRename" style="padding:4px 8px;font-size:10px">${I.pen}</button>
+      ${gevLists.length>1?`<button class="btn ghost" id="gevDelList" style="padding:4px 8px;font-size:10px">${I.x}</button>`:""}
+      <button class="btn ghost" id="gevReset" style="padding:4px 8px;font-size:10px">Reset</button>
+    </div></div>`;
+
+  g.categories.forEach(cat=>{
+    h+=`<div class="gev-cat">${esc(cat.name)}<span class="gc tnum">${cat.items.length}</span></div>`;
+    cat.items.forEach(item=>{
+      const crossed=!!g.crossed[item];
       h+=`<div class="gev-item${crossed?" crossed":""}" data-gev="${esc(item)}">
         <div class="gev-tick">${I.check}</div>
         <div class="gev-name">${esc(item)}</div></div>`;
     });
   });
   view.innerHTML=h;
+
+  /* Wire list selector */
+  document.getElementById("gevListSel").onchange=function(){ gevActiveId=this.value; saveGevActive(); render(); };
+
+  /* Wire add new list */
+  document.getElementById("gevAddList").onclick=()=>{
+    const name=prompt("New GEV list name:");
+    if(!name||!name.trim()) return;
+    const id="gev_"+Date.now();
+    gevLists.push({id,name:name.trim(),categories:[],crossed:{}});
+    gevActiveId=id;
+    saveGevLists(); saveGevActive(); render();
+  };
+
+  /* Wire rename */
+  const ren=document.getElementById("gevRename");
+  if(ren) ren.onclick=()=>{
+    const name=prompt("Rename list:",g.name);
+    if(!name||!name.trim()) return;
+    g.name=name.trim(); saveGevLists(); render();
+  };
+
+  /* Wire delete */
+  const del=document.getElementById("gevDelList");
+  if(del) del.onclick=()=>{
+    if(!confirm(`Delete "${g.name}"?`)) return;
+    gevLists=gevLists.filter(l=>l.id!==gevActiveId);
+    gevActiveId=gevLists[0].id;
+    saveGevLists(); saveGevActive(); render();
+  };
+
+  /* Wire item toggle */
   view.querySelectorAll("[data-gev]").forEach(el=>el.onclick=()=>{
-    const key=el.dataset.gev;
-    gevCrossed[key]=!gevCrossed[key];
-    saveGev();
+    g.crossed[el.dataset.gev]=!g.crossed[el.dataset.gev];
+    saveGevLists();
     const sc=window.scrollY; renderGEV(); window.scrollTo(0,sc);
   });
+
+  /* Wire reset */
   const gr=document.getElementById("gevReset");
-  if(gr) gr.onclick=()=>{ if(confirm("Reset all GEV items?")){ gevCrossed={}; saveGev(); renderGEV(); } };
+  if(gr) gr.onclick=()=>{ if(confirm("Reset all items?")){ g.crossed={}; saveGevLists(); renderGEV(); } };
 }
 
 /* ================= TOOLS ================= */
@@ -1456,7 +1513,7 @@ function handleScanFile(file){
     scanBody.innerHTML=`
       <div class="scan-step"><div class="num">1</div>Photo captured</div>
       <img src="${imgSrc}" class="scan-preview" alt="Schedule photo">
-      <div class="scan-step"><div class="num">2</div>Claude is reading the schedule…</div>
+      <div class="scan-step"><div class="num">2</div>Claude is reading the ${scanMode==="gev"?"GEV list":"schedule"}…</div>
       <div class="scan-progress"><div class="scan-progress-bar" id="scanBar" style="width:30%;animation:pulse 1.5s ease-in-out infinite"></div></div>
       <div class="scan-status" id="scanStatus">Sending to Claude AI…</div>`;
 
@@ -1464,7 +1521,7 @@ function handleScanFile(file){
     const bar=document.getElementById("scanBar");
 
     try{
-      status.textContent="Analyzing image…";
+      status.textContent=scanMode==="gev"?"Analyzing GEV list…":"Analyzing schedule…";
       bar.style.width="60%";
 
       const schedulePrompt=`You are reading a grocery store "Wall Schedule" for a produce department. It's a printed grid/table.
@@ -1642,8 +1699,9 @@ scanFileInput.onchange=function(){ const f=scanFileInput.files&&scanFileInput.fi
 scanUploadInput.onchange=function(){ const f=scanUploadInput.files&&scanUploadInput.files[0]; scanUploadInput.value=""; if(f) handleScanFile(f); };
 
 function applyScanResults(){
-  if(!scanParsed||!scanParsed.length) return;
+  if(!scanParsed) return;
   if(scanMode==="gev"){ applyGevScan(); return; }
+  if(!scanParsed.length) return;
   const w=sched.weeks[schWeek];
   const merge=w.employees.length>0 && !confirm("Replace existing employees?\n\nOK = Replace all\nCancel = Add to existing");
   if(!merge) w.employees=[];
@@ -1657,13 +1715,22 @@ function applyScanResults(){
 }
 
 function applyGevScan(){
-  /* scanParsed is an object: {categories:[{name:"Cat",items:["item1","item2"]},..]} */
-  if(scanParsed.categories){
-    gevData=scanParsed.categories;
-    try{ localStorage.setItem("pdp_gev_data_v1",JSON.stringify(gevData)); }catch(e){}
-    gevCrossed={};
-    saveGev();
+  if(!scanParsed||!scanParsed.categories) return;
+  /* Ask: replace current list or create new? */
+  const g=activeGev();
+  const action=g.categories.length?confirm("Replace current list?\n\nOK = Replace \""+g.name+"\"\nCancel = Create new list"):true;
+  if(action){
+    g.categories=scanParsed.categories;
+    g.crossed={};
+  } else {
+    const name=prompt("Name for the new list:","Scanned GEV");
+    if(!name) return;
+    const id="gev_"+Date.now();
+    gevLists.push({id,name:name.trim(),categories:scanParsed.categories,crossed:{}});
+    gevActiveId=id;
+    saveGevActive();
   }
+  saveGevLists();
   closeScanOverlay();
   render();
 }
