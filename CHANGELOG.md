@@ -4,6 +4,65 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [2.7.0] — 2026-06-08
+
+### Added
+- **OCR Schedule Scanner**: Tap "Scan" in the Schedule topbar to photograph a printed schedule. Uses Tesseract.js OCR engine to extract text, then a custom text parser identifies employee names and shift times automatically. Includes image pre-processing (contrast boost, sharpening), progress bar, parsed result preview, and apply/retry flow.
+- **Tesseract.js v5**: Loaded from CDN for in-browser OCR capability
+- **Scan icon**: New viewfinder-style icon in the icon set
+
+### Changed
+- Schedule empty state now mentions "Scan" as the primary action
+- Schedule home tile description updated to "Scan or build the weekly schedule"
+- Version bumped to v2.7.0
+
+### Technical
+- Image pre-processing pipeline: resize to max 2000px, contrast 1.3×, brightness 1.05×
+- Text parser handles common schedule formats: tab/space-delimited rows, name + 7 shift cells
+- Normalizes OCR artifacts (l→1, O→0 in numeric context), dash types, and OFF variants
+- Scan results can replace or append to existing employee data
+
+### Files
+- `index.html` — Main app (v2.7.0)
+- `pdp-v2_5_0.html` — Archived v2.5.0
+- `icon192.png` — PWA icon (192×192, circular)
+- `icon512.png` — PWA icon (512×512, circular)
+- `sw.js` — Service worker (cache v2.7.0)
+- `manifest.json` — PWA manifest
+- `CHANGELOG.md` — This file
+
+---
+
+## [2.6.0] — 2026-06-08
+
+### Added
+- **Digital Schedule**: Replaced photo upload with a full digital schedule entry system. Two-week view ("This Week" / "Next Week") with segment control. Add employees, enter shift times per day (Sun–Sat), tap any cell to edit inline. Auto-calculates weekly hours per employee. Edit mode with add/remove employees and inline shift editing.
+- **Schedule Edit button**: Edit/Done toggle in topbar when on the Schedule tab
+
+### Changed
+- **Claims tile description**: "Quick shrink calculator" → "Quick Claims Calculator"
+- **Claims panel subtitle**: Updated to "Quick Claims Calculator"
+- **PWA icons**: New clean circular design with "PDP / PRODUCE DEPT" text on dark green background — fits properly inside phone circle masks
+- Service worker cache bumped to `pdp-v2.6.0`
+
+### Removed
+- **Image-based schedule**: Removed photo upload, lightbox, pinch-zoom, and all image schedule code
+- **Lightbox**: Removed entirely (HTML, CSS, JS) — no longer needed
+
+### Storage
+- New localStorage key: `pdp_schedule_v3` (digital schedule data)
+- Old key `pdp_schedule_v2` (image data) is no longer used
+
+### Files
+- `index.html` — Main app (v2.6.0)
+- `pdp-v2_5_0.html` — Archived previous version
+- `icon192.png` — PWA icon (192×192, new circular design)
+- `icon512.png` — PWA icon (512×512, new circular design)
+- `sw.js` — Service worker (cache v2.6.0)
+- `CHANGELOG.md` — This file
+
+---
+
 ## [2.5.0] — 2026-06-08
 
 ### Added
