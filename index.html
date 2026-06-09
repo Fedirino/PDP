@@ -382,7 +382,7 @@
   .scan-emp{margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--line);}
   .scan-emp:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none;}
   .scan-emp-name{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:5px;}
-  .scan-emp-shifts{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;}
+  .scan-emp-shifts{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
   .scan-emp-shifts .scan-day-hd{font-size:9px;font-weight:700;color:var(--ink-3);text-align:center;text-transform:uppercase;}
   .scan-emp-shifts .scan-shift{font-size:10px;font-weight:600;color:var(--ink);text-align:center;
     background:var(--surface-2);border-radius:5px;padding:4px 1px;}
@@ -402,6 +402,7 @@
   <div class="scan-body" id="scanBody"></div>
 </div>
 <input type="file" id="scanFileInput" accept="image/*" capture="environment" style="display:none">
+<input type="file" id="scanUploadInput" accept="image/*" style="display:none">
 
 <script id="stencil-data" type="application/json">[{"c":"40613","d":"3LB GALA","p":"12","u":"ea"},{"c":"40558","d":"3LB MCINTOSH","p":"12","u":"ea"},{"c":"40738","d":"3LB RED DELICIOUS","p":"12","u":"ea"},{"c":"112414","d":"SB APPLE GLD DEL BAG3LB","p":"12","u":"ea"},{"c":"40542","d":"SB APPLE EMPIRE BAG3LB","p":"12","u":"ea"},{"c":"40702","d":"APPLES CORTLAND 3LB BAG CO","p":"12","u":"ea"},{"c":"40716","d":"APPLES MACOUN 3LB","p":"12","u":"ea"},{"c":"40632","d":"3LB GRANNY","p":"12","u":"ea"},{"c":"112402","d":"SB APPLES FUJI BAG3LB","p":"12","u":"ea"},{"c":"112014","d":"3LB HONEYCRISP","p":"12","u":"ea"},{"c":"148777","d":"CSMC CRISP APPL 3LB BG","p":"12","u":"ea"},{"c":"150152","d":"SB APPLE PNKLDY BG 3LB","p":"12","u":"ea"},{"c":"40550","d":"MAC APPLE","p":"36","u":"lb"},{"c":"40534","d":"EMPIRE APPLE","p":"40","u":"lb"},{"c":"40712","d":"CORTLAND APPLE","p":"40","u":"lb"},{"c":"40715","d":"SB MACOUN APPLE","p":"38","u":"lb"},{"c":"100837","d":"RAVE APPLES","p":"40","u":"lb"},{"c":"40636","d":"GOLD DELICIOUS","p":"40","u":"lb"},{"c":"40794","d":"GRANNY SMITH","p":"40","u":"lb"},{"c":"40618","d":"GALA","p":"40","u":"lb"},{"c":"40722","d":"RED DELICIOUS","p":"40","u":"lb"},{"c":"40719","d":"FUJI APPLES","p":"42","u":"lb"},{"c":"40573","d":"HONEYCRISP","p":"38","u":"lb"},{"c":"40678","d":"PINK LADY APPLE","p":"40","u":"lb"},{"c":"51500","d":"ENVY APPLE","p":"40","u":"lb"},{"c":"214671","d":"COSMIC CRISP APPLE","p":"40","u":"lb"},{"c":"272342","d":"EVERCRISP APPLES","p":"27","u":"lb"},{"c":"113506","d":"PINATA APPLES","p":"40","u":"lb"},{"c":"58191","d":"SNAP DRAGON APPLES","p":"27","u":"lb"},{"c":"279701","d":"ENVY APPLE 27 lb box","p":"27","u":"lb"},{"c":"119042","d":"AURA APPLE","p":"27","u":"lb"},{"c":"125013","d":"SWEET TANGO APPLES","p":"72","u":"lb"},{"c":"143039","d":"HUNNYZ APPLE","p":"40","u":"lb"},{"c":"20790","d":"RUBY FROST APPLE","p":"27","u":"lb"},{"c":"181673","d":"RUBY FROST APPLES 2LB","p":"12","u":"ea"},{"c":"205022","d":"SNAP DRGON APPL 2LB BAG","p":"12","u":"ea"},{"c":"62251","d":"RED KISSABEL APPLES","p":"26","u":"ea"},{"c":"40598","d":"TOTE BAG MACS","p":"40","u":"lb"},{"c":"40599","d":"TOTE BAG RED DEL","p":"40","u":"lb"},{"c":"40600","d":"TOTE BAG EMPIRES","p":"40","u":"lb"},{"c":"40601","d":"TOTE BAG CORTLANDS","p":"40","u":"lb"},{"c":"40610","d":"TOTE BAG GALA","p":"40","u":"lb"},{"c":"40639","d":"TOTE BAG GOLD","p":"40","u":"lb"},{"c":"40718","d":"TOTE BAG MACOUN","p":"38","u":"lb"},{"c":"114074","d":"TOTE BAG FUJI","p":"38","u":"lb"},{"c":"41851","d":"HASS AVOCADO","p":"48","u":"ea"},{"c":"213339","d":"FIRM AVOCADOS","p":"48","u":"ea"},{"c":"114594","d":"BAG AVOCADOS 4 ct bag (70 ct fruit)","p":"18","u":"ea"},{"c":"101256","d":"AVOCADO GREEN SKIN","p":"20","u":"ea"},{"c":"252618","d":"HASS AVOCADO 60","p":"60","u":"ea"},{"c":"96210","d":"AVOCADO FIRM 60CT","p":"60","u":"ea"},{"c":"67858","d":"HASS AVOCADO","p":"40","u":"ea"},{"c":"28409","d":"JUMBO AVOCADO 3CT BAG","p":"12","u":"ea"},{"c":"41110","d":"BANANAS","p":"40","u":"lb"},{"c":"41112","d":"GREEN BANANAS","p":"40","u":"lb"},{"c":"42073","d":"UNGASSED BANANAS","p":"40","u":"lb"},{"c":"42122","d":"RIPE PLANTAINS 55LB","p":"65","u":"ea"},{"c":"41196","d":"RIPE PLANTAINS","p":"35","u":"ea"},{"c":"43266","d":"GREEN PLANTAINS","p":"65","u":"ea"},{"c":"41084","d":"STRAWBERRY 1 LB","p":"8","u":"ea"},{"c":"41049","d":"STRAWBERRIES 2 LB","p":"4","u":"ea"},{"c":"149801","d":"DRISCOLLS SWT BATCH STRAW 14 oz","p":"8","u":"ea"},{"c":"160596","d":"DRSCL SWTBTCH STRW 10Z","p":"16","u":"ea"},{"c":"105293","d":"HYDROPONIC STRAWBERRIES","p":"8","u":"ea"},{"c":"117120","d":"DRISCOL BIG STRWBRY 16Z","p":"8","u":"ea"},{"c":"214327","d":"NE STRAWBERRIES 1LB","p":"8","u":"lb"},{"c":"41088","d":"PKG STEM STRWBRY","p":"4","u":"ea"},{"c":"126529","d":"WHITE STRAWBERRY 10Z","p":"8","u":"ea"},{"c":"43381","d":"DRISCOLL TROPICAL BLISS 9Z","p":"16","u":"ea"},{"c":"41092","d":"BLUEBERRIES 6Z","p":"12","u":"ea"},{"c":"41090","d":"BLUEBERRY PINT","p":"12","u":"ea"},{"c":"219357","d":"BLUEBERRY 18oz","p":"8","u":"ea"},{"c":"243663","d":"JUMBO BLUEBERRY 9OZ","p":"12","u":"ea"},{"c":"214477","d":"DRISCOL JUMBO BLUES 11Z","p":"8","u":"ea"},{"c":"117119","d":"DRISCOL SWT BATCH RAS6Z","p":"12","u":"ea"},{"c":"41096","d":"RASPBERRIES 6oz","p":"12","u":"ea"},{"c":"219879","d":"RASPBERRIES 12oz","p":"6","u":"ea"},{"c":"148274","d":"SUMMER DREAM RASPBERRY","p":"12","u":"ea"},{"c":"67485","d":"SUNBELLE GOLDEN BERRIES","p":"12","u":"ea"},{"c":"41093","d":"BLACKBERRIES 6oz","p":"12","u":"ea"},{"c":"136694","d":"DRISCOLLS BLACKBERRIES 12 oz","p":"12","u":"ea"},{"c":"241931","d":"10OZ SWEETBATCHBLKBERRY","p":"12","u":"ea"},{"c":"293800","d":"SW KAROLINE BLCKBERRIES","p":"8","u":"ea"},{"c":"41068","d":"12OZ CRANBERRY","p":"24","u":"ea"},{"c":"41082","d":"LOCAL CRANBERRY 12 OZ","p":"24","u":"ea"},{"c":"142569","d":"FRESH CRANBERRIES 2LB","p":"12","u":"ea"},{"c":"41072","d":"CHILEAN CHERRIES","p":"11","u":"lb"},{"c":"41074","d":"WASHINGTN CHERRY 18#","p":"18","u":"lb"},{"c":"41079","d":"CALIFORNIA CHERRIES","p":"16","u":"lb"},{"c":"41075","d":"GOLD RAINER CHRRY15","p":"15","u":"lb"},{"c":"28051","d":"SWEET CHERRY 1LB","p":"16","u":"lb"},{"c":"160990","d":"SB SKYLR RAE CHRRY 1EA","p":"16","u":"ea"},{"c":"182229","d":"RANIER CHERRY 1 LB PKG","p":"16","u":"ea"},{"c":"40470","d":"RED GRAPEFRUIT 36 CT","p":"36","u":"lb"},{"c":"150540","d":"TEXAS RUBY RED GRAPEFRUIT 32 CT","p":"32","u":"ea"},{"c":"40222","d":"TANGELOS","p":"45","u":"ea"},{"c":"40362","d":"TANGELOS","p":"64","u":"ea"},{"c":"40524","d":"LEMONS","p":"115","u":"ea"},{"c":"132642","d":"WONDERFL SDLS LEMON BAG","p":"24","u":"ea"},{"c":"40789","d":"SUNKIST MEYER LEMONS","p":"12","u":"ea"},{"c":"40521","d":"SB 2 LB LEMON BAG","p":"18","u":"ea"},{"c":"41820","d":"LIMES","p":"42","u":"ea"},{"c":"7601","d":"SB 2LB LIMES","p":"8","u":"ea"},{"c":"41821","d":"16OZ KEY LIMES","p":"10","u":"ea"},{"c":"214616","d":"WONDERFL SDLS LEMON BAG","p":"18","u":"ea"},{"c":"146702","d":"PEELZ MANDARINS 2LB","p":"15","u":"ea"},{"c":"213236","d":"HALO MANDARIN 2LB","p":"15","u":"ea"},{"c":"35675","d":"SUMO MANDARINS 1LB","p":"18","u":"ea"},{"c":"190459","d":"SUMO MANDARINS 2LB","p":"12","u":"ea"},{"c":"67739","d":"MANDARINS 3LB IMPORTED","p":"10","u":"ea"},{"c":"94926","d":"PEELZ MANDARINS 3LB","p":"6","u":"ea"},{"c":"203482","d":"PEELZ MANDARINS 5 LB","p":"10","u":"ea"},{"c":"40845","d":"FLORIDA PUMMELO","p":"12","u":"ea"},{"c":"41284","d":"RED SEEDLESS GRAPES","p":"18","u":"lb"},{"c":"41288","d":"WHITE SEEDLESS GRAPES","p":"18","u":"lb"},{"c":"41280","d":"GRAPES BLACK SEEDLESS","p":"18","u":"lb"},{"c":"60896","d":"MOON DROP GRAPES","p":"18","u":"lb"},{"c":"68053","d":"2LB GREEN GRAPES","p":"8","u":"ea"},{"c":"68054","d":"2LB RED GRAPES","p":"8","u":"ea"},{"c":"293496","d":"TASTE OF INSPIRATIONS SORBET GRA","p":"10","u":"ea"},{"c":"115701","d":"GRAPE CLAMSHELL 3LB","p":"6","u":"ea"},{"c":"118546","d":"GUM DROP GRAPES","p":"16","u":"lb"},{"c":"280993","d":"SB COTTON CANDY GRAPES","p":"16","u":"lb"},{"c":"45007","d":"TEAR DROP GRAPES","p":"10","u":"lb"},{"c":"214461","d":"CANDY HEART GRAPES 1LB","p":"12","u":"lb"},{"c":"41338","d":"CLAMSHEL CONCRD GRAPE","p":"10","u":"ea"},{"c":"158653","d":"COTTON CNDY 1LB CLMSHL","p":"10","u":"lb"},{"c":"219431","d":"GRAPE CLAMSHELL 2LB","p":"8","u":"ea"},{"c":"222225","d":"TOI GEM RED SDLS GRP2LB","p":"8","u":"ea"},{"c":"222226","d":"TOI SPRK RED SDL GRP2LB","p":"8","u":"ea"},{"c":"222229","d":"TOI STABLAGRN SDL GRP 2L","p":"8","u":"ea"},{"c":"40750","d":"CANTALOUPES 9 CT","p":"9","u":"ea"},{"c":"40772","d":"HONEYDEW 5 CT","p":"5","u":"ea"},{"c":"40774","d":"HONEYDEW 6CT","p":"6","u":"ea"},{"c":"44788","d":"MINI WATERMELON","p":"6","u":"ea"},{"c":"295061","d":"WATRMLN SDLS BIN 45 CT","p":"45","u":"ea"},{"c":"114708","d":"WTRMRLON SDLS 60CT","p":"60","u":"ea"},{"c":"40888","d":"BIN SEEDED WATERMELON","p":"35","u":"ea"},{"c":"241193","d":"SEEDLESS CRTN WATMELN","p":"65","u":"lb"},{"c":"40934","d":"ANJOU PEAR","p":"40","u":"lb"},{"c":"41011","d":"SB BARTLETT PEARS","p":"27","u":"lb"},{"c":"41015","d":"BARTLETT PEARS","p":"40","u":"lb"},{"c":"41018","d":"ORCHARD PERFECT ANJOU","p":"27","u":"lb"},{"c":"40948","d":"BOSC PEARS","p":"43","u":"lb"},{"c":"204983","d":"BOSC PEARS","p":"26","u":"lb"},{"c":"41028","d":"RED PEARS","p":"22","u":"lb"},{"c":"41042","d":"ASIAN PEAR","p":"18","u":"ea"},{"c":"101441","d":"BUTTERSCOTCH PEARS","p":"11","u":"lb"},{"c":"279102","d":"2LB HAPPI PEAR","p":"12","u":"ea"},{"c":"295046","d":"GOLD PINEAPPLE","p":"6","u":"ea"},{"c":"213666","d":"DM HNYGLW PNPPL","p":"6","u":"ea"},{"c":"40896","d":"PEACHES","p":"18","u":"lb"},{"c":"41143","d":"WHITE PEACHES","p":"18","u":"lb"},{"c":"41152","d":"FRESH PEACHES","p":"16","u":"lb"},{"c":"41153","d":"EASTERN PEACHES","p":"25","u":"lb"},{"c":"68022","d":"DONUT PEACHES 1.25LB","p":"16","u":"ea"},{"c":"40897","d":"NECTARINES","p":"18","u":"lb"},{"c":"41073","d":"WHITE NECTARINES","p":"18","u":"lb"},{"c":"40904","d":"NECTARINE YELLOW","p":"16","u":"lb"},{"c":"40923","d":"CHILEAN APRICOT","p":"12","u":"lb"},{"c":"40918","d":"APRICOT LARGE WESTERN","p":"13","u":"lb"},{"c":"51494","d":"BLKVEL APRICOT 1.25LB","p":"18","u":"ea"},{"c":"42752","d":"ANGELCOTS","p":"16","u":"lb"},{"c":"41175","d":"SB BLACK PLUM","p":"28","u":"lb"},{"c":"41172","d":"PRUNE PLUMS","p":"25","u":"lb"},{"c":"41194","d":"PLUM 1LB","p":"16","u":"lb"},{"c":"80199","d":"PLUM LEMON 1LB","p":"12","u":"lb"},{"c":"112454","d":"SFT FR PLUM PLUOT MOTL","p":"16","u":"lb"},{"c":"112458","d":"SFT FRT PLUM PLUOT RED","p":"16","u":"lb"},{"c":"112462","d":"SFT FRT PLUM PLUOT GRN","p":"16","u":"lb"},{"c":"40881","d":"PLUOT BLACK","p":"16","u":"lb"},{"c":"41836","d":"MANGOES","p":"10","u":"ea"},{"c":"41841","d":"HONEY MANGO","p":"16","u":"ea"},{"c":"144586","d":"MANGOES 8CT","p":"8","u":"ea"},{"c":"41437","d":"KIWI","p":"81","u":"ea"},{"c":"103910","d":"KIWI GOLD PACKAGE 1 LB","p":"8","u":"lb"},{"c":"103909","d":"2LB GREEN KIWI","p":"8","u":"lb"},{"c":"221445","d":"1LB RED KIWI","p":"8","u":"lb"},{"c":"125264","d":"ZESPRI SUNGOLD KIWI 2LB","p":"8","u":"ea"},{"c":"206067","d":"JACK FRUIT","p":"40","u":"lb"},{"c":"14978","d":"JACK FRUIT PODS 1 LB","p":"8","u":"ea"},{"c":"114001","d":"PAPAYA","p":"8","u":"ea"},{"c":"41875","d":"JUMBO PAPAYA (MARADOL OR CARIBB)","p":"32","u":"lb"},{"c":"279579","d":"WHITE DRAGON FRUIT","p":"10","u":"lb"},{"c":"214655","d":"YELLOW DRAGON FRUIT","p":"6","u":"lb"},{"c":"101425","d":"YELLOW DRAGON FRUIT","p":"9","u":"lb"},{"c":"279377","d":"GUAVA","p":"10","u":"lb"},{"c":"41121","d":"COCONUTS","p":"24","u":"ea"},{"c":"136330","d":"COCONUT YOUNG","p":"9","u":"ea"},{"c":"42085","d":"WATER COCONUTS","p":"10","u":"ea"},{"c":"3393","d":"FRESH FIGS 8Z","p":"12","u":"ea"},{"c":"110065","d":"FRESH FIG CLAMSHELL","p":"6","u":"ea"},{"c":"271131","d":"EDIBLE ALOE LEAVES","p":"20","u":"ea"},{"c":"117826","d":"PEPINO MELON","p":"12","u":"ea"},{"c":"40876","d":"PASSION FRUIT","p":"33","u":"ea"},{"c":"77634","d":"PINEAPPLE","p":"7","u":"ea"},{"c":"61574","d":"POMEGRANATE","p":"22","u":"ea"},{"c":"67441","d":"POMEGRANATES 8-10 CT","p":"10","u":"ea"},{"c":"101284","d":"POMEGRANATE 30CT","p":"30","u":"ea"},{"c":"228521","d":"SB PERSIMMON KAKI","p":"10","u":"ea"},{"c":"41065","d":"FUYU PERSIMMON","p":"18","u":"ea"},{"c":"41061","d":"HACHIYA PERSIMMON","p":"16","u":"ea"},{"c":"280992","d":"LYCHEE CLAMSHELL","p":"12","u":"ea"},{"c":"214149","d":"FRIEDAS RAMBUTAN 12Z","p":"6","u":"ea"},{"c":"295024","d":"STAR FRUIT","p":"20","u":"ea"},{"c":"137610","d":"TURMERIC ROOT 6OZ","p":"6","u":"ea"},{"c":"182257","d":"TURMERIC 6OZ BAG","p":"12","u":"ea"},{"c":"41661","d":"ARTICHOKES","p":"24","u":"ea"},{"c":"41848","d":"ASPARAGUS 1LB","p":"28","u":"lb"},{"c":"42071","d":"ASPARAGUS 1LB","p":"11","u":"lb"},{"c":"279052","d":"BABY GREEN PEAS","p":"6","u":"ea"},{"c":"142720","d":"12OZ GREEN BEANS","p":"12","u":"ea"},{"c":"142719","d":"2LB GREEN BEANS","p":"5","u":"ea"},{"c":"273627","d":"HV FRENCH BEAN 24Z","p":"8","u":"ea"},{"c":"283286","d":"12OZ FRENCH GREEN BEANS","p":"6","u":"ea"},{"c":"41870","d":"BULK GREEN BEANS","p":"25","u":"lb"},{"c":"41519","d":"BROCCOLI CROWNS","p":"20","u":"lb"},{"c":"41552","d":"BUNCH BROCCOLI","p":"22","u":"lb"},{"c":"122379","d":"SB BROCCOLI FLORETS 12Z","p":"6","u":"lb"},{"c":"41900","d":"CAULIFLOWER","p":"12","u":"ea"},{"c":"41858","d":"RHUBARB","p":"15","u":"ea"},{"c":"41562","d":"GREEN CABBAGE","p":"50","u":"lb"},{"c":"279373","d":"RED CABBAGE","p":"20","u":"lb"},{"c":"41982","d":"SAVOY CABBAGE","p":"35","u":"lb"},{"c":"279302","d":"NAPA","p":"15","u":"lb"},{"c":"279303","d":"BOK CHOY","p":"15","u":"lb"},{"c":"100310","d":"BRUSSELS SPROUTS 12oz","p":"9","u":"ea"},{"c":"100361","d":"PETITE BRUSSEL SPROUTS","p":"9","u":"ea"},{"c":"254026","d":"COOKVEG BRUSSEL SPRT","p":"8","u":"ea"},{"c":"279159","d":"1LB BABY CARROTS","p":"30","u":"ea"},{"c":"279160","d":"2LB BABY CARROTS","p":"15","u":"ea"},{"c":"112262","d":"MATCHSTICK CARROTS","p":"12","u":"ea"},{"c":"44631","d":"PREMIUM PETITE CARROTS","p":"12","u":"ea"},{"c":"41534","d":"2LB BAG CARROTS","p":"24","u":"ea"},{"c":"279598","d":"5LB CARROTS","p":"10","u":"ea"},{"c":"3173","d":"BLTHOUSE SP STW CRT 12Z","p":"12","u":"ea"},{"c":"62400","d":"CELERY","p":"30","u":"ea"},{"c":"113854","d":"CELERY HEART","p":"18","u":"ea"},{"c":"101038","d":"CELERY STICKS","p":"24","u":"ea"},{"c":"213334","d":"DANDY CELERY STICKS","p":"10","u":"ea"},{"c":"42024","d":"ANISE","p":"18","u":"ea"},{"c":"42104","d":"GINGER ROOT","p":"10","u":"lb"},{"c":"143332","d":"ASIAN OKRA 8 OZ","p":"6","u":"ea"},{"c":"143339","d":"CHINESE LONG SQUASH 1 CT","p":"6","u":"ea"},{"c":"143349","d":"CHINESE BITTER MELON 2 CT","p":"6","u":"ea"},{"c":"143350","d":"CHINESE EGGPLANT 3 CT","p":"6","u":"ea"},{"c":"143338","d":"INDIAN EGGPLANT 6 CT","p":"6","u":"ea"},{"c":"146656","d":"Gai Lan (Chinese Broccoli)","p":"12","u":"ea"},{"c":"146657","d":"Baby Bok Choy","p":"12","u":"ea"},{"c":"100211","d":"Shanghai Bok Choy","p":"12","u":"ea"},{"c":"100236","d":"Yu Choy","p":"6","u":"ea"},{"c":"208191","d":"BABY BOK CHOY 1LB","p":"10","u":"lb"},{"c":"81223","d":"ASIAN NOODLE SALAD","p":"5","u":"lb"},{"c":"42390","d":"NASOYA WON TON WRAPPERS","p":"6","u":"ea"},{"c":"42463","d":"NASOYA EGG ROLL WRAPPERS","p":"6","u":"ea"},{"c":"279085","d":"KIM CHEE","p":"6","u":"ea"},{"c":"42061","d":"DANDELION GREENS","p":"13","u":"lb"},{"c":"67670","d":"PERO FARMS OKRA","p":"12","u":"ea"},{"c":"41990","d":"TURNIP GREEN","p":"18","u":"lb"},{"c":"42044","d":"MUSTARD GREENS","p":"18","u":"lb"},{"c":"42052","d":"COLLARD GREENS","p":"18","u":"lb"},{"c":"42106","d":"KALE, BULK","p":"18","u":"lb"},{"c":"42090","d":"BROCCOLI RABE","p":"20","u":"lb"},{"c":"44429","d":"BROCCOLINI","p":"18","u":"ea"},{"c":"42159","d":"BRIGHT LIGHT SWISS CHARD","p":"12","u":"ea"},{"c":"260118","d":"SB BAG COLLARDS 16Z","p":"8","u":"lb"},{"c":"260163","d":"SB SHRED COLLARDS 32OZ","p":"6","u":"ea"},{"c":"260165","d":"SB BAG KALE 16Z","p":"8","u":"ea"},{"c":"260124","d":"SB BAG KALE 32OZ","p":"6","u":"ea"},{"c":"3834","d":"RUMA FIDDLEHEADS 8Z","p":"12","u":"ea"},{"c":"41570","d":"SWEET CORN","p":"60","u":"ea"},{"c":"41572","d":"BI COLR SWEET CORN","p":"48","u":"ea"},{"c":"125070","d":"SB CORN SWEET 5PK","p":"12","u":"ea"},{"c":"150036","d":"CORN SWEET PREPACK","p":"12","u":"ea"},{"c":"41859","d":"CUCUMBERS","p":"70","u":"ea"},{"c":"42154","d":"HOT HOUSE CUCUMBERS","p":"12","u":"ea"},{"c":"103528","d":"3PK SEEDLESS CUCUMBER","p":"8","u":"ea"},{"c":"279323","d":"CELLO MINI CUCUMBERS","p":"8","u":"ea"},{"c":"114027","d":"MINI CUC 2LB BAG","p":"8","u":"lb"},{"c":"147978","d":"QUKES TT 9OZ","p":"15","u":"ea"},{"c":"208177","d":"4CT PICKLE CUCUMBER","p":"12","u":"ea"},{"c":"3195","d":"SW GRLC GNGR FUSION 8Z","p":"12","u":"ea"},{"c":"42164","d":"SHALLOTS","p":"10","u":"lb"},{"c":"150341","d":"3 OZ. BAG SHALLOT","p":"12","u":"ea"},{"c":"150338","d":"5 BULB SLEEVE GARLIC","p":"22","u":"ea"},{"c":"42350","d":"JUMBO PACKAGED GARLIC","p":"24","u":"ea"},{"c":"42360","d":"GARLIC","p":"200","u":"ea"},{"c":"110043","d":"SQUEEZE MINCED GARLIC","p":"12","u":"ea"},{"c":"114985","d":"MINCED GARLIC 32OZ","p":"6","u":"ea"},{"c":"114984","d":"MINCED GARLIC IN OLIVE OIL 4.5OZ","p":"12","u":"ea"},{"c":"114987","d":"MINCED GARLIC 8OZ","p":"12","u":"ea"},{"c":"114986","d":"CHOPPED GARLIC 8OZ","p":"12","u":"ea"},{"c":"114988","d":"MINCED GARLIC 4.5OZ","p":"12","u":"ea"},{"c":"114989","d":"CHOPPED GARLIC 4.5OZ","p":"12","u":"ea"},{"c":"280997","d":"SW SQUEEZE GINGER 10oz","p":"12","u":"ea"},{"c":"160974","d":"SB PEELED GARLIC 6Z","p":"12","u":"ea"},{"c":"41605","d":"CELLO ICEBERG LETTUCE","p":"24","u":"ea"},{"c":"41604","d":"ROMAINE LETTUCE","p":"24","u":"ea"},{"c":"279448","d":"GREEN LEAF LETTUCE","p":"24","u":"ea"},{"c":"279447","d":"RED LEAF LETTUCE","p":"24","u":"ea"},{"c":"42953","d":"ROMAINE HEARTS 3CT","p":"12","u":"ea"},{"c":"150031","d":"HYDRO BOSTON LETTUCE (Connecticut)","p":"12","u":"ea"},{"c":"212511","d":"ROMAINE LETTUCE CLMSHL","p":"12","u":"ea"},{"c":"212510","d":"GREEN LF LETTUCE CLMSHL","p":"12","u":"ea"},{"c":"212512","d":"RED LEAF LETTUCE CLMSHL","p":"12","u":"ea"},{"c":"41642","d":"ESCAROLE","p":"20","u":"lb"},{"c":"44011","d":"RADICCHIO","p":"4","u":"lb"},{"c":"42050","d":"BELGIAN ENDIVE","p":"10","u":"lb"},{"c":"182262","d":"LETTUCE HYDRO ROMAINE","p":"12","u":"ea"},{"c":"182263","d":"HYDRO GREEN","p":"12","u":"ea"},{"c":"182264","d":"HYDRO RED","p":"12","u":"ea"},{"c":"270079","d":"WHITE WHOLE MUSHROOMS","p":"12","u":"ea"},{"c":"44405","d":"PRE WASHED & SLICED","p":"12","u":"ea"},{"c":"279502","d":"WHOLE BABY BELLA","p":"12","u":"ea"},{"c":"279503","d":"SLICED BABY BELLA","p":"12","u":"ea"},{"c":"150668","d":"16OZ SLICED WHITE MUSHROOMS","p":"8","u":"ea"},{"c":"143079","d":"16OZ SLICED BABY BELLA MUSHROOM","p":"8","u":"ea"},{"c":"42057","d":"14OZ WHITE STUFFING MUSHROOM","p":"8","u":"ea"},{"c":"42256","d":"SB OYSTER MUSHROOMS 4Z","p":"6","u":"ea"},{"c":"44553","d":"SHIITAKE MUSHROOM","p":"6","u":"ea"},{"c":"42287","d":"PORTABELLA MUSHROOM CAPS","p":"4","u":"ea"},{"c":"42014","d":"SB PORTABELLA CAPS 6Z","p":"6","u":"ea"},{"c":"117108","d":"CHEF BLEND MUSHROOM","p":"8","u":"ea"},{"c":"110778","d":"SLCD SHTK 10OZ","p":"10","u":"ea"},{"c":"40111","d":"LOOSE WHITE ONIONS","p":"25","u":"lb"},{"c":"40122","d":"LOOSE RED ONIONS","p":"25","u":"lb"},{"c":"40098","d":"LOOSE YELLOW ONIONS","p":"50","u":"lb"},{"c":"40117","d":"SWEET ONIONS","p":"40","u":"lb"},{"c":"40119","d":"VIDALIA ONION","p":"40","u":"lb"},{"c":"40102","d":"3LB YELLOW ONION","p":"16","u":"ea"},{"c":"241794","d":"PINK ONION 2LB","p":"18","u":"ea"},{"c":"159943","d":"2LB RED ONION","p":"20","u":"ea"},{"c":"40104","d":"5LB YELLOW ONION","p":"10","u":"ea"},{"c":"112670","d":"3LB SWEET ONION BAG","p":"12","u":"ea"},{"c":"242247","d":"VIDALIA 3 SWT ONION USA","p":"12","u":"ea"},{"c":"115004","d":"SWEET ONIONS 5LB","p":"8","u":"ea"},{"c":"112318","d":"ONION VIDLIA ONION 5LB","p":"8","u":"ea"},{"c":"41672","d":"SCALLION 48CTX","p":"48","u":"ea"},{"c":"40884","d":"ONION BOILING 1.5LB","p":"15","u":"ea"},{"c":"41464","d":"ONION CIPOLLINE 8OZ","p":"12","u":"ea"},{"c":"279412","d":"PEARL ONION VARIETY 8Z","p":"12","u":"ea"},{"c":"42004","d":"SB EGGPLANT","p":"25","u":"lb"},{"c":"41733","d":"RED LAROUGE PEPPR 15LB","p":"15","u":"lb"},{"c":"281230","d":"GREEN PEPPER","p":"40","u":"ea"},{"c":"273707","d":"GREEN PEPPER 2LBS","p":"7","u":"ea"},{"c":"149852","d":"SEEDLESS RED PEPPER 1LB","p":"12","u":"ea"},{"c":"142277","d":"IMPORTED RED PEPPER","p":"22","u":"ea"},{"c":"142279","d":"IMPORTED YELLOW PEPPER","p":"22","u":"ea"},{"c":"142278","d":"IMPORTED ORANGE PEPPER","p":"22","u":"ea"},{"c":"256651","d":"VARIETY PEPPERS BOX B (Anaheim, Cherry Hot, Finger Hot, Serrano)","p":"8","u":"lb"},{"c":"150217","d":"LOOSE HABANERO PEPPER","p":"5","u":"lb"},{"c":"270069","d":"LOOSE PABLANO PEPPER","p":"10","u":"lb"},{"c":"241036","d":"LOOSE JALAPENO PEPPER","p":"10","u":"lb"},{"c":"275380","d":"3PK RAINBOW PEPPER","p":"8","u":"ea"},{"c":"180421","d":"4PK MIXED BELL PEPPER","p":"6","u":"ea"},{"c":"105737","d":"6PK RAINBOW PEPPER","p":"4","u":"ea"},{"c":"103912","d":"24OZ CUBANELLE PEPPER","p":"9","u":"ea"},{"c":"295520","d":"BF CUBANELLE PEPPER 16Z","p":"8","u":"ea"},{"c":"143313","d":"AJICITOS PEPPERS TRAY PK 5 OZ","p":"6","u":"ea"},{"c":"143328","d":"SCOTCH BONNET TRAY PK 5 OZ","p":"6","u":"ea"},{"c":"143330","d":"THAI CHILI PEPPRS RED5Z","p":"12","u":"ea"},{"c":"143331","d":"CHILI PEPPER TRAY PK 5 OZ","p":"6","u":"ea"},{"c":"134827","d":"3OZ DRD ANCHO CHILI PEP","p":"12","u":"ea"},{"c":"134826","d":"3Z DRD GUAJILLO CHL PEP","p":"12","u":"ea"},{"c":"219909","d":"3OZ DRIED ARBOL CHILE","p":"12","u":"ea"},{"c":"90234","d":"MINI SWEET PEPPER 1LB","p":"12","u":"lb"},{"c":"110067","d":"RED PEPPERS 2LB","p":"10","u":"ea"},{"c":"35755","d":"8LB RUSSET POTATO","p":"6","u":"ea"},{"c":"40011","d":"5LB YELLOW POTATO","p":"10","u":"ea"},{"c":"40015","d":"5LB RED POTATO","p":"10","u":"ea"},{"c":"40034","d":"5LB RUSSET POTATO","p":"10","u":"ea"},{"c":"40002","d":"5LB WHITE POTATO","p":"10","u":"ea"},{"c":"40012","d":"LOOSE RED POTATO","p":"50","u":"lb"},{"c":"40013","d":"LOOSE RUSSET POTATO","p":"50","u":"lb"},{"c":"51723","d":"BULK YELLOW POTATO","p":"50","u":"lb"},{"c":"150442","d":"4ct TRAY RUSSET POTATO","p":"12","u":"ea"},{"c":"61726","d":"15LB RUSSET POTATO","p":"75","u":"ea"},{"c":"40045","d":"MICRO BAKE POTATO","p":"28","u":"ea"},{"c":"40046","d":"MICRO SWEET POTATO","p":"33","u":"ea"},{"c":"20086","d":"MICROWAVE SWEET POTATO","p":"30","u":"ea"},{"c":"20087","d":"MICROWAVE RUSSET POTATO","p":"30","u":"ea"},{"c":"26110","d":"STEAMABLE FINGERLING","p":"12","u":"ea"},{"c":"26111","d":"STEAMABLE RED POTATOES","p":"12","u":"ea"},{"c":"26103","d":"STEAMABLE SWEET POTATOES","p":"12","u":"ea"},{"c":"222887","d":"SB BABY RED POTATO 24Z","p":"12","u":"ea"},{"c":"222886","d":"SB BABY MEDLEY POTATOES 24Z","p":"12","u":"ea"},{"c":"222885","d":"SB BABY GOLD POTATO 24Z","p":"12","u":"ea"},{"c":"213417","d":"RUBY SENSATION","p":"10","u":"ea"},{"c":"213443","d":"HONEY GOLD","p":"10","u":"ea"},{"c":"162052","d":"MN WT POT 1.5LB","p":"8","u":"ea"},{"c":"162054","d":"MN DT PT 1.5LB","p":"8","u":"ea"},{"c":"241687","d":"QA POTATOES 2LB","p":"24","u":"ea"},{"c":"162053","d":"MN YL POT 3LB","p":"16","u":"ea"},{"c":"162056","d":"MN YL POT 5LB","p":"10","u":"ea"},{"c":"41924","d":"GREEN SQUASH","p":"20","u":"lb"},{"c":"41932","d":"YELLOW SQUASH","p":"20","u":"lb"},{"c":"41940","d":"ACORN SQUASH","p":"40","u":"lb"},{"c":"41948","d":"BUTTERNUT SQUASH","p":"40","u":"lb"},{"c":"41970","d":"SPAGHETTI SQUASH","p":"35","u":"lb"},{"c":"41952","d":"BUTTERCUP SQUASH","p":"32","u":"lb"},{"c":"41953","d":"RED TURBAN SQUASH","p":"35","u":"lb"},{"c":"41946","d":"RED KURIE SQUASH","p":"20","u":"lb"},{"c":"213354","d":"HONEYNUT SQUASH 1LB","p":"50","u":"lb"},{"c":"41692","d":"RW CELLO SQUASH 15LBS","p":"15","u":"ea"},{"c":"41780","d":"SB PEELED CUBED SQUASH","p":"12","u":"ea"},{"c":"119442","d":"DICED BUTTERNUT 4-48Z","p":"4","u":"ea"},{"c":"42023","d":"DELICATA SQUASH","p":"20","u":"lb"},{"c":"41463","d":"CARNIVAL SQUASH","p":"35","u":"lb"},{"c":"41911","d":"SB BLUE HUBBARD SQUASH","p":"35","u":"lb"},{"c":"41930","d":"SWEETDUMPLINGSQUASH","p":"20","u":"lb"},{"c":"41949","d":"WHITE ACORN SQUASH","p":"40","u":"lb"},{"c":"42029","d":"SB TURKS TURBAN SQUASH","p":"40","u":"lb"},{"c":"42031","d":"GOLDEN ACORN SQUASH","p":"35","u":"lb"},{"c":"41967","d":"LARGE PUMPKIN 45CT","p":"45","u":"ea"},{"c":"214469","d":"PUMPKIN PIE BIN","p":"250","u":"ea"},{"c":"110096","d":"PIE PUMPKIN","p":"12","u":"ea"},{"c":"229772","d":"PUMPKIN VARIETY BIN","p":"40","u":"ea"},{"c":"40035","d":"SWEET POTATOES","p":"40","u":"lb"},{"c":"241909","d":"SWEET POTATOES 5LB","p":"8","u":"lb"},{"c":"60895","d":"ANGEL SWEET TOMATO1.5LB","p":"6","u":"ea"},{"c":"8589","d":"ONE SWEET TOMATO 1.5LB","p":"6","u":"ea"},{"c":"279443","d":"1LB CAMPARI TOMATO","p":"10","u":"ea"},{"c":"163160","d":"WLD WNDR TOMATOS 1.5LB","p":"6","u":"ea"},{"c":"190463","d":"NAT SWT CHERUBS 16.5OZ","p":"15","u":"ea"},{"c":"103861","d":"TASTI LEE TOMATO 1LB","p":"12","u":"lb"},{"c":"182218","d":"RED N TASTY TOMATOES LB","p":"18","u":"lb"},{"c":"41801","d":"GRAPE TOMATO PINT","p":"12","u":"ea"},{"c":"214328","d":"NAT SWEET CHERUBS 10Z","p":"15","u":"ea"},{"c":"139184","d":"FLAVOR BOMBS 12Z","p":"8","u":"ea"},{"c":"214049","d":"WILD WONDER TOMATO 12Z","p":"10","u":"ea"},{"c":"102323","d":"SUGAR BOMBS 12Z","p":"8","u":"ea"},{"c":"150608","d":"CAMPARI TOMATO 2LB","p":"8","u":"ea"},{"c":"144159","d":"NS CHERUBS 24OZ","p":"9","u":"ea"},{"c":"284771","d":"ANGEL SWEET TOMATOES","p":"15","u":"ea"},{"c":"3174","d":"ORG COSMIC CRISP 3LB","p":"12","u":"ea"},{"c":"114836","d":"ORGANIC HONEYCRISP","p":"27","u":"lb"},{"c":"100968","d":"ORGANIC HONEYCRISP 2 LB","p":"12","u":"ea"},{"c":"146720","d":"ORG HYCRISP AP 4LB BAG","p":"9","u":"ea"},{"c":"41066","d":"ORGANIC STRAWBERRIES 1 LB","p":"8","u":"ea"},{"c":"159328","d":"ORG STRAWBERRY 2LB","p":"4","u":"ea"},{"c":"41086","d":"ORGANIC BLUEBERRIES 6 OZ","p":"12","u":"ea"},{"c":"110085","d":"ORG BLUEBERRY PINT","p":"12","u":"ea"},{"c":"137738","d":"NP ORG BLUEBERRY PINT","p":"12","u":"ea"},{"c":"225192","d":"ORGANIC BLUEBERRIES 18Z","p":"8","u":"ea"},{"c":"41004","d":"ORGANIC RASPBERRIES 6OZ","p":"12","u":"ea"},{"c":"41000","d":"ORGANIC BLACKBERRIES 6OZ","p":"12","u":"ea"},{"c":"101271","d":"ORG FRESH CRANBERRY 12Z","p":"24","u":"ea"},{"c":"41799","d":"ORG BAG AVOCADO","p":"8","u":"ea"},{"c":"35741","d":"ORG AVOCADO MINI","p":"14","u":"ea"},{"c":"41103","d":"ORG. BANANA","p":"40","u":"lb"},{"c":"268436","d":"NP ORG ORANGES 3LB","p":"9","u":"lb"},{"c":"135930","d":"CITRUS ORG ORNGS 28CT","p":"28","u":"ea"},{"c":"40480","d":"ORG RED GRAPEFRUIT 32","p":"18","u":"ea"},{"c":"214238","d":"ORGANIC MANDARINS 2LB","p":"9","u":"lb"},{"c":"228523","d":"ORGANIC MANDARIN 2LB","p":"12","u":"ea"},{"c":"214240","d":"NP ORGANIC LIMES 3CT","p":"6","u":"ea"},{"c":"90190","d":"NP ORGANIC LEMONS 3CT","p":"6","u":"ea"},{"c":"219412","d":"CHERRY ORG 1LB CLMSHL","p":"16","u":"lb"},{"c":"229804","d":"ORG GRN SDLS GRAPE 2LB","p":"10","u":"ea"},{"c":"229805","d":"ORG RED SDLS GRAPE 2LB","p":"10","u":"ea"},{"c":"3554","d":"ORG COTTON CANDY GRAPES","p":"16","u":"ea"},{"c":"40925","d":"ORG GREEN PEAR","p":"40","u":"lb"},{"c":"40662","d":"ORG GREEN PEAR","p":"27","u":"lb"},{"c":"226772","d":"ORG GREEN PEARS 2LB","p":"12","u":"lb"},{"c":"40906","d":"NP ORG NECTARINES","p":"18","u":"lb"},{"c":"41144","d":"NP ORGANIC PEACH","p":"18","u":"lb"},{"c":"158626","d":"NP ORG PEACH BAG 2LB","p":"12","u":"ea"},{"c":"158628","d":"NP ORG NECTARINE BAG2LB","p":"12","u":"ea"},{"c":"102407","d":"ORG KIWI 1LB","p":"16","u":"ea"},{"c":"16101","d":"ORG KIWI 1LB","p":"11","u":"lb"},{"c":"293801","d":"ORG SUNGOLD KIWI 1LB","p":"8","u":"lb"},{"c":"90228","d":"ORGANIC MANGO","p":"10","u":"ea"},{"c":"243664","d":"ORG. ASPARAGUS","p":"14","u":"ea"},{"c":"228519","d":"N.P. ORG GREEN BEANS 10OZ","p":"6","u":"ea"},{"c":"160805","d":"ORG. BEAN SPROUTS","p":"6","u":"ea"},{"c":"41565","d":"N.P. ORG BROCCOLI BUNCH","p":"20","u":"lb"},{"c":"2374","d":"N.P. ORG CAULIFLOWER","p":"12","u":"ea"},{"c":"59307","d":"ORG BRUSSEL SPROUTS","p":"8","u":"ea"},{"c":"41559","d":"ORG CABBAGE","p":"25","u":"lb"},{"c":"46138","d":"ORG RED CABBAGE","p":"14","u":"lb"},{"c":"41676","d":"N.P. ORG BABY PEELED 1# BAG","p":"24","u":"ea"},{"c":"41536","d":"NAT PRMS ORG CAROT 5LB","p":"10","u":"ea"},{"c":"41537","d":"N.P. ORG CARROTS 1LB","p":"48","u":"ea"},{"c":"41540","d":"ORG. BUNCH CARROT","p":"24","u":"ea"},{"c":"1732","d":"ORG PET CRT 12Z","p":"12","u":"ea"},{"c":"100733","d":"ORG GINGER ROOT 4Z","p":"12","u":"ea"},{"c":"279304","d":"N.P. ORG CELERY HEARTS","p":"12","u":"ea"},{"c":"42116","d":"ORG. KALE","p":"7","u":"lb"},{"c":"260107","d":"N.P. ORG KALE 16OZ","p":"8","u":"ea"},{"c":"114904","d":"ORG. HYDRO CUCUMBER","p":"12","u":"ea"},{"c":"279212","d":"ORGANIC CUCUMBER 2CT","p":"6","u":"ea"},{"c":"158704","d":"SB ORG MINI CUCUMBR","p":"12","u":"ea"},{"c":"118276","d":"ORGANIC SHALLOT","p":"12","u":"ea"},{"c":"150340","d":"ORG JUMBO BOX GRLC 2.5","p":"24","u":"ea"},{"c":"160975","d":"ORGANIC CHOPPED GARLIC","p":"12","u":"ea"},{"c":"214598","d":"NP ORG SHALLOT 3Z","p":"12","u":"ea"},{"c":"214599","d":"SB SHALLOT 3Z","p":"12","u":"ea"},{"c":"41607","d":"ORG. ROMAINE LEAF","p":"12","u":"ea"},{"c":"41625","d":"ORG ICEBERG LETTUCE","p":"12","u":"ea"},{"c":"214193","d":"ORG ICEBERG LETTUCE","p":"24","u":"ea"},{"c":"41606","d":"N.P. ORG ROMAINE HEARTS","p":"12","u":"ea"},{"c":"42045","d":"ORG. GREEN LEAF","p":"12","u":"ea"},{"c":"221407","d":"NP ORG BBELL MSHR","p":"6","u":"ea"},{"c":"221480","d":"ORG BB WHL BELLA MSH 8Z","p":"6","u":"ea"},{"c":"279225","d":"N.P. ORG PORTABELLA MUSHROOM CO","p":"6","u":"ea"},{"c":"278251","d":"NP ORG RED ONIONS 2LB","p":"8","u":"ea"},{"c":"262245","d":"NP 2LB YL ONION","p":"8","u":"ea"},{"c":"101513","d":"ORG SWEET ONIONS 3LB","p":"12","u":"ea"},{"c":"150557","d":"VIDALIA ORGANIC 3LB","p":"12","u":"ea"},{"c":"42049","d":"ORG. LEEKS","p":"12","u":"ea"},{"c":"113953","d":"ORGANIC MINI PEPPERS","p":"12","u":"lb"},{"c":"279213","d":"N.P. ORG VARIETY PEPPERS 2CT","p":"12","u":"ea"},{"c":"82667","d":"N.P. ORG RED POTATO24Z","p":"12","u":"ea"},{"c":"82674","d":"N.P. ORG GOLD POTATO24Z","p":"12","u":"ea"},{"c":"62035","d":"N.P. ORG MEDLEY POTATO24Z","p":"12","u":"ea"},{"c":"20927","d":"N.P. ORG GOLD POTATO24Z","p":"6","u":"ea"},{"c":"20928","d":"NP ORG MEDLEY POTATO24Z","p":"6","u":"ea"},{"c":"20943","d":"N.P. ORG RED POTATO24Z","p":"6","u":"ea"},{"c":"20888","d":"ORG YELLOW POTATO 3LB","p":"8","u":"ea"},{"c":"20889","d":"ORG RUSSET POTATO 3LB","p":"8","u":"ea"},{"c":"278413","d":"ORG YELLOW POTATOES 3LB","p":"16","u":"ea"},{"c":"278415","d":"ORG RUSSET POTATOES 3LB","p":"16","u":"ea"},{"c":"293541","d":"OB SWT POTATOS 3LB BAG","p":"12","u":"ea"},{"c":"279215","d":"N.P. ORG YELLOW SQUASH 2CT","p":"6","u":"ea"},{"c":"279216","d":"N.P. ORG GREEN SQUASH 2CT","p":"6","u":"ea"},{"c":"255706","d":"ORG BUTTERNUT SQUASH","p":"32","u":"lb"},{"c":"255787","d":"SB ORG ACORN SQUASH 1LB","p":"32","u":"lb"},{"c":"255788","d":"ORG SB SPGHTI SQUASH1LB","p":"32","u":"lb"},{"c":"100134","d":"NP ORG BTTRNT SQSH 14Z","p":"4","u":"ea"},{"c":"279699","d":"ORG SWEET POTATOES 3LB","p":"10","u":"ea"},{"c":"41957","d":"NP ORG GRAPE TOM 1PT","p":"12","u":"ea"},{"c":"159269","d":"ORG CAMPARI","p":"10","u":"ea"},{"c":"214684","d":"ORG WW TOMATOES 10Z","p":"15","u":"lb"},{"c":"41719","d":"ORG. TOV'S","p":"11","u":"lb"},{"c":"102322","d":"ORG ANGEL SWT TOM","p":"15","u":"ea"},{"c":"214255","d":"SNST ORG GRP TMTO 1.5LB","p":"6","u":"ea"},{"c":"147975","d":"NP 2CT TOMATOES","p":"12","u":"ea"},{"c":"191062","d":"ORG SWT BITE TOM 12Z","p":"8","u":"ea"},{"c":"266031","d":"ORG PEA SHOOTS","p":"6","u":"ea"},{"c":"136438","d":"ORG. BEETS","p":"12","u":"ea"},{"c":"136298","d":"SB VEG ORG BEETS GOLD","p":"12","u":"ea"},{"c":"191077","d":"NP ORG VEG TRAY 21.95Z","p":"2","u":"ea"},{"c":"127045","d":"NP ORG VEG TRAY 22Z","p":"2","u":"ea"},{"c":"247419","d":"NP ORG BABY ARUGULA 5OZ","p":"8","u":"ea"},{"c":"247421","d":"NP ORG BABY ROMAINE 5OZ","p":"8","u":"ea"},{"c":"247424","d":"NP ORG SPRING MIX BABY KALE 5Z","p":"8","u":"ea"},{"c":"247422","d":"NP ORG BABY SPINACH KALE 5Z","p":"8","u":"ea"},{"c":"247423","d":"NP ORG BABY SPINACH 5 OZ","p":"8","u":"ea"},{"c":"247427","d":"NP ORG SPRING MIX 5 OZ","p":"8","u":"ea"},{"c":"247429","d":"NP ORG SWEET LETTUCE 5OZ","p":"8","u":"ea"},{"c":"247425","d":"NP ORG SPRING MIX/BABY SPINACH 5OZ","p":"8","u":"ea"},{"c":"82705","d":"NP POWER BLEND","p":"8","u":"ea"},{"c":"3786","d":"NP BABY BUTTER","p":"8","u":"ea"},{"c":"67862","d":"NP ORG SMOOTHIE BLND","p":"6","u":"ea"},{"c":"67863","d":"NP ORG SPRING MX 11Z","p":"6","u":"ea"},{"c":"67864","d":"NP ORG BBY SPNCH 11Z","p":"6","u":"ea"},{"c":"67866","d":"NP ORG SPNCH SPG MX 11Z","p":"6","u":"ea"},{"c":"125069","d":"LTLE LF ROMAINE 4Z","p":"8","u":"ea"},{"c":"214210","d":"LTLE LF BABY RED&GRN 8Z","p":"6","u":"ea"},{"c":"214211","d":"LTLE LF BABY GREEN 8Z","p":"6","u":"ea"},{"c":"262563","d":"LTLE LF SOUTHWSTKIT7.5Z","p":"6","u":"ea"},{"c":"262562","d":"LTLE LF CAESAR KIT 7.4Z","p":"6","u":"ea"},{"c":"150137","d":"DOLE ENDLESS SUMMER KIT 13OZ","p":"6","u":"ea"},{"c":"279550","d":"DOLE SOUTHWEST SALAD 13OZ","p":"6","u":"ea"},{"c":"100257","d":"DOLE CHOPPED CAESAR KIT 10.8OZ","p":"6","u":"ea"},{"c":"143056","d":"DOLE CHOPPED CHIPOTLE CHEDDAR K","p":"6","u":"ea"},{"c":"144543","d":"DOLE CHP CRMY GRK10Z","p":"6","u":"ea"},{"c":"158702","d":"DOLE CHOPPED SUNFLOWER KIT 13.6","p":"6","u":"ea"},{"c":"158703","d":"DOLE CHOPPED SESAME KIT 13.6","p":"6","u":"ea"},{"c":"221143","d":"DOLE CHOPPED POMEGRANTE KIT 13.1","p":"6","u":"ea"},{"c":"221340","d":"DOLE CAESAR SLD 10Z","p":"12","u":"ea"},{"c":"221341","d":"DOLE CAESAR KT 11.3Z","p":"12","u":"ea"},{"c":"190478","d":"DOLE SHT PAN FRE ONION","p":"6","u":"ea"},{"c":"106149","d":"TOI ASIAN CHOP 13Z","p":"6","u":"ea"},{"c":"106147","d":"TOI SWEET KALE CHOP12Z","p":"6","u":"ea"},{"c":"106181","d":"TOI CAESAR CHOP11.15Z","p":"6","u":"ea"},{"c":"106185","d":"TOI EVTG BGEL CHP11.57Z","p":"6","u":"ea"},{"c":"106317","d":"TOI STHWST CHP 12.6Z","p":"6","u":"ea"},{"c":"106125","d":"TOI AVO RNCH CHOP 12.8Z","p":"6","u":"ea"},{"c":"115093","d":"DOLE CRNH TACO KIT9.6Z","p":"6","u":"ea"},{"c":"162098","d":"DOLE CAJUN RANCH 10.2Z","p":"6","u":"ea"},{"c":"144546","d":"DOLECHOPITALIANSUB 10.2Z","p":"6","u":"ea"},{"c":"214163","d":"DOLE FIESTA RANCH KIT","p":"6","u":"ea"},{"c":"214162","d":"DOLE LENTIL CUCUMBER KIT","p":"6","u":"ea"},{"c":"214161","d":"DOLE THAI KIT","p":"6","u":"ea"},{"c":"41634","d":"SB SPRING MIX 5 OZ","p":"6","u":"ea"},{"c":"208109","d":"SB BABY SPINACH SPRG MIX","p":"6","u":"ea"},{"c":"41667","d":"SB SPINACH SALAD 6Z","p":"6","u":"ea"},{"c":"41668","d":"SB CHOPPED ROMAINE 10Z","p":"6","u":"ea"},{"c":"41677","d":"SB AMERICAN BLEND 12OZ","p":"6","u":"ea"},{"c":"41678","d":"SB BUTTER LETTUCE 7OZ","p":"6","u":"ea"},{"c":"41683","d":"SB BABY ARUGULA BLND 5Z","p":"6","u":"ea"},{"c":"105249","d":"PRIMIVERAVEGBLEND11.75Z","p":"4","u":"ea"},{"c":"208115","d":"DOLE VEGGIE BLEND 10OZ","p":"6","u":"ea"},{"c":"208114","d":"DOLE PREM ROMAINE 9.5Z","p":"6","u":"ea"},{"c":"41581","d":"DOLE LIGHT CAESAR 10OZ","p":"6","u":"ea"},{"c":"113902","d":"DOLE FAMILY SIZE CLASSIC ROMAINE","p":"6","u":"ea"},{"c":"41630","d":"DOLE GREENER SELECT","p":"12","u":"ea"},{"c":"273740","d":"DOLE ROMAINE","p":"12","u":"ea"},{"c":"3781","d":"SB SALAD MIX 12 OZ","p":"12","u":"ea"},{"c":"279693","d":"DOLE SHREDDED LETTUCE 8OZ","p":"12","u":"ea"},{"c":"143060","d":"DOLE 50/50 BLEND 10 OZ","p":"6","u":"ea"},{"c":"274645","d":"DOLE SPINACH 10OZ","p":"6","u":"ea"},{"c":"274649","d":"DOLE SPRING MIX 10OZ","p":"6","u":"ea"},{"c":"213227","d":"DOLE SNKBT BLUE NUT 5Z","p":"6","u":"ea"},{"c":"279691","d":"DOLE COLE SLAW 14OZ","p":"12","u":"ea"},{"c":"70232","d":"CHICKEN CAESAR BOWL","p":"6","u":"ea"},{"c":"70231","d":"CHEF BOWL","p":"6","u":"ea"},{"c":"70235","d":"SANTA FE BOWL","p":"6","u":"ea"},{"c":"101226","d":"CHOPPED ITALIAN BOWL","p":"6","u":"ea"},{"c":"101456","d":"NATURES PROMISE SPINACH CHICKNE","p":"4","u":"ea"},{"c":"101449","d":"NATURES PROMISE CHICKEN CAESAR","p":"4","u":"ea"},{"c":"143529","d":"OLIVIAS SPNCH MISO KIT","p":"6","u":"ea"},{"c":"143531","d":"OLIVIA SPG MX VNGR","p":"6","u":"ea"},{"c":"67726","d":"PERO FRMS APL QUIN SLD","p":"6","u":"ea"},{"c":"67727","d":"PERO FRMS ITAL HRV SLD","p":"6","u":"ea"},{"c":"67728","d":"PERO FRMS SWT KALE SLD","p":"6","u":"ea"},{"c":"214213","d":"GRN GNT BURRITO BWL","p":"4","u":"ea"},{"c":"214214","d":"GRN GNT FRIED RC BWL","p":"4","u":"ea"},{"c":"214215","d":"GRN GNT RNCHEROS BWL","p":"4","u":"ea"},{"c":"100412","d":"Ready Pac Family - Santa Fe Chicken Salad","p":"4","u":"ea"},{"c":"100405","d":"Ready Pac Family - Chicken Bacon Caesar","p":"4","u":"ea"},{"c":"214347","d":"TAYLOR MDTRN CHP SLD11Z","p":"6","u":"ea"},{"c":"27954","d":"TF MPL BRBN BCN SLD12.8","p":"6","u":"ea"},{"c":"109886","d":"TF MXCN ST CORN 11.62OZ","p":"6","u":"ea"},{"c":"162115","d":"TF CHEDDAR RANCH 10.5Z","p":"6","u":"ea"},{"c":"162116","d":"TF GRN GODDESS KT 11.5Z","p":"6","u":"ea"},{"c":"190492","d":"BRT FRM CHKPEA CRNCH","p":"6","u":"ea"},{"c":"190491","d":"BRT FRM BACON CRNCH","p":"6","u":"ea"},{"c":"67861","d":"RP BSTRO CRBRY WLNT 4.5","p":"6","u":"ea"},{"c":"96868","d":"LITTLE LEAF BBY BTTER8Z","p":"6","u":"ea"},{"c":"56082","d":"LTLE LF BUTTER LETTUC4Z","p":"6","u":"ea"},{"c":"144039","d":"QOG UNRLY ARGL 4Z","p":"6","u":"ea"},{"c":"16243","d":"BF HARVEST CRUNCH 4Z","p":"6","u":"ea"},{"c":"162117","d":"BF MEDITRRNEAN CRNCH 6Z","p":"6","u":"ea"},{"c":"81631","d":"BRT FRM BABY RMN 4Z","p":"6","u":"ea"},{"c":"241860","d":"BRT FRM SNY CRNCH","p":"6","u":"ea"},{"c":"127558","d":"NP ORG BABY ARUGULA5Z","p":"12","u":"ea"},{"c":"127570","d":"NP ORG SPNCH SPG MX 11Z","p":"8","u":"ea"},{"c":"127575","d":"NP ORG BABY SPNCH 11Z","p":"8","u":"ea"},{"c":"127577","d":"NP ORG SMOOTHIE BLND11Z","p":"8","u":"ea"},{"c":"127640","d":"NP ORG SPRING MX 11Z","p":"8","u":"ea"},{"c":"127641","d":"NP ORG BABYBTR LTCE5Z","p":"12","u":"ea"},{"c":"127700","d":"NP ORG SPN&SPRG MIX 5Z","p":"12","u":"ea"},{"c":"127706","d":"NP ORG POWER BLND5Z","p":"12","u":"ea"},{"c":"127709","d":"NP ORG BBY SPNCH KAL5Z","p":"12","u":"ea"},{"c":"127712","d":"NP ORG MX BBY KAL 5Z","p":"12","u":"ea"},{"c":"127713","d":"NP ORGANIC SPINACH5Z","p":"12","u":"ea"},{"c":"127720","d":"NP ORG SPRING MIX5Z","p":"12","u":"ea"},{"c":"127744","d":"NP ORG SWEET LET5Z","p":"12","u":"ea"},{"c":"124522","d":"BISTRO APLBTRCHK5.8Z","p":"6","u":"ea"},{"c":"133235","d":"SB CHKN BCN CSR BOWL5.9","p":"6","u":"ea"},{"c":"293869","d":"Baja Ranch Kit","p":"6","u":"ea"},{"c":"293879","d":"Hummus Crunch Kit","p":"6","u":"ea"},{"c":"112242","d":"B&W WATERCRESS 4Z","p":"6","u":"ea"},{"c":"144959","d":"EB ROMAINE CRUNCH 4 OZ","p":"8","u":"ea"},{"c":"144963","d":"EB SPRING MIX 4 OZ","p":"8","u":"ea"},{"c":"144964","d":"EB CRISPY LETTUCE 4 OZ","p":"8","u":"ea"},{"c":"124974","d":"LK BBY SPNCH CRNCH 4Z","p":"8","u":"ea"},{"c":"124977","d":"LK SWT BBY CRNCH 4Z","p":"8","u":"ea"},{"c":"124979","d":"LK RED AND GRN CRNCH 4Z","p":"8","u":"ea"},{"c":"137739","d":"LCLY KNW BBY ARGL CRN4Z","p":"8","u":"ea"},{"c":"141038","d":"LL SESAME GINGER 6.45Z","p":"6","u":"ea"},{"c":"182205","d":"CAESR CHCKNBCN SLD .75Z","p":"6","u":"ea"},{"c":"182206","d":"HRD FIEST CHKNSLD 6.35Z","p":"6","u":"ea"},{"c":"182207","d":"HRD CHCKN CAES SALD 6Z","p":"6","u":"ea"},{"c":"182208","d":"HRD CHEF SALAD 7.26Z","p":"6","u":"ea"},{"c":"182272","d":"FUJI APPLE SALAD BOWL","p":"6","u":"ea"},{"c":"253503","d":"TOI MPL BRBN CHP 12.8OZ","p":"6","u":"ea"},{"c":"253497","d":"TOI MED CHOP 11.01Z","p":"6","u":"ea"},{"c":"20960","d":"NP GH SPG MX FAM8Z","p":"6","u":"ea"},{"c":"125001","d":"DOLE CHP SMSH BRGR10.6Z","p":"6","u":"ea"},{"c":"100261","d":"MANN'S SOUTHWEST BOWL","p":"4","u":"ea"},{"c":"100269","d":"MANN'S SESAME SIRACHA BOWL","p":"4","u":"ea"},{"c":"100319","d":"MANN'S MONTEREY RISOTO BOWL","p":"4","u":"ea"},{"c":"96294","d":"BYF BOLD MIX 4Z","p":"6","u":"ea"},{"c":"144040","d":"BYF ROM BLND 4Z","p":"6","u":"ea"},{"c":"144041","d":"BYF GRN&RED LF 4Z","p":"6","u":"ea"},{"c":"144042","d":"BYF SPRING MIX 4Z","p":"6","u":"ea"},{"c":"148736","d":"BYF KALE SPRING MIX 4Z","p":"6","u":"ea"},{"c":"293880","d":"LTLE LF SWEETCRISPY4Z","p":"8","u":"ea"},{"c":"42008","d":"BULK PARSLEY (CURLY)","p":"30","u":"ea"},{"c":"42016","d":"BULK ITALIAN PARSLEY (FLAT LEAF)","p":"30","u":"ea"},{"c":"241055","d":"BULK CILANTRO","p":"30","u":"ea"},{"c":"42080","d":"BUNCH DILL","p":"12","u":"ea"},{"c":"42112","d":"BUNCH MINT","p":"6","u":"ea"},{"c":"235656","d":"HYDRO BASIL","p":"6","u":"ea"},{"c":"101089","d":"GG TUBE LEMON GRASS4Z","p":"6","u":"ea"},{"c":"35901","d":"NP ORGANIC TARRAGON .5Z","p":"6","u":"ea"},{"c":"214516","d":"NP ORG MAJORAM .5Z","p":"6","u":"ea"},{"c":"214525","d":"NP ORG LMN GRASS .5Z","p":"6","u":"ea"},{"c":"62278","d":"ORG FRESH BASIL 1.5OZ","p":"6","u":"ea"},{"c":"279488","d":"POTTED BASIL 4IN","p":"6","u":"ea"},{"c":"35895","d":"NP ORG CILANTRO","p":"6","u":"ea"},{"c":"35896","d":"NP ORG DILL .5Z","p":"6","u":"ea"},{"c":"35898","d":"NP ORG POULTRY .5Z","p":"6","u":"ea"},{"c":"35899","d":"NP ORG ROASTING .5Z","p":"6","u":"ea"},{"c":"35900","d":"NP ORG SAGE .5Z","p":"6","u":"ea"},{"c":"67386","d":"NP ORG CHIVES .5Z","p":"6","u":"ea"},{"c":"67387","d":"NP ORG MINT .5Z","p":"6","u":"ea"},{"c":"67388","d":"NP ORG ROSEMARY .5Z","p":"6","u":"ea"},{"c":"67389","d":"NP ORG THYME .5Z","p":"6","u":"ea"},{"c":"214517","d":"NP ORG CILANTRO 2.5Z","p":"6","u":"ea"},{"c":"214520","d":"NP ORG BAY LEAF .5Z","p":"6","u":"ea"},{"c":"214523","d":"NP ORG BASIL 2.5Z","p":"6","u":"ea"},{"c":"214524","d":"NP ORG ITLN PARLSEY .5Z","p":"6","u":"ea"},{"c":"214526","d":"NP ORG MINT 2.5Z","p":"6","u":"ea"},{"c":"252560","d":"MICRO KALE","p":"6","u":"ea"},{"c":"279641","d":"GG TUBE BASIL 4OZ","p":"6","u":"ea"},{"c":"279639","d":"GG TUBE CILANTRO 4OZ","p":"6","u":"ea"},{"c":"279640","d":"GG TUBE GARLC 4OZ","p":"6","u":"ea"},{"c":"279638","d":"GG TUBE GINGER 4OZ","p":"6","u":"ea"},{"c":"279637","d":"GG TUBE PARSLEY 4OZ","p":"6","u":"ea"},{"c":"104551","d":"GG TUBE CHUNKY GARLIC 4OZ","p":"6","u":"ea"},{"c":"154070","d":"GG TUBE GRL HRB","p":"6","u":"ea"},{"c":"293508","d":"GG DRD PARS.35","p":"6","u":"ea"},{"c":"262244","d":"GG DR PAR 35Z","p":"6","u":"ea"},{"c":"113282","d":"L.H. DRIED BASIL","p":"6","u":"ea"},{"c":"113278","d":"L.H. DRIED CHIVES","p":"6","u":"ea"},{"c":"113294","d":"L.H. DRIED DILL","p":"6","u":"ea"},{"c":"113290","d":"L.H. DRIED PARSLEY","p":"6","u":"ea"},{"c":"113286","d":"L.H. DRIED RED ONION","p":"6","u":"ea"},{"c":"150149","d":"L.H. DRIED SPRING ONION","p":"6","u":"ea"},{"c":"70251","d":"L.H. DRIED GINGER","p":"6","u":"ea"},{"c":"70253","d":"L.H. ITALIAN","p":"6","u":"ea"},{"c":"70250","d":"L.H. MINT","p":"6","u":"ea"},{"c":"40151","d":"NAVEL ORANGES","p":"56","u":"ea"},{"c":"279247","d":"CARA CARA ORANGES","p":"48","u":"ea"},{"c":"40301","d":"SB ORANGE 4LB BAG","p":"8","u":"ea"},{"c":"116463","d":"SB 3LB CARA CARA","p":"12","u":"ea"},{"c":"61384","d":"SB 8LBS ORANGES","p":"6","u":"ea"},{"c":"273809","d":"CARA CARA NAVEL 3LB","p":"9","u":"ea"},{"c":"125033","d":"CUTIES 3 CT. MANDARINS","p":"21","u":"ea"},{"c":"159323","d":"ORANGE FOR JUICE","p":"100","u":"ea"},{"c":"112774","d":"ORANGES 3LB","p":"9","u":"ea"},{"c":"125099","d":"3 LB MINNEOLA","p":"12","u":"ea"},{"c":"273810","d":"2 LB RASPBERRY ORANGES","p":"18","u":"ea"},{"c":"190402","d":"RASPBERRY ORANGES 44CT","p":"44","u":"ea"},{"c":"262957","d":"6 LB. NAVEL ORANGES","p":"6","u":"ea"},{"c":"115253","d":"LPC GR GRL HRB","p":"6","u":"lb"},{"c":"115254","d":"LPC ONION & CHV","p":"6","u":"lb"},{"c":"125034","d":"LPC HOT HNEY POTATO 1LB","p":"6","u":"lb"},{"c":"214322","d":"LPC SVRY HRB POTATO 1LB","p":"6","u":"lb"},{"c":"214323","d":"LPC GRLC PRSLY POTA1LB","p":"6","u":"lb"},{"c":"222247","d":"LY POTATO 3LB","p":"8","u":"ea"},{"c":"222251","d":"LR POTATO 3LB","p":"8","u":"ea"},{"c":"280219","d":"LT POTATO 3LB","p":"8","u":"ea"},{"c":"280220","d":"LD POTATO 3LB","p":"8","u":"ea"},{"c":"272328","d":"TOI SVY GRL TRAY","p":"8","u":"ea"},{"c":"272330","d":"TOI SMKY BRBN & MPL TRY","p":"8","u":"ea"},{"c":"41686","d":"BAGGED RADISH","p":"14","u":"ea"},{"c":"43911","d":"DAIKON","p":"10","u":"lb"},{"c":"41490","d":"TOMATILLO","p":"10","u":"lb"},{"c":"134828","d":"YUCCA BREAD","p":"10","u":"ea"},{"c":"100917","d":"PASTELE STRING CMBO PK","p":"15","u":"ea"},{"c":"41975","d":"SOUR ORANGES","p":"80","u":"ea"},{"c":"271123","d":"NAME YELLOW","p":"40","u":"lb"},{"c":"271126","d":"NAME NEGRO","p":"38","u":"lb"},{"c":"271122","d":"NAME COSTA RICAN","p":"36","u":"lb"},{"c":"271125","d":"BATATA","p":"40","u":"lb"},{"c":"271127","d":"EDDOS","p":"36","u":"lb"},{"c":"271129","d":"YUCCA ROOT","p":"36","u":"lb"},{"c":"42140","d":"YAUTIA BLANCA (MALANGA WHITE)","p":"36","u":"lb"},{"c":"42086","d":"CALABAZA SQUASH","p":"40","u":"lb"},{"c":"279392","d":"CHAYOTE SQUASH","p":"24","u":"ea"},{"c":"42068","d":"HORSERADISH","p":"5","u":"lb"},{"c":"41378","d":"CELERY ROOT","p":"12","u":"lb"},{"c":"41402","d":"JICAMA","p":"20","u":"lb"},{"c":"551","d":"SWEET TAMARIND","p":"16","u":"lb"},{"c":"42036","d":"PARSLEY ROOT","p":"12","u":"ea"},{"c":"271132","d":"BREAD FRUIT","p":"35","u":"ea"},{"c":"113534","d":"MALANGA COCOA","p":"38","u":"lb"},{"c":"113538","d":"YAUTIA LILA (MALANGA RED)","p":"36","u":"lb"},{"c":"77237","d":"SUGAR CANE","p":"10","u":"ea"},{"c":"143348","d":"RECAO CULANTRO","p":"12","u":"ea"},{"c":"41432","d":"OB MICRO SPINACH","p":"6","u":"ea"},{"c":"104880","d":"SB SPINACH 8OZ","p":"12","u":"ea"},{"c":"41714","d":"TOMATOES ON THE VINE","p":"11","u":"lb"},{"c":"41747","d":"SB EX LG TOMATO","p":"15","u":"lb"},{"c":"279589","d":"TOMATOES 4PK-20Z","p":"14","u":"ea"},{"c":"41754","d":"PLUM TOMATO","p":"25","u":"lb"},{"c":"279076","d":"VAR HEIRLOOM TOM 1LB","p":"10","u":"lb"},{"c":"41899","d":"HOT HOUSE TOMATO 1LB","p":"15","u":"lb"},{"c":"262626","d":"SPRINKLE TOMATOES","p":"15","u":"ea"},{"c":"279163","d":"SUNSET KUMATO 3CT","p":"14","u":"ea"},{"c":"191053","d":"VINERIPE 16OZ","p":"12","u":"lb"},{"c":"148758","d":"VLG FARM MARZANO TOMATO","p":"6","u":"ea"},{"c":"182178","d":"VF SAN MARZANO PINT","p":"12","u":"ea"},{"c":"279325","d":"CAL SUN DRIED TOMATOES 3OZ","p":"12","u":"ea"},{"c":"279326","d":"CAL SUN DRIED TOMATOES JULIENNE","p":"12","u":"ea"},{"c":"214065","d":"CSD TOM JULIEN 16Z","p":"12","u":"ea"},{"c":"20879","d":"CSD TOM HALVES 8OZ","p":"12","u":"ea"},{"c":"20880","d":"CSD TOM JULIEN 8OZ","p":"12","u":"ea"},{"c":"20940","d":"CSD TOM JULIEN 16OZ","p":"12","u":"ea"},{"c":"113434","d":"CAL SUN DRIED TOMATOES JULIENNE","p":"12","u":"ea"},{"c":"44140","d":"CAL SUN DRY TOMATOES 8.5","p":"12","u":"ea"},{"c":"44141","d":"CAL SUN DRY TOMATOES-JULIENNE ST","p":"12","u":"ea"},{"c":"40138","d":"RUTABAGA","p":"25","u":"lb"},{"c":"40140","d":"WHITE TURNIP","p":"50","u":"lb"},{"c":"41994","d":"PARSNIPS 1 LB. BAG","p":"12","u":"ea"},{"c":"41986","d":"PURPLE TOP TURNIP","p":"25","u":"lb"},{"c":"40665","d":"NP ORG GALA","p":"27","u":"lb"},{"c":"40663","d":"NP ORG GRANNY EURO BOX","p":"27","u":"lb"},{"c":"40630","d":"ORG GRANNY SMITH","p":"40","u":"lb"},{"c":"40661","d":"NP ORGANIC FUJI","p":"27","u":"lb"},{"c":"114999","d":"SB ORG PINK LADY","p":"27","u":"lb"},{"c":"297757","d":"ORG CRIPPS PINK APPLE","p":"40","u":"lb"},{"c":"221328","d":"ORG COSMIC CRISP APPLES","p":"27","u":"lb"},{"c":"40570","d":"NP ORG GOLD DELIC 3LB","p":"40","u":"ea"},{"c":"40602","d":"ORGANIC GALA 3LB","p":"12","u":"ea"},{"c":"142251","d":"ORGANIC FUJI 3 LB","p":"12","u":"ea"},{"c":"40625","d":"NP ORG GRNNY SMITH3LB","p":"12","u":"ea"},{"c":"113508","d":"ORG CRIPPS PINK 3LB BAG","p":"12","u":"ea"},{"c":"70248","d":"L.H. CILANTRO","p":"6","u":"ea"},{"c":"70249","d":"L.H. GARLIC","p":"12","u":"ea"},{"c":"283635","d":"L.H. GUACAMOLE HERB","p":"6","u":"ea"}]</script>
 <script>
@@ -501,8 +502,13 @@ const GEV = [
   {cat:"\u{1F95C} PR PRODUCE NUTS",items:["WONDERFUL_PISTACHIOS_16_OZ","HAMPTON_PEANUTS_48_OZ"]}
 ];
 const GEV_KEY="pdp_gev_v1";
+const GEV_DATA_KEY="pdp_gev_data_v1";
+let gevData;
 let gevCrossed;
 (function loadGev(){
+  /* Load custom GEV data from scan, or fall back to built-in */
+  try{ const raw=localStorage.getItem(GEV_DATA_KEY); if(raw) gevData=JSON.parse(raw); }catch(e){}
+  if(!gevData||!Array.isArray(gevData)||!gevData.length) gevData=GEV.map(g=>({name:g.cat,items:[...g.items]}));
   const raw=readK(GEV_KEY);
   if(raw){ try{ gevCrossed=JSON.parse(raw); }catch(e){ gevCrossed={}; } }
   if(!gevCrossed||typeof gevCrossed!=="object") gevCrossed={};
@@ -574,9 +580,9 @@ let state;
 function save(){ writeK(KEY,JSON.stringify(state)); }
 
 const SCHKEY="pdp_schedule_v3";
-const SCH_DAYS=["Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-const SCH_KEYS=["sat","sun","mon","tue","wed","thu","fri","sat2"];
-const SCH_DAYS_SHORT=["S","S","M","T","W","T","F","S"];
+const SCH_DAYS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const SCH_KEYS=["sun","mon","tue","wed","thu","fri","sat"];
+const SCH_DAYS_SHORT=["S","M","T","W","T","F","S"];
 function seedSched(){ return { weeks:[
   { label:"This Week", employees:[] },
   { label:"Next Week", employees:[] }
@@ -727,13 +733,15 @@ function renderTopbar(){
     if(ll.screen!=="list"&&ll.screen!=="unfound") right=`<button class="tb-act" id="editAct">${ll.edit?"Done":"Edit"}</button>`;
   } else if(tab==="schedule"){ title="Schedule";
     right=`<button class="tb-act" id="schScanAct" style="gap:4px;display:inline-flex;align-items:center"><span style="width:14px;height:14px;display:inline-flex">${I.scan}</span>Scan</button><button class="tb-act" id="schEditAct">${schEdit?"Done":"Edit"}</button>`;
-  } else if(tab==="gev") title="GEV List";
-  else if(tab==="tools") title="Tools";
+  } else if(tab==="gev"){ title="GEV List";
+    right=`<button class="tb-act" id="gevScanAct" style="gap:4px;display:inline-flex;align-items:center"><span style="width:14px;height:14px;display:inline-flex">${I.scan}</span>Scan</button>`;
+  } else if(tab==="tools") title="Tools";
   topbar.innerHTML=`<div class="brand"><img src="${LOGO_SM}" alt="PDP"></div><div class="tb-tt"><h1>${title}</h1></div>${right}`;
   const ea=document.getElementById("editAct"); if(ea) ea.onclick=()=>{ ll.edit=!ll.edit; render(); };
   const stea=document.getElementById("stencilEditAct"); if(stea) stea.onclick=()=>{ stencilEdit=!stencilEdit; render(); };
   const sea=document.getElementById("schEditAct"); if(sea) sea.onclick=()=>{ schEdit=!schEdit; render(); };
-  const ssa=document.getElementById("schScanAct"); if(ssa) ssa.onclick=()=>openScanOverlay();
+  const ssa=document.getElementById("schScanAct"); if(ssa) ssa.onclick=()=>openScanOverlay("schedule");
+  const gsa=document.getElementById("gevScanAct"); if(gsa) gsa.onclick=()=>openScanOverlay("gev");
 }
 
 /* ---- Tab bar ---- */
@@ -782,7 +790,7 @@ function renderHome(){
          <div class="go" style="color:var(--ink-3);font-size:10px;font-weight:700;letter-spacing:.06em">SOON</div>
        </div>
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v3.0.0</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v3.1.0</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
 }
 
@@ -1121,7 +1129,10 @@ function unfoundHTML(){
       h+=`</div>`;
     });
   });
-  h+=`<button class="btn ghost block" id="clearUnfound" style="margin-top:18px">${I.x} Clear Saved Checks</button>`;
+  h+=`<div style="display:flex;gap:8px;margin-top:18px">
+    <button class="btn ghost block" id="copyUnfound">${I.copy} Copy List</button>
+    <button class="btn ghost block" id="clearUnfound">${I.x} Clear</button>
+  </div>`;
   return h;
 }
 function wireUnfound(){
@@ -1129,6 +1140,28 @@ function wireUnfound(){
   if(cu){ cu.addEventListener("click",function(e){
     e.preventDefault(); e.stopPropagation();
     if(confirm("Clear all saved inventory check items?")){ unfound=[]; saveUnfound(); render(); }
+  }); }
+  const cp=document.getElementById("copyUnfound");
+  if(cp){ cp.addEventListener("click",async function(e){
+    e.preventDefault(); e.stopPropagation();
+    let txt="";
+    unfound.forEach(entry=>{
+      txt+=entry.date+"\n";
+      entry.items.forEach(it=>{
+        txt+=`  ${it.name}`;
+        if(it.code) txt+=` (#${it.code})`;
+        if(it.section) txt+=` — ${it.section}`;
+        if(it.sub) txt+=` / ${it.sub}`;
+        if(it.note) txt+=` [${it.note}]`;
+        txt+="\n";
+      });
+      txt+="\n";
+    });
+    try{ await navigator.clipboard.writeText(txt.trim()); }catch(er){
+      const t=document.createElement("textarea"); t.value=txt.trim(); document.body.appendChild(t); t.select();
+      try{document.execCommand("copy");}catch(_){} t.remove();
+    }
+    cp.innerHTML=I.check+" Copied"; setTimeout(()=>cp.innerHTML=I.copy+" Copy List",1400);
   }); }
 }
 
@@ -1212,7 +1245,7 @@ function renderSchedule(){
     const ne=document.getElementById("newEmp"), ae=document.getElementById("addEmp");
     if(ne&&ae){
       const add=()=>{ const v=ne.value.trim(); if(!v) return;
-        w.employees.push({name:v,shifts:{sat:"",sun:"",mon:"",tue:"",wed:"",thu:"",fri:"",sat2:""}});
+        w.employees.push({name:v,shifts:{sun:"",mon:"",tue:"",wed:"",thu:"",fri:"",sat:""},meals:{sun:0,mon:0,tue:0,wed:0,thu:0,fri:0,sat:0}});
         saveSched(); render(); };
       ae.onclick=add; ne.onkeydown=e=>{ if(e.key==="Enter") add(); };
     }
@@ -1256,18 +1289,21 @@ function calcWeekHrs(emp){
     if(ap2==="p"&&h2<12) h2+=12; if(ap2==="a"&&h2===12) h2=0;
     let diff=(h2*60+min2)-(h1*60+min1);
     if(diff<0) diff+=1440;
-    total+=diff;
+    /* Subtract meal break */
+    const meal=(emp.meals&&emp.meals[k])?parseInt(emp.meals[k])||0:0;
+    diff-=meal;
+    if(diff>0) total+=diff;
   }
   return total>0?Math.round(total/60*10)/10:0;
 }
 
 /* ================= GEV LIST ================= */
 function renderGEV(){
-  const totalGev=GEV.reduce((s,g)=>s+g.items.length,0);
+  const totalGev=gevData.reduce((s,g)=>s+g.items.length,0);
   const crossedGev=Object.keys(gevCrossed).filter(k=>gevCrossed[k]).length;
   let h=`<div class="gev-summary"><span><b>${totalGev - crossedGev}</b> of <b>${totalGev}</b> remaining</span><button class="btn ghost" id="gevReset" style="padding:6px 12px;font-size:11px;">Reset</button></div>`;
-  GEV.forEach(g=>{
-    h+=`<div class="gev-cat">${esc(g.cat)}<span class="gc tnum">${g.items.length}</span></div>`;
+  gevData.forEach(g=>{
+    h+=`<div class="gev-cat">${esc(g.name)}<span class="gc tnum">${g.items.length}</span></div>`;
     g.items.forEach(item=>{
       const crossed=!!gevCrossed[item];
       h+=`<div class="gev-item${crossed?" crossed":""}" data-gev="${esc(item)}">
@@ -1320,17 +1356,22 @@ function renderTools(){
 const scanOverlay=document.getElementById("scanOverlay");
 const scanBody=document.getElementById("scanBody");
 const scanFileInput=document.getElementById("scanFileInput");
+const scanUploadInput=document.getElementById("scanUploadInput");
 const APIKEY_KEY="pdp_api_key";
 let scanParsed=null;
+let scanMode="schedule"; /* "schedule" or "gev" */
 
 function getApiKey(){ try{ return localStorage.getItem(APIKEY_KEY)||""; }catch(e){ return ""; } }
 function saveApiKey(k){ try{ localStorage.setItem(APIKEY_KEY,k); }catch(e){} }
 
 document.getElementById("scanClose").onclick=closeScanOverlay;
 
-function openScanOverlay(){
+function openScanOverlay(mode){
   scanParsed=null;
+  scanMode=mode||"schedule";
+  const title=scanMode==="gev"?"Scan GEV List":"Scan Schedule";
   const hasKey=!!getApiKey();
+  document.querySelector("#scanOverlay .scan-bar .t").textContent=title;
   scanBody.innerHTML=`
     ${!hasKey?`
     <div class="scan-step"><div class="num">!</div>API key needed (one-time setup)</div>
@@ -1340,18 +1381,21 @@ function openScanOverlay(){
       <input id="apiKeyInput" type="password" placeholder="sk-ant-..." style="flex:1;font:inherit;font-size:13px;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:10px 12px;color:var(--ink);">
       <button class="btn" id="apiKeySave" style="flex:none">Save</button>
     </div>`:""}
-    <div class="scan-step"><div class="num">1</div>Take a photo of the printed schedule</div>
-    <div style="text-align:center;padding:16px 0">
-      <button class="btn block" id="scanCapture" ${!hasKey?"disabled style='opacity:.4;pointer-events:none'":""}>${I.scan} Capture Schedule Photo</button>
+    <div class="scan-step"><div class="num">1</div>Take a photo or upload an image</div>
+    <div style="display:flex;gap:8px;padding:8px 0 16px;${!hasKey?"opacity:.4;pointer-events:none":""}">
+      <button class="btn block" id="scanCapture" style="flex:1">${I.scan} Camera</button>
+      <button class="btn ghost block" id="scanUpload" style="flex:1">${I.upload||I.plus} Upload</button>
     </div>
-    <div class="hintline" style="text-align:center">Point your camera at the schedule. Claude will read the grid and extract every employee name and shift.</div>
+    <div class="hintline" style="text-align:center">${scanMode==="gev"?"Point your camera at the GEV list or upload a photo. Claude will read every item.":"Point your camera at the schedule or upload a photo. Claude will read the grid and extract every employee and shift."}</div>
     ${hasKey?`<div style="margin-top:12px;text-align:center"><button class="sch-sm-btn" id="changeKey">Change API key</button></div>`:""}`;
 
   scanOverlay.classList.add("open");
   document.body.style.overflow="hidden";
 
   const captureBtn=document.getElementById("scanCapture");
+  const uploadBtn=document.getElementById("scanUpload");
   if(captureBtn) captureBtn.onclick=()=>scanFileInput.click();
+  if(uploadBtn) uploadBtn.onclick=()=>scanUploadInput.click();
 
   const saveBtn=document.getElementById("apiKeySave");
   if(saveBtn) saveBtn.onclick=()=>{
@@ -1359,13 +1403,13 @@ function openScanOverlay(){
     const k=(inp?inp.value:"").trim();
     if(!k||!k.startsWith("sk-")){ alert("Enter a valid API key starting with sk-"); return; }
     saveApiKey(k);
-    openScanOverlay(); /* Refresh UI with key saved */
+    openScanOverlay(scanMode);
   };
 
   const changeBtn=document.getElementById("changeKey");
   if(changeBtn) changeBtn.onclick=()=>{
     saveApiKey("");
-    openScanOverlay();
+    openScanOverlay(scanMode);
   };
 }
 function closeScanOverlay(){
@@ -1373,11 +1417,8 @@ function closeScanOverlay(){
   document.body.style.overflow="";
 }
 
-scanFileInput.onchange=async function(){
-  const file=scanFileInput.files&&scanFileInput.files[0];
+function handleScanFile(file){
   if(!file) return;
-  scanFileInput.value="";
-
   const apiKey=getApiKey();
   if(!apiKey){ alert("No API key saved."); return; }
 
@@ -1407,8 +1448,49 @@ scanFileInput.onchange=async function(){
     const bar=document.getElementById("scanBar");
 
     try{
-      status.textContent="Analyzing schedule image…";
+      status.textContent="Analyzing image…";
       bar.style.width="60%";
+
+      const schedulePrompt=`You are reading a grocery store "Wall Schedule" for a produce department. It's a grid/table with:
+- Employee names in the leftmost column (ALL CAPS: "LASTNAME, FIRSTNAME M")
+- Day columns running left to right. There may be TWO Saturday columns — IGNORE THE FIRST SATURDAY (left edge). Only use: Sun, Mon, Tue, Wed, Thu, Fri, Sat (the SECOND/rightmost Saturday).
+- Each cell contains a shift time like "7:00A - 3:30P", or is empty/hatched (no shift), or says "UNAVAILABLE" or "Request Off"
+- Below each shift time is a role (MANAGER, CLERK, HEADCLERK) — IGNORE these
+- Below the role is meal info like "Meal 30 min" or "Meal 60 min" — EXTRACT the meal minutes
+
+Extract EVERY employee and their shift for EACH day (Sun-Sat only). Read times very carefully — pay close attention to AM/PM.
+
+Return ONLY a valid JSON array. No markdown, no backticks, no explanation.
+
+[{"name":"Firstname Lastname","shifts":{"sun":"7:00A-3:30P","mon":"8:00A-4:30P","tue":"","wed":"","thu":"REQ OFF","fri":"UNAVAIL","sat":""},"meals":{"sun":30,"mon":30,"tue":0,"wed":0,"thu":0,"fri":0,"sat":0}}]
+
+CRITICAL RULES:
+- Convert names: "DUTKIEWICZ, GAVIN S" → "Gavin Dutkiewicz"
+- Shift format: "7:00A-3:30P" (no spaces around dash)
+- Empty/hatched cells (diagonal lines, no text) = "" (empty string)
+- "Request Off" = "REQ OFF"
+- "UNAVAILABLE" = "UNAVAIL"
+- meals: integer minutes for that day's meal break (30 or 60 typically). Use 0 if no meal listed or no shift.
+- Read EVERY row — do not skip any employee
+- IGNORE the first/leftmost Saturday column entirely
+- If a time is hard to read, give your best interpretation rather than leaving it blank
+- Double-check AM/PM (A or P) is correct for each time`;
+
+      const gevPrompt=`You are reading a grocery store GEV (Guaranteed Everyday Variety) checklist. It lists categories of produce items that must always be stocked.
+
+Extract ALL categories and their items from the image.
+
+Return ONLY a valid JSON object. No markdown, no backticks, no explanation.
+
+{"categories":[{"name":"Category Name","items":["Item 1","Item 2","Item 3"]}]}
+
+RULES:
+- Include EVERY category and EVERY item exactly as written
+- Preserve the original category names
+- List items in the order they appear
+- Do not skip any items even if partially visible`;
+
+      const promptText=scanMode==="gev"?gevPrompt:schedulePrompt;
 
       const resp=await fetch("https://api.anthropic.com/v1/messages",{
         method:"POST",
@@ -1418,29 +1500,7 @@ scanFileInput.onchange=async function(){
           max_tokens:2000,
           messages:[{role:"user",content:[
             {type:"image",source:{type:"base64",media_type:"image/jpeg",data:b64}},
-            {type:"text",text:`You are reading a grocery store "Wall Schedule" for a produce department. It's a grid/table with:
-- Employee names in the leftmost column (ALL CAPS: "LASTNAME, FIRSTNAME M")
-- Day columns running left to right: Sat, Sun, Mon, Tue, Wed, Thu, Fri, Sat (or Sun through Sat)
-- Each cell contains a shift time like "7:00A - 3:30P", or is empty/hatched (no shift), or says "UNAVAILABLE" or "Request Off"
-- Below each shift time is a role (MANAGER, CLERK, HEADCLERK) and meal info — IGNORE these, only extract the shift time
-- There are also "Total Hours" and "Weekly Hours" columns — IGNORE these
-
-Extract EVERY employee and their shift for EACH day. Read the times very carefully — pay close attention to AM/PM markers and exact hour:minute values.
-
-Return ONLY a valid JSON array. No markdown, no backticks, no explanation.
-
-[{"name":"Firstname Lastname","shifts":{"sat":"","sun":"7:00A-3:30P","mon":"8:00A-4:30P","tue":"","wed":"OFF","thu":"REQ OFF","fri":"UNAVAIL","sat2":""}}]
-
-CRITICAL RULES:
-- The schedule may have TWO Saturday columns (start and end of week). Use "sat" for the first Saturday and "sat2" for the second Saturday. If there's only one Saturday column, omit "sat2".
-- Convert names: "DUTKIEWICZ, GAVIN S" → "Gavin Dutkiewicz"
-- Shift format: "7:00A-3:30P" (no spaces around dash)
-- Empty/hatched cells (diagonal lines, no text) = "" (empty string)  
-- "Request Off" = "REQ OFF"
-- "UNAVAILABLE" = "UNAVAIL"
-- Read EVERY row — do not skip any employee
-- If a time is hard to read, give your best interpretation rather than leaving it blank
-- Double-check that AM/PM (A or P) is correct for each time`}
+            {type:"text",text:promptText}
           ]}]
         })
       });
@@ -1466,6 +1526,33 @@ CRITICAL RULES:
         throw new Error("Could not parse AI response as JSON. Raw: "+jsonText.substring(0,200));
       }
 
+      if(scanMode==="gev"){
+        /* GEV mode: expect {categories:[...]} */
+        if(!parsed.categories||!parsed.categories.length) throw new Error("No GEV categories found.");
+        scanParsed=parsed;
+        bar.style.width="100%";
+        let preview="";
+        parsed.categories.forEach(cat=>{
+          preview+=`<div class="scan-emp"><div class="scan-emp-name">${esc(cat.name)} (${cat.items.length})</div>
+            <div style="font-size:11px;color:var(--ink-2);line-height:1.5">${cat.items.map(it=>esc(it)).join(", ")}</div></div>`;
+        });
+        const totalItems=parsed.categories.reduce((s,c)=>s+c.items.length,0);
+        scanBody.innerHTML=`
+          <div class="scan-step"><div class="num">1</div>Photo captured</div>
+          <img src="${imgSrc}" class="scan-preview" alt="GEV photo">
+          <div class="scan-step"><div class="num">2</div>Done — ${parsed.categories.length} categories, ${totalItems} items</div>
+          <div class="scan-result">${preview}</div>
+          <div class="scan-step"><div class="num">3</div>Apply — this will replace the current GEV list</div>
+          <div class="scan-actions">
+            <button class="btn ghost" id="scanRetry">Retry</button>
+            <button class="btn" id="scanApply">${I.check} Apply</button>
+          </div>`;
+        document.getElementById("scanRetry").onclick=()=>openScanOverlay("gev");
+        document.getElementById("scanApply").onclick=applyScanResults;
+        return;
+      }
+
+      /* Schedule mode */
       if(!Array.isArray(parsed)||!parsed.length){
         throw new Error("No employees found in the response.");
       }
@@ -1474,14 +1561,14 @@ CRITICAL RULES:
       scanParsed=parsed.map(emp=>({
         name:emp.name||"Unknown",
         shifts:{
-          sat:emp.shifts?.sat||"",
-          sun:emp.shifts?.sun||"",
-          mon:emp.shifts?.mon||"",
-          tue:emp.shifts?.tue||"",
-          wed:emp.shifts?.wed||"",
-          thu:emp.shifts?.thu||"",
-          fri:emp.shifts?.fri||"",
-          sat2:emp.shifts?.sat2||""
+          sun:emp.shifts?.sun||"",mon:emp.shifts?.mon||"",tue:emp.shifts?.tue||"",
+          wed:emp.shifts?.wed||"",thu:emp.shifts?.thu||"",fri:emp.shifts?.fri||"",
+          sat:emp.shifts?.sat||""
+        },
+        meals:{
+          sun:parseInt(emp.meals?.sun)||0,mon:parseInt(emp.meals?.mon)||0,tue:parseInt(emp.meals?.tue)||0,
+          wed:parseInt(emp.meals?.wed)||0,thu:parseInt(emp.meals?.thu)||0,fri:parseInt(emp.meals?.fri)||0,
+          sat:parseInt(emp.meals?.sat)||0
         }
       }));
 
@@ -1526,17 +1613,32 @@ CRITICAL RULES:
     }
   };
   reader.readAsDataURL(file);
-};
+}
+scanFileInput.onchange=function(){ const f=scanFileInput.files&&scanFileInput.files[0]; scanFileInput.value=""; if(f) handleScanFile(f); };
+scanUploadInput.onchange=function(){ const f=scanUploadInput.files&&scanUploadInput.files[0]; scanUploadInput.value=""; if(f) handleScanFile(f); };
 
 function applyScanResults(){
   if(!scanParsed||!scanParsed.length) return;
+  if(scanMode==="gev"){ applyGevScan(); return; }
   const w=sched.weeks[schWeek];
   const merge=w.employees.length>0 && !confirm("Replace existing employees?\n\nOK = Replace all\nCancel = Add to existing");
   if(!merge) w.employees=[];
   scanParsed.forEach(emp=>{
-    w.employees.push({name:emp.name,shifts:{...emp.shifts}});
+    w.employees.push({name:emp.name,shifts:{...emp.shifts},meals:{...emp.meals}});
   });
   saveSched();
+  closeScanOverlay();
+  render();
+}
+
+function applyGevScan(){
+  /* scanParsed is an object: {categories:[{name:"Cat",items:["item1","item2"]},..]} */
+  if(scanParsed.categories){
+    gevData=scanParsed.categories;
+    try{ localStorage.setItem("pdp_gev_data_v1",JSON.stringify(gevData)); }catch(e){}
+    gevCrossed={};
+    saveGev();
+  }
   closeScanOverlay();
   render();
 }
