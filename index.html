@@ -1258,17 +1258,27 @@ scanFileInput.onchange=async function(){
     const status=document.getElementById("scanStatus");
 
     try{
-      /* Pre-process: compress image for faster OCR */
+      /* Pre-process: optimize image for OCR on printed schedules */
       const img=new Image();
       await new Promise((ok,fail)=>{ img.onload=ok; img.onerror=fail; img.src=imgSrc; });
-      const MAX=2000; let w=img.width, h=img.height;
+      const MAX=2400; let w=img.width, h=img.height;
       const scale=Math.min(1, MAX/Math.max(w,h));
       w=Math.round(w*scale); h=Math.round(h*scale);
       const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
       const ctx=cv.getContext("2d");
-      /* Sharpen & boost contrast for OCR */
-      ctx.filter="contrast(1.3) brightness(1.05)";
+      /* Draw original */
       ctx.drawImage(img,0,0,w,h);
+      /* Convert to high-contrast grayscale for OCR */
+      const idata=ctx.getImageData(0,0,w,h);
+      const px=idata.data;
+      for(let i=0;i<px.length;i+=4){
+        /* Grayscale */
+        const g=Math.round(px[i]*0.299+px[i+1]*0.587+px[i+2]*0.114);
+        /* Boost contrast: stretch range */
+        const c=Math.min(255,Math.max(0,Math.round((g-128)*1.8+128)));
+        px[i]=px[i+1]=px[i+2]=c;
+      }
+      ctx.putImageData(idata,0,0);
       const processedData=cv.toDataURL("image/png");
 
       /* Run Tesseract OCR */
@@ -1315,6 +1325,8 @@ scanFileInput.onchange=async function(){
         <img src="${imgSrc}" class="scan-preview" alt="Schedule photo">
         <div class="scan-step"><div class="num">2</div>OCR complete — ${scanParsed.length} employee${scanParsed.length!==1?"s":""} found</div>
         <div class="scan-result">${preview}</div>
+        <div style="margin-top:8px"><button class="sch-sm-btn" id="scanShowRaw">Show raw OCR text</button>
+          <div id="scanRawBox" style="display:none;margin-top:6px;font-size:10px;color:var(--ink-2);white-space:pre-wrap;max-height:140px;overflow-y:auto;font-family:monospace;background:var(--surface-2);padding:8px;border-radius:8px;">${esc(rawText)}</div></div>
         <div class="scan-step"><div class="num">3</div>Review and apply to ${sched.weeks[schWeek].label}</div>
         <div class="scan-actions">
           <button class="btn ghost" id="scanRetry">Retry</button>
@@ -1322,6 +1334,12 @@ scanFileInput.onchange=async function(){
         </div>`;
       document.getElementById("scanRetry").onclick=openScanOverlay;
       document.getElementById("scanApply").onclick=applyScanResults;
+      const rawBtn=document.getElementById("scanShowRaw");
+      if(rawBtn) rawBtn.onclick=()=>{
+        const box=document.getElementById("scanRawBox");
+        if(box){ box.style.display=box.style.display==="none"?"block":"none";
+          rawBtn.textContent=box.style.display==="none"?"Show raw OCR text":"Hide raw OCR text"; }
+      };
 
     }catch(err){
       status.textContent="OCR failed: "+err.message;
@@ -1348,84 +1366,96 @@ function applyScanResults(){
 
 /* ======= Schedule Text Parser ======= */
 function parseScheduleText(raw){
-  const lines=raw.split(/\n/).map(l=>l.trim()).filter(Boolean);
   const employees=[];
+  const lines=raw.split(/\n/).map(l=>l.trim()).filter(Boolean);
+  const fullText=lines.join("\n");
 
-  /* Detect day header row to find column positions */
-  const dayPatterns=[
-    /\b(sun|mon|tue|wed|thu|fri|sat)\b/gi,
-    /\b(su|mo|tu|we|th|fr|sa)\b/gi,
-    /\b(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/gi
-  ];
-  const dayMap={
-    sun:"sun",su:"sun",sunday:"sun",
-    mon:"mon",mo:"mon",monday:"mon",
-    tue:"tue",tu:"tue",tuesday:"tue",
-    wed:"wed",we:"wed",wednesday:"wed",
-    thu:"thu",th:"thu",thursday:"thu",
-    fri:"fri",fr:"fri",friday:"fri",
-    sat:"sat",sa:"sat",saturday:"sat"
-  };
+  /* 1. Find employee names: ALLCAPS LASTNAME, FIRSTNAME pattern */
+  const nameRe=/\b([A-Z][A-Z]+),\s*([A-Z][A-Z]+(?:\s+[A-Z])?)\b/g;
+  const names=[];
+  let m;
+  while((m=nameRe.exec(fullText))!==null){
+    /* Skip header words like EMPLOYEE, MANAGER, CLERK, etc */
+    const full=m[0];
+    if(/^(EMPLOYEE|MANAGER|CLERK|HEADCLERK|DAIRY|STORE|PRODUCE|UNAVAILABLE|SELECTED|LOCATIONS|PERIOD|TOTAL|WEEKLY|HOURS)/i.test(full)) continue;
+    names.push({name:m[1]+", "+m[2], pos:m.index});
+  }
 
-  /* Time pattern: matches things like 6-2, 6a-2p, 6:00-2:00, 06:00-14:00, OFF, etc */
-  const timeRe=/\d{1,2}(?::\d{2})?\s*[ap]?\s*[-–—]\s*\d{1,2}(?::\d{2})?\s*[ap]?/i;
-  const offRe=/^(off|o|x|day\s*off|-)$/i;
+  if(!names.length) return employees;
 
-  /* Strategy: each non-header line with time-like tokens is an employee row */
-  /* Try to split each line into name + 7 shift cells */
+  /* 2. Time pattern for this schedule format: H:MMA - H:MMP */
+  const shiftRe=/\d{1,2}[:.]\d{2}\s*[AaPp]\s*[-–—~]\s*\d{1,2}[:.]\d{2}\s*[AaPp]/g;
+  const reqOffRe=/Request\s*Off|Req\.?\s*Off/gi;
+  const unavailRe=/UNAVAILABLE|UNAV/gi;
 
-  for(const line of lines){
-    /* Skip lines that look like headers (day names only) */
-    const dayCount=(line.match(/\b(sun|mon|tue|wed|thu|fri|sat|su|mo|tu|we|th|fr|sa|sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/gi)||[]).length;
-    if(dayCount>=4) continue; /* header row */
+  /* 3. For each employee, grab the text between their name and the next name */
+  for(let i=0; i<names.length; i++){
+    const start=names[i].pos;
+    const end=i+1<names.length ? names[i+1].pos : fullText.length;
+    const section=fullText.substring(start, end);
 
-    /* Split line by whitespace clusters, tabs, or multiple spaces */
-    const tokens=line.split(/\t+|\s{2,}/).map(t=>t.trim()).filter(Boolean);
-    if(tokens.length<2) continue;
-
-    /* First token(s) that aren't time-like are the name */
-    let nameTokens=[];
-    let shiftTokens=[];
-    let foundShift=false;
-
-    for(const tok of tokens){
-      if(!foundShift && !timeRe.test(tok) && !offRe.test(tok) && !/^\d{1,2}[ap]?$/i.test(tok)){
-        nameTokens.push(tok);
-      } else {
-        foundShift=true;
-        shiftTokens.push(tok);
-      }
-    }
-
-    if(!nameTokens.length) continue;
-    const name=nameTokens.join(" ").replace(/[^a-zA-Z\s.\-']/g,"").trim();
-    if(!name||name.length<2) continue;
-
-    /* Build shifts — map tokens to days */
     const shifts={sun:"",mon:"",tue:"",wed:"",thu:"",fri:"",sat:""};
     const dayKeys=["sun","mon","tue","wed","thu","fri","sat"];
+    const found=[];
 
-    /* If we have exactly 7 shift tokens, map 1:1 */
-    if(shiftTokens.length===7){
-      shiftTokens.forEach((tok,i)=>{ shifts[dayKeys[i]]=normalizeShift(tok); });
-    } else if(shiftTokens.length>=3){
-      /* Try best-effort mapping — first token to sun, etc */
-      shiftTokens.slice(0,7).forEach((tok,i)=>{ if(i<7) shifts[dayKeys[i]]=normalizeShift(tok); });
-    } else continue; /* Not enough data to be a real row */
+    /* Collect all shift times in order */
+    let sm;
+    const tempSection=section;
 
-    employees.push({name,shifts});
+    /* Mark positions of all tokens we care about */
+    const tokens=[];
+    const shiftRe2=/\d{1,2}[:.]\d{2}\s*[AaPp]\s*[-–—~]\s*\d{1,2}[:.]\d{2}\s*[AaPp]/g;
+    while((sm=shiftRe2.exec(section))!==null){
+      tokens.push({pos:sm.index, val:normalizeShift(sm[0]), type:"shift"});
+    }
+    const reqRe2=/Request\s*Off|Req\.?\s*Off/gi;
+    while((sm=reqRe2.exec(section))!==null){
+      tokens.push({pos:sm.index, val:"REQ OFF", type:"special"});
+    }
+    const unavRe2=/UNAVAILABLE|UNAV[A-Z]*/gi;
+    while((sm=unavRe2.exec(section))!==null){
+      tokens.push({pos:sm.index, val:"UNAVAIL", type:"special"});
+    }
+
+    /* Sort by position in text */
+    tokens.sort((a,b)=>a.pos-b.pos);
+
+    /* Map tokens to days — first 7 tokens map to Sun-Sat */
+    tokens.slice(0,7).forEach((tok,idx)=>{
+      if(idx<7) shifts[dayKeys[idx]]=tok.val;
+    });
+
+    /* Clean up the name */
+    let empName=names[i].name.replace(/[^A-Za-z,\s.\-']/g,"").trim();
+    /* Convert from "LASTNAME, FIRSTNAME" to "Firstname Lastname" */
+    const np=empName.split(",").map(s=>s.trim());
+    if(np.length>=2){
+      empName=titleCase(np[1])+" "+titleCase(np[0]);
+    } else {
+      empName=titleCase(empName);
+    }
+
+    if(empName.length>=3 && tokens.length>0){
+      employees.push({name:empName, shifts});
+    }
   }
   return employees;
+}
+
+function titleCase(s){
+  return s.toLowerCase().replace(/\b\w/g,c=>c.toUpperCase());
 }
 
 function normalizeShift(raw){
   raw=raw.trim();
   if(!raw||/^[-—]+$/.test(raw)) return "";
   if(/^(off|o|x|day\s*off)$/i.test(raw)) return "OFF";
-  /* Clean up common OCR artifacts */
-  raw=raw.replace(/[|lI](?=\d)/g,"1").replace(/[oO](?=\d)/g,"0");
-  /* Normalize dash types */
-  raw=raw.replace(/[–—]/g,"-");
+  /* Fix OCR artifacts */
+  raw=raw.replace(/[:.]/g,":").replace(/[–—~]/g,"-");
+  /* Normalize spacing: "7:00A - 12:00P" → "7:00A-12:00P" */
+  raw=raw.replace(/\s*-\s*/g,"-");
+  /* Uppercase AM/PM markers */
+  raw=raw.replace(/([0-9])([ap])/gi,(m,d,ap)=>d+ap.toUpperCase());
   return raw;
 }
 
