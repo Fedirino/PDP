@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PDP">
+<meta name="theme-color" content="#1a1e17">
+<title>PDP — Produce Department Portal</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png">
+<link rel="apple-touch-icon" href="icon192.png">
+<style>
+  :root{
+    --bg:#1a1e17; --surface:#262b22; --surface-2:#2c322a; --surface-3:#21261e;
+    --ink:#e4ebe0; --ink-2:#b0b8a8; --ink-3:#7a8572;
+    --line:#333b2e; --line-2:#3d4538;
+    --brand:#4a9e4b; --brand-d:#3a8a3b; --brand-h:#5ab05b;
+    --brand-tint:#1e3320; --brand-tint-2:#1b2e1d; --brand-ink:#6ec070;
+    --mono-bg:#21261e; --mono-ink:#9aaa8e;
+    --amber:#e08030; --amber-tint:#2e2418; --amber-ink:#e8a050;
+    --danger:#e04438; --danger-tint:#2e1a18; --danger-line:#5a2824;
+    --r-lg:16px; --r:13px; --r-sm:10px;
+    --sh-sm:0 1px 2px rgba(0,0,0,.25);
+    --sh:0 1px 3px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.2);
+    --sh-hero:0 8px 26px rgba(0,0,0,.4);
+    --tabh:62px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:-apple-system,"SF Pro Text",BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--ink);overscroll-behavior-y:none;
+    -webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  }
+  .tnum{font-variant-numeric:tabular-nums;}
+  #shell{position:relative;min-height:100%;display:flex;flex-direction:column;max-width:600px;margin:0 auto;}
+
+  .topbar{
+    position:sticky;top:0;z-index:30;background:rgba(26,30,23,.88);
+    backdrop-filter:saturate(140%) blur(14px);-webkit-backdrop-filter:saturate(140%) blur(14px);
+    border-bottom:1px solid var(--line);
+    padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;
+    display:flex;align-items:center;gap:11px;min-height:58px;
+  }
+  .brand{width:38px;height:38px;flex:none;overflow:hidden;}
+  .brand img{width:100%;height:100%;object-fit:contain;display:block;}
+  .tb-tt{flex:1;min-width:0;}
+  .tb-tt h1{margin:0;font-size:18px;font-weight:700;letter-spacing:-.02em;line-height:1.15;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .tb-act{appearance:none;background:var(--surface);color:var(--brand);
+    font:inherit;font-size:13.5px;font-weight:600;padding:7px 15px;border-radius:999px;cursor:pointer;
+    border:1px solid var(--line-2);transition:background .15s ease;}
+  .tb-act:active{background:var(--surface-2);}
+  .tb-act.danger{color:var(--danger);border-color:var(--danger-line);}
+
+  main{flex:1;padding:18px 16px calc(var(--tabh) + env(safe-area-inset-bottom) + 26px);}
+
+  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;justify-content:center;
+    background:rgba(26,30,23,.93);backdrop-filter:saturate(140%) blur(16px);
+    -webkit-backdrop-filter:saturate(140%) blur(16px);border-top:1px solid var(--line);
+    padding-bottom:env(safe-area-inset-bottom);}
+  .tabbar .inner{width:100%;max-width:600px;display:flex;}
+  .tab{flex:1;appearance:none;border:none;background:none;cursor:pointer;font:inherit;
+    display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0 7px;color:var(--ink-3);
+    height:var(--tabh);justify-content:center;transition:color .15s ease;}
+  .tab .ic{width:36px;height:24px;display:grid;place-items:center;border-radius:999px;transition:background .18s ease;}
+  .tab svg{width:21px;height:21px;}
+  .tab span{font-size:9.5px;font-weight:600;letter-spacing:.01em;}
+  .tab.active{color:var(--brand);}
+  .tab.active .ic{background:var(--brand-tint);}
+  .tab.active span{font-weight:700;}
+
+  .btn{appearance:none;border:none;cursor:pointer;font:inherit;font-weight:600;font-size:13px;
+    color:#fff;background:var(--brand);border-radius:var(--r-sm);
+    padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:7px;
+    box-shadow:var(--sh-sm);transition:transform .08s ease,background .15s ease;}
+  .btn:active{transform:scale(.985);background:var(--brand-d);}
+  .btn.block{width:100%;}
+  .btn.ghost{background:var(--surface);color:var(--brand);border:1px solid var(--line-2);}
+  .btn.ghost:active{background:var(--surface-2);}
+  .btn svg{width:14px;height:14px;}
+  .btn-danger{appearance:none;border:1px solid var(--danger-line);background:var(--surface);color:var(--danger);
+    font:inherit;font-weight:600;font-size:13px;padding:10px;border-radius:var(--r-sm);cursor:pointer;width:100%;
+    box-shadow:var(--sh-sm);}
+  .btn-danger:active{background:var(--danger-tint);}
+
+  .hero{position:relative;overflow:hidden;border-radius:var(--r-lg);padding:26px 24px;color:#eaf4ee;
+    background:linear-gradient(150deg,#3a7d3b 0%,#2d6a2e 55%,#1a4a1c 100%);box-shadow:var(--sh-hero);
+    animation:rise .45s cubic-bezier(.2,.8,.3,1) both;}
+  .hero::before{content:"";position:absolute;inset:0;
+    background:radial-gradient(120% 90% at 85% -10%,rgba(255,255,255,.12),transparent 50%);pointer-events:none;}
+  .hero .ey{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;opacity:.66;}
+  .hero h2{margin:9px 0 0;font-size:27px;font-weight:700;letter-spacing:-.03em;line-height:1.08;}
+  .hero .date{margin-top:9px;font-size:13.5px;opacity:.74;font-weight:500;}
+
+  .lbl{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+    margin:26px 4px 12px;}
+
+  .tiles{display:flex;flex-direction:column;gap:11px;}
+  .tile{text-align:left;appearance:none;border:1px solid var(--line);background:var(--surface);
+    border-radius:var(--r);padding:16px 17px;cursor:pointer;font:inherit;color:inherit;box-shadow:var(--sh-sm);
+    display:flex;align-items:center;gap:15px;
+    transition:transform .08s ease,box-shadow .16s ease;
+    animation:rise .45s cubic-bezier(.2,.8,.3,1) both;}
+  .tile:active{transform:scale(.985);}
+  .tile .chip{width:46px;height:46px;flex:none;border-radius:13px;display:grid;place-items:center;
+    background:var(--brand-tint);color:var(--brand);}
+  .tile .chip.amber{background:var(--amber-tint);color:var(--amber);}
+  .tile svg{width:23px;height:23px;}
+  .tile .tx{flex:1;min-width:0;}
+  .tile .tt{font-size:16px;font-weight:700;letter-spacing:-.015em;}
+  .tile .sub{font-size:12.5px;color:var(--ink-3);margin-top:3px;font-weight:500;}
+  .tile .go{flex:none;color:var(--ink-3);}
+  .tile .go svg{width:20px;height:20px;}
+  @keyframes rise{from{opacity:0;transform:translateY(9px);}to{opacity:1;transform:none;}}
+
+  .seg{display:flex;background:var(--surface-3);border:1px solid var(--line);border-radius:11px;padding:3px;gap:3px;
+    margin-bottom:14px;}
+  .seg button{flex:1;appearance:none;border:none;background:none;font:inherit;font-weight:600;font-size:14px;
+    color:var(--ink-2);padding:9px 8px;border-radius:8px;cursor:pointer;display:flex;align-items:center;
+    justify-content:center;gap:7px;transition:all .15s ease;}
+  .seg button.on{background:var(--surface);color:var(--brand);box-shadow:var(--sh-sm);}
+  .seg .pill{min-width:20px;height:20px;padding:0 6px;border-radius:7px;background:var(--brand);color:#fff;
+    font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;
+    font-variant-numeric:tabular-nums;}
+  .seg button:not(.on) .pill{background:var(--ink-3);}
+
+  .backlink{display:inline-flex;align-items:center;gap:5px;background:none;border:none;cursor:pointer;
+    font:inherit;font-size:13.5px;font-weight:600;color:var(--brand);padding:2px 0 14px;}
+  .backlink svg{width:17px;height:17px;}
+
+  .search{position:sticky;top:calc(env(safe-area-inset-top) + 70px);z-index:20;display:flex;align-items:center;
+    gap:10px;background:var(--surface);border:1px solid var(--line-2);border-radius:13px;padding:0 14px;
+    box-shadow:var(--sh-sm);margin-bottom:14px;transition:border-color .15s ease,box-shadow .15s ease;}
+  .search:focus-within{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint);}
+  .search .si{color:var(--ink-3);display:grid;place-items:center;flex:none;}
+  .search .si svg{width:20px;height:20px;}
+  .search input{flex:1;border:none;background:none;font:inherit;font-size:16px;font-weight:500;padding:15px 0;
+    color:var(--ink);outline:none;min-width:0;}
+  .search input::placeholder{color:var(--ink-3);font-weight:500;}
+  .search .clr{appearance:none;border:none;background:var(--surface-3);color:var(--ink-2);width:26px;height:26px;
+    border-radius:50%;flex:none;cursor:pointer;display:none;place-items:center;}
+  .search .clr.show{display:grid;}
+  .search .clr svg{width:14px;height:14px;}
+
+  .smeta{font-size:12px;color:var(--ink-3);font-weight:500;margin:0 4px 12px;display:flex;
+    align-items:center;justify-content:space-between;gap:10px;}
+  .smeta b{color:var(--ink-2);font-weight:700;}
+
+  .sr{display:flex;align-items:center;gap:13px;width:100%;text-align:left;background:var(--surface);
+    border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:8px;cursor:pointer;
+    font:inherit;color:inherit;box-shadow:var(--sh-sm);
+    transition:transform .07s ease,background .14s ease,border-color .14s ease;}
+  .sr:active{transform:scale(.99);}
+  .sr .add{width:30px;height:30px;border-radius:9px;border:1.6px solid var(--line-2);flex:none;display:grid;
+    place-items:center;color:var(--ink-3);background:var(--surface);transition:all .14s ease;}
+  .sr .add svg{width:18px;height:18px;transition:transform .14s ease;}
+  .sr .bd{flex:1;min-width:0;}
+  .sr .nm{font-size:15px;font-weight:600;letter-spacing:-.01em;line-height:1.25;}
+  .sr .nm mark{background:var(--brand-tint);color:var(--brand-ink);border-radius:3px;padding:0 2px;font-weight:700;}
+  .sr .mt{font-size:11.5px;color:var(--ink-3);font-weight:500;margin-top:3px;font-variant-numeric:tabular-nums;
+    display:flex;flex-wrap:wrap;gap:4px 9px;}
+  .sr .mt .code{color:var(--brand-ink);font-weight:700;}
+  .sr.on{background:var(--brand-tint-2);border-color:var(--brand);}
+  .sr.on .add{background:var(--brand);border-color:var(--brand);color:#fff;}
+  .sr.on .add svg{transform:rotate(45deg);}
+  .sr.on .nm{color:var(--brand-ink);}
+
+  .empty{text-align:center;color:var(--ink-2);font-size:14px;line-height:1.55;padding:46px 26px;}
+  .empty .ei{width:54px;height:54px;border-radius:15px;margin:0 auto 15px;display:grid;place-items:center;
+    background:var(--surface);border:1px solid var(--line);color:var(--brand);box-shadow:var(--sh-sm);}
+  .empty .ei svg{width:26px;height:26px;}
+  .empty b{color:var(--ink);font-weight:600;}
+
+  .row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);
+    border:1px solid var(--line);border-radius:var(--r);padding:11px 13px;margin-bottom:9px;cursor:pointer;
+    box-shadow:var(--sh-sm);font:inherit;color:inherit;transition:transform .08s ease,border-color .15s ease;}
+  .row:active{transform:scale(.99);}
+  .row .nm{flex:1;font-size:15.5px;font-weight:600;letter-spacing:-.01em;}
+  .row .cnt{flex:none;min-width:24px;height:24px;padding:0 8px;border-radius:7px;background:var(--brand-tint);
+    color:var(--brand-ink);font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center;
+    font-variant-numeric:tabular-nums;}
+  .row .chev{flex:none;color:var(--ink-3);display:grid;place-items:center;transition:transform .2s ease,color .2s ease;}
+  .row .chev svg{width:19px;height:19px;}
+  .row.openhdr{margin-bottom:6px;box-shadow:none;border-color:var(--line-2);}
+  .row.openhdr .chev{transform:rotate(90deg);color:var(--brand);}
+  .row.editing{cursor:default;}
+  .row input.rn{flex:1;font:inherit;font-size:15.5px;font-weight:600;background:var(--surface-2);
+    border:1px solid var(--line);border-radius:9px;padding:10px 12px;color:var(--ink);min-width:0;}
+  .row input.rn:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint);}
+  .endbody{margin:0 0 16px 9px;padding-left:14px;border-left:2px solid var(--line-2);}
+
+  .del{appearance:none;border:none;background:var(--danger-tint);color:var(--danger);width:40px;height:40px;
+    border-radius:10px;font-size:20px;flex:none;cursor:pointer;display:flex;align-items:center;
+    justify-content:center;transition:background .15s ease;}
+  .del:active{background:#f5d3ce;}
+
+  .item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);
+    border:1px solid var(--line);border-radius:11px;padding:0 13px;margin-bottom:8px;min-height:54px;
+    cursor:pointer;font:inherit;color:inherit;transition:transform .07s ease,background .14s ease,border-color .14s ease;}
+  .item:active{transform:scale(.99);}
+  .item .tick{width:24px;height:24px;border-radius:50%;border:2px solid var(--line-2);flex:none;display:grid;
+    place-items:center;color:#fff;transition:background .14s ease,border-color .14s ease;}
+  .item .tick svg{width:14px;height:14px;opacity:0;transition:opacity .12s ease;}
+  .item .pn{flex:1;font-size:15px;font-weight:500;padding:13px 0;letter-spacing:-.005em;}
+  .item.on{background:var(--brand-tint-2);border-color:var(--brand);}
+  .item.on .pn{font-weight:600;color:var(--brand-ink);}
+  .item.on .tick{background:var(--brand);border-color:var(--brand);}
+  .item.on .tick svg{opacity:1;}
+  .endbody .item{min-height:48px;}
+
+  .addrow{display:flex;gap:9px;margin:8px 0 4px;}
+  .addrow input{flex:1;font:inherit;font-size:15px;padding:13px 14px;border-radius:11px;border:1px solid var(--line-2);
+    background:var(--surface);color:var(--ink);min-width:0;}
+  .addrow input::placeholder{color:var(--ink-3);}
+  .addrow input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint);}
+  .addrow button{appearance:none;border:none;background:var(--brand);color:#fff;font:inherit;font-weight:600;
+    font-size:14.5px;padding:0 18px;border-radius:11px;cursor:pointer;flex:none;}
+  .addrow button:active{background:var(--brand-d);}
+  .addrow-wrap{position:relative;}
+  .sg{position:absolute;left:0;right:0;top:100%;z-index:25;background:var(--surface);border:1px solid var(--line-2);
+    border-radius:0 0 11px 11px;box-shadow:var(--sh);max-height:240px;overflow-y:auto;display:none;}
+  .sg.open{display:block;}
+  .sg-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:11px 14px;
+    border:none;background:none;font:inherit;color:var(--ink);cursor:pointer;border-bottom:1px solid var(--line);}
+  .sg-item:last-child{border-bottom:none;}
+  .sg-item:active{background:var(--brand-tint-2);}
+  .sg-item .sg-name{flex:1;font-size:14px;font-weight:600;letter-spacing:-.005em;min-width:0;}
+  .sg-item .sg-name mark{background:var(--brand-tint);color:var(--brand-ink);border-radius:3px;padding:0 2px;font-weight:700;}
+  .sg-item .sg-code{flex:none;font-size:11px;color:var(--brand-ink);font-weight:700;font-variant-numeric:tabular-nums;}
+  .sg-item .sg-meta{flex:none;font-size:11px;color:var(--ink-3);font-weight:500;}
+
+  .grp{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--brand-ink);
+    margin:22px 4px 11px;display:flex;align-items:center;gap:10px;}
+  .grp:first-child{margin-top:4px;}
+  .grp::before{content:"";width:14px;height:3px;border-radius:2px;background:var(--brand);flex:none;}
+  .grp .gc{margin-left:auto;color:var(--ink-3);font-weight:700;font-variant-numeric:tabular-nums;
+    letter-spacing:0;font-size:11px;}
+  .subgrp{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--brand-ink);
+    margin:11px 4px 8px 15px;display:flex;align-items:center;gap:7px;}
+  .subgrp::before{content:"";width:12px;height:2px;border-radius:2px;background:var(--brand);}
+
+  .li{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;
+    box-shadow:var(--sh-sm);overflow:hidden;}
+  .li-main{display:flex;align-items:center;gap:12px;padding:11px 13px;}
+  .li-check{width:25px;height:25px;border-radius:50%;border:2px solid var(--line-2);flex:none;cursor:pointer;
+    display:grid;place-items:center;color:#fff;transition:background .14s ease,border-color .14s ease;}
+  .li-check svg{width:14px;height:14px;opacity:0;transition:opacity .12s ease;}
+  .li-bd{flex:1;min-width:0;}
+  .li-name{font-size:15px;font-weight:600;letter-spacing:-.005em;line-height:1.25;}
+  .li-mt{font-size:11.5px;color:var(--ink-3);font-weight:500;margin-top:3px;font-variant-numeric:tabular-nums;
+    display:flex;flex-wrap:wrap;gap:4px 9px;}
+  .li-mt .code{color:var(--brand-ink);font-weight:700;}
+  .li-note{color:var(--amber-ink);font-size:12.5px;font-weight:600;margin-top:4px;display:flex;align-items:center;gap:5px;}
+  .li-note svg{width:13px;height:13px;flex:none;}
+  .li.done .li-name{text-decoration:line-through;color:var(--ink-3);font-weight:500;}
+  .li.done .li-check{background:var(--brand);border-color:var(--brand);}
+  .li.done .li-check svg{opacity:1;}
+  .li.done{opacity:.55;}
+  .li-act{appearance:none;border:none;background:var(--surface-2);color:var(--ink-2);width:36px;height:36px;
+    border-radius:9px;cursor:pointer;flex:none;display:grid;place-items:center;transition:background .15s ease;}
+  .li-act svg{width:17px;height:17px;}
+  .li-act:active{background:var(--surface-3);}
+  .li-act.rm{background:var(--danger-tint);color:var(--danger);}
+  .li-note-edit{padding:0 13px 12px;display:none;}
+  .li-note-edit.open{display:block;}
+  .li-note-edit input{width:100%;font:inherit;font-size:14.5px;padding:11px 12px;border-radius:9px;
+    border:1px solid var(--amber);background:var(--amber-tint);color:var(--ink);}
+  .li-note-edit input:focus{outline:none;box-shadow:0 0 0 3px rgba(138,82,16,.13);}
+
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh-sm);
+    padding:18px;margin-bottom:12px;}
+  .panel-h{display:flex;align-items:center;gap:13px;margin-bottom:16px;}
+  .panel-h .chip{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--brand-tint);color:var(--brand);}
+  .panel-h .chip svg{width:22px;height:22px;}
+  .panel-h .chip.amber{background:var(--amber-tint);color:var(--amber);}
+  .panel-h h3{margin:0;font-size:16.5px;font-weight:700;letter-spacing:-.015em;}
+  .panel-h p{margin:2px 0 0;font-size:12px;color:var(--ink-3);font-weight:500;}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin:0 0 7px 2px;}
+  .money{display:flex;align-items:center;background:var(--surface-2);border:1px solid var(--line-2);border-radius:11px;
+    padding:0 14px;transition:border-color .15s ease,box-shadow .15s ease;}
+  .money:focus-within{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint);}
+  .money .cur{color:var(--ink-3);font-size:19px;font-weight:600;}
+  .money input{flex:1;border:none;background:none;font:inherit;font-size:21px;font-weight:600;padding:14px 8px;
+    color:var(--ink);outline:none;font-variant-numeric:tabular-nums;-moz-appearance:textfield;}
+  .money input::-webkit-outer-spin-button,.money input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+  .result{margin-top:15px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
+    background:linear-gradient(150deg,#3a7d3b,#1a4a1c);border-radius:11px;padding:16px 17px;color:#eaf4ee;}
+  .result .rl{font-size:11px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;opacity:.72;}
+  .result .rv{font-size:29px;font-weight:700;letter-spacing:-.025em;line-height:1;margin-top:6px;font-variant-numeric:tabular-nums;}
+  .copy{appearance:none;border:none;background:rgba(255,255,255,.14);color:#fff;font:inherit;font-weight:600;
+    font-size:13px;padding:9px 14px;border-radius:9px;cursor:pointer;display:flex;align-items:center;gap:6px;}
+  .copy svg{width:15px;height:15px;}
+  .copy:active{background:rgba(255,255,255,.28);}
+  .hintline{font-size:12px;color:var(--ink-3);margin-top:13px;line-height:1.55;}
+
+  .gev-cat{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--brand-ink);
+    margin:18px 0 9px;display:flex;align-items:center;gap:8px;}
+  .gev-cat:first-child{margin-top:4px;}
+  .gev-cat::before{content:"";width:12px;height:3px;border-radius:2px;background:var(--brand);flex:none;}
+  .gev-cat .gc{margin-left:auto;color:var(--ink-3);font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:0;font-size:11px;}
+  .gev-item{display:flex;align-items:center;gap:11px;padding:10px 13px;background:var(--surface);
+    border:1px solid var(--line);border-radius:var(--r-sm);margin-bottom:5px;cursor:pointer;
+    font:inherit;color:inherit;transition:opacity .15s ease;}
+  .gev-item:active{opacity:.8;}
+  .gev-item .gev-name{flex:1;font-size:13.5px;font-weight:600;letter-spacing:-.005em;transition:color .15s ease;}
+  .gev-item.crossed{opacity:.45;}
+  .gev-item.crossed .gev-name{text-decoration:line-through;color:var(--ink-3);font-weight:500;}
+  .gev-item .gev-tick{width:22px;height:22px;border-radius:50%;border:2px solid var(--line-2);flex:none;display:grid;
+    place-items:center;color:#fff;transition:background .14s ease,border-color .14s ease;}
+  .gev-item .gev-tick svg{width:13px;height:13px;opacity:0;transition:opacity .12s ease;}
+  .gev-item.crossed .gev-tick{background:var(--brand);border-color:var(--brand);}
+  .gev-item.crossed .gev-tick svg{opacity:1;}
+  .gev-summary{font-size:12px;color:var(--ink-3);font-weight:500;margin:0 4px 12px;display:flex;align-items:center;justify-content:space-between;}
+  .gev-summary b{color:var(--ink-2);font-weight:700;}
+
+  .ll-actions{margin-top:20px;display:flex;flex-direction:column;gap:8px;padding:14px 0 4px;
+    border-top:1px solid var(--line);}
+  .ll-summary{font-size:11px;font-weight:600;color:var(--ink-3);text-align:center;letter-spacing:.03em;margin-bottom:2px;}
+  .danger-txt{color:var(--danger)!important;border-color:var(--danger-line)!important;}
+
+  .uf-item{padding:10px 13px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);margin-bottom:5px;}
+  .uf-name{font-size:13px;font-weight:600;color:var(--ink);}
+  .uf-meta{font-size:11px;color:var(--ink-3);margin-top:2px;line-height:1.4;}
+
+  .sch-section{margin-bottom:18px;}
+  .sch-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+    display:flex;align-items:center;gap:8px;}
+  .sch-label::before{content:"";width:12px;height:3px;border-radius:2px;background:var(--brand);flex:none;}
+  .sch-lbl-row{display:flex;align-items:center;justify-content:space-between;margin:0 4px 10px;}
+  .sch-sm-btn{appearance:none;border:none;background:none;font:inherit;font-size:11px;font-weight:600;
+    color:var(--ink-3);cursor:pointer;padding:4px 0;display:flex;align-items:center;gap:4px;}
+  .sch-sm-btn svg{width:12px;height:12px;}
+  .sch-sm-btn:active{color:var(--brand);}
+  .sch-note{font-size:12px;color:var(--ink-3);margin:12px 4px 0;line-height:1.55;text-align:center;}
+  
+  .sch-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+    box-shadow:var(--sh-sm);margin-bottom:10px;overflow:hidden;}
+  .sch-card-hdr{display:flex;align-items:center;gap:10px;padding:11px 13px;cursor:pointer;}
+  .sch-card-hdr .sch-emp-name{flex:1;font-size:15px;font-weight:600;letter-spacing:-.01em;}
+  .sch-card-hdr .sch-emp-hrs{flex:none;font-size:11px;font-weight:700;color:var(--brand-ink);
+    background:var(--brand-tint);padding:3px 8px;border-radius:6px;font-variant-numeric:tabular-nums;}
+  .sch-card-hdr .chev{flex:none;color:var(--ink-3);transition:transform .2s ease;}
+  .sch-card-hdr .chev svg{width:17px;height:17px;}
+  .sch-card.open .sch-card-hdr .chev{transform:rotate(90deg);color:var(--brand);}
+  .sch-days{display:none;padding:0 13px 13px;}
+  .sch-card.open .sch-days{display:block;}
+  .sch-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+  .sch-day-lbl{text-align:center;font-size:10px;font-weight:700;color:var(--ink-3);
+    letter-spacing:.04em;text-transform:uppercase;padding-bottom:3px;}
+  .sch-cell{background:var(--surface-2);border:1px solid var(--line);border-radius:7px;
+    padding:7px 2px;text-align:center;font-size:11px;font-weight:600;color:var(--ink);
+    min-height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:border-color .15s ease;word-break:break-all;line-height:1.2;}
+  .sch-cell:active{border-color:var(--brand);}
+  .sch-cell.off{color:var(--danger);font-weight:600;font-size:10px;text-transform:uppercase;}
+  .sch-cell.empty{color:var(--ink-3);font-size:14px;}
+  .sch-cell input{width:100%;border:none;background:none;font:inherit;font-size:11px;font-weight:600;
+    text-align:center;color:var(--ink);outline:none;padding:0;min-width:0;}
+  .sch-emp-edit{display:flex;align-items:center;gap:8px;padding:11px 13px;}
+  .sch-emp-edit input{flex:1;font:inherit;font-size:15px;font-weight:600;background:var(--surface-2);
+    border:1px solid var(--line);border-radius:9px;padding:10px 12px;color:var(--ink);min-width:0;}
+  .sch-emp-edit input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint);}
+
+  .scan-overlay{position:fixed;inset:0;z-index:80;background:rgba(8,18,12,.96);display:none;flex-direction:column;
+    overflow-y:auto;-webkit-overflow-scrolling:touch;}
+  .scan-overlay.open{display:flex;}
+  .scan-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;flex:none;}
+  .scan-bar .t{color:#eef4f0;font-size:16px;font-weight:700;}
+  .scan-bar button{appearance:none;border:none;background:rgba(255,255,255,.13);color:#fff;
+    font:inherit;font-size:13px;font-weight:600;padding:8px 14px;border-radius:9px;cursor:pointer;}
+  .scan-bar button:active{background:rgba(255,255,255,.26);}
+  .scan-body{flex:1;padding:16px;display:flex;flex-direction:column;gap:16px;}
+  .scan-step{color:var(--ink-2);font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;}
+  .scan-step .num{width:24px;height:24px;border-radius:50%;background:var(--brand);color:#fff;font-size:11px;
+    font-weight:700;display:grid;place-items:center;flex:none;}
+  .scan-preview{width:100%;max-height:240px;object-fit:contain;border-radius:var(--r);border:1px solid var(--line);background:var(--surface-3);}
+  .scan-progress{background:var(--surface);border-radius:8px;overflow:hidden;height:6px;}
+  .scan-progress-bar{height:100%;background:var(--brand);border-radius:8px;transition:width .3s ease;width:0%;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+  .scan-status{color:var(--ink-3);font-size:12px;font-weight:500;text-align:center;}
+  .scan-result{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;
+    max-height:340px;overflow-y:auto;}
+  .scan-emp{margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--line);}
+  .scan-emp:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none;}
+  .scan-emp-name{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:5px;}
+  .scan-emp-shifts{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+  .scan-emp-shifts .scan-day-hd{font-size:9px;font-weight:700;color:var(--ink-3);text-align:center;text-transform:uppercase;}
+  .scan-emp-shifts .scan-shift{font-size:10px;font-weight:600;color:var(--ink);text-align:center;
+    background:var(--surface-2);border-radius:5px;padding:4px 1px;}
+  .scan-actions{display:flex;gap:8px;flex:none;padding-bottom:env(safe-area-inset-bottom);}
+  .scan-actions .btn{flex:1;}
+
+</style>
+</head>
+<body>
+<div id="shell">
+  <div class="topbar" id="topbar"></div>
+  <main id="view"></main>
+  <nav class="tabbar"><div class="inner" id="tabbar"></div></nav>
+</div>
+<div class="scan-overlay" id="scanOverlay">
+  <div class="scan-bar"><div class="t">Scan Schedule</div><button id="scanClose">Cancel</button></div>
+  <div class="scan-body" id="scanBody"></div>
+</div>
+<input type="file" id="scanFileInput" accept="image/*" capture="environment" style="display:none">
+
+<script id="stencil-data" type="application/json">[{"c":"40613","d":"3LB GALA","p":"12","u":"ea"},{"c":"40558","d":"3LB MCINTOSH","p":"12","u":"ea"},{"c":"40738","d":"3LB RED DELICIOUS","p":"12","u":"ea"},{"c":"112414","d":"SB APPLE GLD DEL BAG3LB","p":"12","u":"ea"},{"c":"40542","d":"SB APPLE EMPIRE BAG3LB","p":"12","u":"ea"},{"c":"40702","d":"APPLES CORTLAND 3LB BAG CO","p":"12","u":"ea"},{"c":"40716","d":"APPLES MACOUN 3LB","p":"12","u":"ea"},{"c":"40632","d":"3LB GRANNY","p":"12","u":"ea"},{"c":"112402","d":"SB APPLES FUJI BAG3LB","p":"12","u":"ea"},{"c":"112014","d":"3LB HONEYCRISP","p":"12","u":"ea"},{"c":"148777","d":"CSMC CRISP APPL 3LB BG","p":"12","u":"ea"},{"c":"150152","d":"SB APPLE PNKLDY BG 3LB","p":"12","u":"ea"},{"c":"40550","d":"MAC APPLE","p":"36","u":"lb"},{"c":"40534","d":"EMPIRE APPLE","p":"40","u":"lb"},{"c":"40712","d":"CORTLAND APPLE","p":"40","u":"lb"},{"c":"40715","d":"SB MACOUN APPLE","p":"38","u":"lb"},{"c":"100837","d":"RAVE APPLES","p":"40","u":"lb"},{"c":"40636","d":"GOLD DELICIOUS","p":"40","u":"lb"},{"c":"40794","d":"GRANNY SMITH","p":"40","u":"lb"},{"c":"40618","d":"GALA","p":"40","u":"lb"},{"c":"40722","d":"RED DELICIOUS","p":"40","u":"lb"},{"c":"40719","d":"FUJI APPLES","p":"42","u":"lb"},{"c":"40573","d":"HONEYCRISP","p":"38","u":"lb"},{"c":"40678","d":"PINK LADY APPLE","p":"40","u":"lb"},{"c":"51500","d":"ENVY APPLE","p":"40","u":"lb"},{"c":"214671","d":"COSMIC CRISP APPLE","p":"40","u":"lb"},{"c":"272342","d":"EVERCRISP APPLES","p":"27","u":"lb"},{"c":"113506","d":"PINATA APPLES","p":"40","u":"lb"},{"c":"58191","d":"SNAP DRAGON APPLES","p":"27","u":"lb"},{"c":"279701","d":"ENVY APPLE 27 lb box","p":"27","u":"lb"},{"c":"119042","d":"AURA APPLE","p":"27","u":"lb"},{"c":"125013","d":"SWEET TANGO APPLES","p":"72","u":"lb"},{"c":"143039","d":"HUNNYZ APPLE","p":"40","u":"lb"},{"c":"20790","d":"RUBY FROST APPLE","p":"27","u":"lb"},{"c":"181673","d":"RUBY FROST APPLES 2LB","p":"12","u":"ea"},{"c":"205022","d":"SNAP DRGON APPL 2LB BAG","p":"12","u":"ea"},{"c":"62251","d":"RED KISSABEL APPLES","p":"26","u":"ea"},{"c":"40598","d":"TOTE BAG MACS","p":"40","u":"lb"},{"c":"40599","d":"TOTE BAG RED DEL","p":"40","u":"lb"},{"c":"40600","d":"TOTE BAG EMPIRES","p":"40","u":"lb"},{"c":"40601","d":"TOTE BAG CORTLANDS","p":"40","u":"lb"},{"c":"40610","d":"TOTE BAG GALA","p":"40","u":"lb"},{"c":"40639","d":"TOTE BAG GOLD","p":"40","u":"lb"},{"c":"40718","d":"TOTE BAG MACOUN","p":"38","u":"lb"},{"c":"114074","d":"TOTE BAG FUJI","p":"38","u":"lb"},{"c":"41851","d":"HASS AVOCADO","p":"48","u":"ea"},{"c":"213339","d":"FIRM AVOCADOS","p":"48","u":"ea"},{"c":"114594","d":"BAG AVOCADOS 4 ct bag (70 ct fruit)","p":"18","u":"ea"},{"c":"101256","d":"AVOCADO GREEN SKIN","p":"20","u":"ea"},{"c":"252618","d":"HASS AVOCADO 60","p":"60","u":"ea"},{"c":"96210","d":"AVOCADO FIRM 60CT","p":"60","u":"ea"},{"c":"67858","d":"HASS AVOCADO","p":"40","u":"ea"},{"c":"28409","d":"JUMBO AVOCADO 3CT BAG","p":"12","u":"ea"},{"c":"41110","d":"BANANAS","p":"40","u":"lb"},{"c":"41112","d":"GREEN BANANAS","p":"40","u":"lb"},{"c":"42073","d":"UNGASSED BANANAS","p":"40","u":"lb"},{"c":"42122","d":"RIPE PLANTAINS 55LB","p":"65","u":"ea"},{"c":"41196","d":"RIPE PLANTAINS","p":"35","u":"ea"},{"c":"43266","d":"GREEN PLANTAINS","p":"65","u":"ea"},{"c":"41084","d":"STRAWBERRY 1 LB","p":"8","u":"ea"},{"c":"41049","d":"STRAWBERRIES 2 LB","p":"4","u":"ea"},{"c":"149801","d":"DRISCOLLS SWT BATCH STRAW 14 oz","p":"8","u":"ea"},{"c":"160596","d":"DRSCL SWTBTCH STRW 10Z","p":"16","u":"ea"},{"c":"105293","d":"HYDROPONIC STRAWBERRIES","p":"8","u":"ea"},{"c":"117120","d":"DRISCOL BIG STRWBRY 16Z","p":"8","u":"ea"},{"c":"214327","d":"NE STRAWBERRIES 1LB","p":"8","u":"lb"},{"c":"41088","d":"PKG STEM STRWBRY","p":"4","u":"ea"},{"c":"126529","d":"WHITE STRAWBERRY 10Z","p":"8","u":"ea"},{"c":"43381","d":"DRISCOLL TROPICAL BLISS 9Z","p":"16","u":"ea"},{"c":"41092","d":"BLUEBERRIES 6Z","p":"12","u":"ea"},{"c":"41090","d":"BLUEBERRY PINT","p":"12","u":"ea"},{"c":"219357","d":"BLUEBERRY 18oz","p":"8","u":"ea"},{"c":"243663","d":"JUMBO BLUEBERRY 9OZ","p":"12","u":"ea"},{"c":"214477","d":"DRISCOL JUMBO BLUES 11Z","p":"8","u":"ea"},{"c":"117119","d":"DRISCOL SWT BATCH RAS6Z","p":"12","u":"ea"},{"c":"41096","d":"RASPBERRIES 6oz","p":"12","u":"ea"},{"c":"219879","d":"RASPBERRIES 12oz","p":"6","u":"ea"},{"c":"148274","d":"SUMMER DREAM RASPBERRY","p":"12","u":"ea"},{"c":"67485","d":"SUNBELLE GOLDEN BERRIES","p":"12","u":"ea"},{"c":"41093","d":"BLACKBERRIES 6oz","p":"12","u":"ea"},{"c":"136694","d":"DRISCOLLS BLACKBERRIES 12 oz","p":"12","u":"ea"},{"c":"241931","d":"10OZ SWEETBATCHBLKBERRY","p":"12","u":"ea"},{"c":"293800","d":"SW KAROLINE BLCKBERRIES","p":"8","u":"ea"},{"c":"41068","d":"12OZ CRANBERRY","p":"24","u":"ea"},{"c":"41082","d":"LOCAL CRANBERRY 12 OZ","p":"24","u":"ea"},{"c":"142569","d":"FRESH CRANBERRIES 2LB","p":"12","u":"ea"},{"c":"41072","d":"CHILEAN CHERRIES","p":"11","u":"lb"},{"c":"41074","d":"WASHINGTN CHERRY 18#","p":"18","u":"lb"},{"c":"41079","d":"CALIFORNIA CHERRIES","p":"16","u":"lb"},{"c":"41075","d":"GOLD RAINER CHRRY15","p":"15","u":"lb"},{"c":"28051","d":"SWEET CHERRY 1LB","p":"16","u":"lb"},{"c":"160990","d":"SB SKYLR RAE CHRRY 1EA","p":"16","u":"ea"},{"c":"182229","d":"RANIER CHERRY 1 LB PKG","p":"16","u":"ea"},{"c":"40470","d":"RED GRAPEFRUIT 36 CT","p":"36","u":"lb"},{"c":"150540","d":"TEXAS RUBY RED GRAPEFRUIT 32 CT","p":"32","u":"ea"},{"c":"40222","d":"TANGELOS","p":"45","u":"ea"},{"c":"40362","d":"TANGELOS","p":"64","u":"ea"},{"c":"40524","d":"LEMONS","p":"115","u":"ea"},{"c":"132642","d":"WONDERFL SDLS LEMON BAG","p":"24","u":"ea"},{"c":"40789","d":"SUNKIST MEYER LEMONS","p":"12","u":"ea"},{"c":"40521","d":"SB 2 LB LEMON BAG","p":"18","u":"ea"},{"c":"41820","d":"LIMES","p":"42","u":"ea"},{"c":"7601","d":"SB 2LB LIMES","p":"8","u":"ea"},{"c":"41821","d":"16OZ KEY LIMES","p":"10","u":"ea"},{"c":"214616","d":"WONDERFL SDLS LEMON BAG","p":"18","u":"ea"},{"c":"146702","d":"PEELZ MANDARINS 2LB","p":"15","u":"ea"},{"c":"213236","d":"HALO MANDARIN 2LB","p":"15","u":"ea"},{"c":"35675","d":"SUMO MANDARINS 1LB","p":"18","u":"ea"},{"c":"190459","d":"SUMO MANDARINS 2LB","p":"12","u":"ea"},{"c":"67739","d":"MANDARINS 3LB IMPORTED","p":"10","u":"ea"},{"c":"94926","d":"PEELZ MANDARINS 3LB","p":"6","u":"ea"},{"c":"203482","d":"PEELZ MANDARINS 5 LB","p":"10","u":"ea"},{"c":"40845","d":"FLORIDA PUMMELO","p":"12","u":"ea"},{"c":"41284","d":"RED SEEDLESS GRAPES","p":"18","u":"lb"},{"c":"41288","d":"WHITE SEEDLESS GRAPES","p":"18","u":"lb"},{"c":"41280","d":"GRAPES BLACK SEEDLESS","p":"18","u":"lb"},{"c":"60896","d":"MOON DROP GRAPES","p":"18","u":"lb"},{"c":"68053","d":"2LB GREEN GRAPES","p":"8","u":"ea"},{"c":"68054","d":"2LB RED GRAPES","p":"8","u":"ea"},{"c":"293496","d":"TASTE OF INSPIRATIONS SORBET GRA","p":"10","u":"ea"},{"c":"115701","d":"GRAPE CLAMSHELL 3LB","p":"6","u":"ea"},{"c":"118546","d":"GUM DROP GRAPES","p":"16","u":"lb"},{"c":"280993","d":"SB COTTON CANDY GRAPES","p":"16","u":"lb"},{"c":"45007","d":"TEAR DROP GRAPES","p":"10","u":"lb"},{"c":"214461","d":"CANDY HEART GRAPES 1LB","p":"12","u":"lb"},{"c":"41338","d":"CLAMSHEL CONCRD GRAPE","p":"10","u":"ea"},{"c":"158653","d":"COTTON CNDY 1LB CLMSHL","p":"10","u":"lb"},{"c":"219431","d":"GRAPE CLAMSHELL 2LB","p":"8","u":"ea"},{"c":"222225","d":"TOI GEM RED SDLS GRP2LB","p":"8","u":"ea"},{"c":"222226","d":"TOI SPRK RED SDL GRP2LB","p":"8","u":"ea"},{"c":"222229","d":"TOI STABLAGRN SDL GRP 2L","p":"8","u":"ea"},{"c":"40750","d":"CANTALOUPES 9 CT","p":"9","u":"ea"},{"c":"40772","d":"HONEYDEW 5 CT","p":"5","u":"ea"},{"c":"40774","d":"HONEYDEW 6CT","p":"6","u":"ea"},{"c":"44788","d":"MINI WATERMELON","p":"6","u":"ea"},{"c":"295061","d":"WATRMLN SDLS BIN 45 CT","p":"45","u":"ea"},{"c":"114708","d":"WTRMRLON SDLS 60CT","p":"60","u":"ea"},{"c":"40888","d":"BIN SEEDED WATERMELON","p":"35","u":"ea"},{"c":"241193","d":"SEEDLESS CRTN WATMELN","p":"65","u":"lb"},{"c":"40934","d":"ANJOU PEAR","p":"40","u":"lb"},{"c":"41011","d":"SB BARTLETT PEARS","p":"27","u":"lb"},{"c":"41015","d":"BARTLETT PEARS","p":"40","u":"lb"},{"c":"41018","d":"ORCHARD PERFECT ANJOU","p":"27","u":"lb"},{"c":"40948","d":"BOSC PEARS","p":"43","u":"lb"},{"c":"204983","d":"BOSC PEARS","p":"26","u":"lb"},{"c":"41028","d":"RED PEARS","p":"22","u":"lb"},{"c":"41042","d":"ASIAN PEAR","p":"18","u":"ea"},{"c":"101441","d":"BUTTERSCOTCH PEARS","p":"11","u":"lb"},{"c":"279102","d":"2LB HAPPI PEAR","p":"12","u":"ea"},{"c":"295046","d":"GOLD PINEAPPLE","p":"6","u":"ea"},{"c":"213666","d":"DM HNYGLW PNPPL","p":"6","u":"ea"},{"c":"40896","d":"PEACHES","p":"18","u":"lb"},{"c":"41143","d":"WHITE PEACHES","p":"18","u":"lb"},{"c":"41152","d":"FRESH PEACHES","p":"16","u":"lb"},{"c":"41153","d":"EASTERN PEACHES","p":"25","u":"lb"},{"c":"68022","d":"DONUT PEACHES 1.25LB","p":"16","u":"ea"},{"c":"40897","d":"NECTARINES","p":"18","u":"lb"},{"c":"41073","d":"WHITE NECTARINES","p":"18","u":"lb"},{"c":"40904","d":"NECTARINE YELLOW","p":"16","u":"lb"},{"c":"40923","d":"CHILEAN APRICOT","p":"12","u":"lb"},{"c":"40918","d":"APRICOT LARGE WESTERN","p":"13","u":"lb"},{"c":"51494","d":"BLKVEL APRICOT 1.25LB","p":"18","u":"ea"},{"c":"42752","d":"ANGELCOTS","p":"16","u":"lb"},{"c":"41175","d":"SB BLACK PLUM","p":"28","u":"lb"},{"c":"41172","d":"PRUNE PLUMS","p":"25","u":"lb"},{"c":"41194","d":"PLUM 1LB","p":"16","u":"lb"},{"c":"80199","d":"PLUM LEMON 1LB","p":"12","u":"lb"},{"c":"112454","d":"SFT FR PLUM PLUOT MOTL","p":"16","u":"lb"},{"c":"112458","d":"SFT FRT PLUM PLUOT RED","p":"16","u":"lb"},{"c":"112462","d":"SFT FRT PLUM PLUOT GRN","p":"16","u":"lb"},{"c":"40881","d":"PLUOT BLACK","p":"16","u":"lb"},{"c":"41836","d":"MANGOES","p":"10","u":"ea"},{"c":"41841","d":"HONEY MANGO","p":"16","u":"ea"},{"c":"144586","d":"MANGOES 8CT","p":"8","u":"ea"},{"c":"41437","d":"KIWI","p":"81","u":"ea"},{"c":"103910","d":"KIWI GOLD PACKAGE 1 LB","p":"8","u":"lb"},{"c":"103909","d":"2LB GREEN KIWI","p":"8","u":"lb"},{"c":"221445","d":"1LB RED KIWI","p":"8","u":"lb"},{"c":"125264","d":"ZESPRI SUNGOLD KIWI 2LB","p":"8","u":"ea"},{"c":"206067","d":"JACK FRUIT","p":"40","u":"lb"},{"c":"14978","d":"JACK FRUIT PODS 1 LB","p":"8","u":"ea"},{"c":"114001","d":"PAPAYA","p":"8","u":"ea"},{"c":"41875","d":"JUMBO PAPAYA (MARADOL OR CARIBB)","p":"32","u":"lb"},{"c":"279579","d":"WHITE DRAGON FRUIT","p":"10","u":"lb"},{"c":"214655","d":"YELLOW DRAGON FRUIT","p":"6","u":"lb"},{"c":"101425","d":"YELLOW DRAGON FRUIT","p":"9","u":"lb"},{"c":"279377","d":"GUAVA","p":"10","u":"lb"},{"c":"41121","d":"COCONUTS","p":"24","u":"ea"},{"c":"136330","d":"COCONUT YOUNG","p":"9","u":"ea"},{"c":"42085","d":"WATER COCONUTS","p":"10","u":"ea"},{"c":"3393","d":"FRESH FIGS 8Z","p":"12","u":"ea"},{"c":"110065","d":"FRESH FIG CLAMSHELL","p":"6","u":"ea"},{"c":"271131","d":"EDIBLE ALOE LEAVES","p":"20","u":"ea"},{"c":"117826","d":"PEPINO MELON","p":"12","u":"ea"},{"c":"40876","d":"PASSION FRUIT","p":"33","u":"ea"},{"c":"77634","d":"PINEAPPLE","p":"7","u":"ea"},{"c":"61574","d":"POMEGRANATE","p":"22","u":"ea"},{"c":"67441","d":"POMEGRANATES 8-10 CT","p":"10","u":"ea"},{"c":"101284","d":"POMEGRANATE 30CT","p":"30","u":"ea"},{"c":"228521","d":"SB PERSIMMON KAKI","p":"10","u":"ea"},{"c":"41065","d":"FUYU PERSIMMON","p":"18","u":"ea"},{"c":"41061","d":"HACHIYA PERSIMMON","p":"16","u":"ea"},{"c":"280992","d":"LYCHEE CLAMSHELL","p":"12","u":"ea"},{"c":"214149","d":"FRIEDAS RAMBUTAN 12Z","p":"6","u":"ea"},{"c":"295024","d":"STAR FRUIT","p":"20","u":"ea"},{"c":"137610","d":"TURMERIC ROOT 6OZ","p":"6","u":"ea"},{"c":"182257","d":"TURMERIC 6OZ BAG","p":"12","u":"ea"},{"c":"41661","d":"ARTICHOKES","p":"24","u":"ea"},{"c":"41848","d":"ASPARAGUS 1LB","p":"28","u":"lb"},{"c":"42071","d":"ASPARAGUS 1LB","p":"11","u":"lb"},{"c":"279052","d":"BABY GREEN PEAS","p":"6","u":"ea"},{"c":"142720","d":"12OZ GREEN BEANS","p":"12","u":"ea"},{"c":"142719","d":"2LB GREEN BEANS","p":"5","u":"ea"},{"c":"273627","d":"HV FRENCH BEAN 24Z","p":"8","u":"ea"},{"c":"283286","d":"12OZ FRENCH GREEN BEANS","p":"6","u":"ea"},{"c":"41870","d":"BULK GREEN BEANS","p":"25","u":"lb"},{"c":"41519","d":"BROCCOLI CROWNS","p":"20","u":"lb"},{"c":"41552","d":"BUNCH BROCCOLI","p":"22","u":"lb"},{"c":"122379","d":"SB BROCCOLI FLORETS 12Z","p":"6","u":"lb"},{"c":"41900","d":"CAULIFLOWER","p":"12","u":"ea"},{"c":"41858","d":"RHUBARB","p":"15","u":"ea"},{"c":"41562","d":"GREEN CABBAGE","p":"50","u":"lb"},{"c":"279373","d":"RED CABBAGE","p":"20","u":"lb"},{"c":"41982","d":"SAVOY CABBAGE","p":"35","u":"lb"},{"c":"279302","d":"NAPA","p":"15","u":"lb"},{"c":"279303","d":"BOK CHOY","p":"15","u":"lb"},{"c":"100310","d":"BRUSSELS SPROUTS 12oz","p":"9","u":"ea"},{"c":"100361","d":"PETITE BRUSSEL SPROUTS","p":"9","u":"ea"},{"c":"254026","d":"COOKVEG BRUSSEL SPRT","p":"8","u":"ea"},{"c":"279159","d":"1LB BABY CARROTS","p":"30","u":"ea"},{"c":"279160","d":"2LB BABY CARROTS","p":"15","u":"ea"},{"c":"112262","d":"MATCHSTICK CARROTS","p":"12","u":"ea"},{"c":"44631","d":"PREMIUM PETITE CARROTS","p":"12","u":"ea"},{"c":"41534","d":"2LB BAG CARROTS","p":"24","u":"ea"},{"c":"279598","d":"5LB CARROTS","p":"10","u":"ea"},{"c":"3173","d":"BLTHOUSE SP STW CRT 12Z","p":"12","u":"ea"},{"c":"62400","d":"CELERY","p":"30","u":"ea"},{"c":"113854","d":"CELERY HEART","p":"18","u":"ea"},{"c":"101038","d":"CELERY STICKS","p":"24","u":"ea"},{"c":"213334","d":"DANDY CELERY STICKS","p":"10","u":"ea"},{"c":"42024","d":"ANISE","p":"18","u":"ea"},{"c":"42104","d":"GINGER ROOT","p":"10","u":"lb"},{"c":"143332","d":"ASIAN OKRA 8 OZ","p":"6","u":"ea"},{"c":"143339","d":"CHINESE LONG SQUASH 1 CT","p":"6","u":"ea"},{"c":"143349","d":"CHINESE BITTER MELON 2 CT","p":"6","u":"ea"},{"c":"143350","d":"CHINESE EGGPLANT 3 CT","p":"6","u":"ea"},{"c":"143338","d":"INDIAN EGGPLANT 6 CT","p":"6","u":"ea"},{"c":"146656","d":"Gai Lan (Chinese Broccoli)","p":"12","u":"ea"},{"c":"146657","d":"Baby Bok Choy","p":"12","u":"ea"},{"c":"100211","d":"Shanghai Bok Choy","p":"12","u":"ea"},{"c":"100236","d":"Yu Choy","p":"6","u":"ea"},{"c":"208191","d":"BABY BOK CHOY 1LB","p":"10","u":"lb"},{"c":"81223","d":"ASIAN NOODLE SALAD","p":"5","u":"lb"},{"c":"42390","d":"NASOYA WON TON WRAPPERS","p":"6","u":"ea"},{"c":"42463","d":"NASOYA EGG ROLL WRAPPERS","p":"6","u":"ea"},{"c":"279085","d":"KIM CHEE","p":"6","u":"ea"},{"c":"42061","d":"DANDELION GREENS","p":"13","u":"lb"},{"c":"67670","d":"PERO FARMS OKRA","p":"12","u":"ea"},{"c":"41990","d":"TURNIP GREEN","p":"18","u":"lb"},{"c":"42044","d":"MUSTARD GREENS","p":"18","u":"lb"},{"c":"42052","d":"COLLARD GREENS","p":"18","u":"lb"},{"c":"42106","d":"KALE, BULK","p":"18","u":"lb"},{"c":"42090","d":"BROCCOLI RABE","p":"20","u":"lb"},{"c":"44429","d":"BROCCOLINI","p":"18","u":"ea"},{"c":"42159","d":"BRIGHT LIGHT SWISS CHARD","p":"12","u":"ea"},{"c":"260118","d":"SB BAG COLLARDS 16Z","p":"8","u":"lb"},{"c":"260163","d":"SB SHRED COLLARDS 32OZ","p":"6","u":"ea"},{"c":"260165","d":"SB BAG KALE 16Z","p":"8","u":"ea"},{"c":"260124","d":"SB BAG KALE 32OZ","p":"6","u":"ea"},{"c":"3834","d":"RUMA FIDDLEHEADS 8Z","p":"12","u":"ea"},{"c":"41570","d":"SWEET CORN","p":"60","u":"ea"},{"c":"41572","d":"BI COLR SWEET CORN","p":"48","u":"ea"},{"c":"125070","d":"SB CORN SWEET 5PK","p":"12","u":"ea"},{"c":"150036","d":"CORN SWEET PREPACK","p":"12","u":"ea"},{"c":"41859","d":"CUCUMBERS","p":"70","u":"ea"},{"c":"42154","d":"HOT HOUSE CUCUMBERS","p":"12","u":"ea"},{"c":"103528","d":"3PK SEEDLESS CUCUMBER","p":"8","u":"ea"},{"c":"279323","d":"CELLO MINI CUCUMBERS","p":"8","u":"ea"},{"c":"114027","d":"MINI CUC 2LB BAG","p":"8","u":"lb"},{"c":"147978","d":"QUKES TT 9OZ","p":"15","u":"ea"},{"c":"208177","d":"4CT PICKLE CUCUMBER","p":"12","u":"ea"},{"c":"3195","d":"SW GRLC GNGR FUSION 8Z","p":"12","u":"ea"},{"c":"42164","d":"SHALLOTS","p":"10","u":"lb"},{"c":"150341","d":"3 OZ. BAG SHALLOT","p":"12","u":"ea"},{"c":"150338","d":"5 BULB SLEEVE GARLIC","p":"22","u":"ea"},{"c":"42350","d":"JUMBO PACKAGED GARLIC","p":"24","u":"ea"},{"c":"42360","d":"GARLIC","p":"200","u":"ea"},{"c":"110043","d":"SQUEEZE MINCED GARLIC","p":"12","u":"ea"},{"c":"114985","d":"MINCED GARLIC 32OZ","p":"6","u":"ea"},{"c":"114984","d":"MINCED GARLIC IN OLIVE OIL 4.5OZ","p":"12","u":"ea"},{"c":"114987","d":"MINCED GARLIC 8OZ","p":"12","u":"ea"},{"c":"114986","d":"CHOPPED GARLIC 8OZ","p":"12","u":"ea"},{"c":"114988","d":"MINCED GARLIC 4.5OZ","p":"12","u":"ea"},{"c":"114989","d":"CHOPPED GARLIC 4.5OZ","p":"12","u":"ea"},{"c":"280997","d":"SW SQUEEZE GINGER 10oz","p":"12","u":"ea"},{"c":"160974","d":"SB PEELED GARLIC 6Z","p":"12","u":"ea"},{"c":"41605","d":"CELLO ICEBERG LETTUCE","p":"24","u":"ea"},{"c":"41604","d":"ROMAINE LETTUCE","p":"24","u":"ea"},{"c":"279448","d":"GREEN LEAF LETTUCE","p":"24","u":"ea"},{"c":"279447","d":"RED LEAF LETTUCE","p":"24","u":"ea"},{"c":"42953","d":"ROMAINE HEARTS 3CT","p":"12","u":"ea"},{"c":"150031","d":"HYDRO BOSTON LETTUCE (Connecticut)","p":"12","u":"ea"},{"c":"212511","d":"ROMAINE LETTUCE CLMSHL","p":"12","u":"ea"},{"c":"212510","d":"GREEN LF LETTUCE CLMSHL","p":"12","u":"ea"},{"c":"212512","d":"RED LEAF LETTUCE CLMSHL","p":"12","u":"ea"},{"c":"41642","d":"ESCAROLE","p":"20","u":"lb"},{"c":"44011","d":"RADICCHIO","p":"4","u":"lb"},{"c":"42050","d":"BELGIAN ENDIVE","p":"10","u":"lb"},{"c":"182262","d":"LETTUCE HYDRO ROMAINE","p":"12","u":"ea"},{"c":"182263","d":"HYDRO GREEN","p":"12","u":"ea"},{"c":"182264","d":"HYDRO RED","p":"12","u":"ea"},{"c":"270079","d":"WHITE WHOLE MUSHROOMS","p":"12","u":"ea"},{"c":"44405","d":"PRE WASHED & SLICED","p":"12","u":"ea"},{"c":"279502","d":"WHOLE BABY BELLA","p":"12","u":"ea"},{"c":"279503","d":"SLICED BABY BELLA","p":"12","u":"ea"},{"c":"150668","d":"16OZ SLICED WHITE MUSHROOMS","p":"8","u":"ea"},{"c":"143079","d":"16OZ SLICED BABY BELLA MUSHROOM","p":"8","u":"ea"},{"c":"42057","d":"14OZ WHITE STUFFING MUSHROOM","p":"8","u":"ea"},{"c":"42256","d":"SB OYSTER MUSHROOMS 4Z","p":"6","u":"ea"},{"c":"44553","d":"SHIITAKE MUSHROOM","p":"6","u":"ea"},{"c":"42287","d":"PORTABELLA MUSHROOM CAPS","p":"4","u":"ea"},{"c":"42014","d":"SB PORTABELLA CAPS 6Z","p":"6","u":"ea"},{"c":"117108","d":"CHEF BLEND MUSHROOM","p":"8","u":"ea"},{"c":"110778","d":"SLCD SHTK 10OZ","p":"10","u":"ea"},{"c":"40111","d":"LOOSE WHITE ONIONS","p":"25","u":"lb"},{"c":"40122","d":"LOOSE RED ONIONS","p":"25","u":"lb"},{"c":"40098","d":"LOOSE YELLOW ONIONS","p":"50","u":"lb"},{"c":"40117","d":"SWEET ONIONS","p":"40","u":"lb"},{"c":"40119","d":"VIDALIA ONION","p":"40","u":"lb"},{"c":"40102","d":"3LB YELLOW ONION","p":"16","u":"ea"},{"c":"241794","d":"PINK ONION 2LB","p":"18","u":"ea"},{"c":"159943","d":"2LB RED ONION","p":"20","u":"ea"},{"c":"40104","d":"5LB YELLOW ONION","p":"10","u":"ea"},{"c":"112670","d":"3LB SWEET ONION BAG","p":"12","u":"ea"},{"c":"242247","d":"VIDALIA 3 SWT ONION USA","p":"12","u":"ea"},{"c":"115004","d":"SWEET ONIONS 5LB","p":"8","u":"ea"},{"c":"112318","d":"ONION VIDLIA ONION 5LB","p":"8","u":"ea"},{"c":"41672","d":"SCALLION 48CTX","p":"48","u":"ea"},{"c":"40884","d":"ONION BOILING 1.5LB","p":"15","u":"ea"},{"c":"41464","d":"ONION CIPOLLINE 8OZ","p":"12","u":"ea"},{"c":"279412","d":"PEARL ONION VARIETY 8Z","p":"12","u":"ea"},{"c":"42004","d":"SB EGGPLANT","p":"25","u":"lb"},{"c":"41733","d":"RED LAROUGE PEPPR 15LB","p":"15","u":"lb"},{"c":"281230","d":"GREEN PEPPER","p":"40","u":"ea"},{"c":"273707","d":"GREEN PEPPER 2LBS","p":"7","u":"ea"},{"c":"149852","d":"SEEDLESS RED PEPPER 1LB","p":"12","u":"ea"},{"c":"142277","d":"IMPORTED RED PEPPER","p":"22","u":"ea"},{"c":"142279","d":"IMPORTED YELLOW PEPPER","p":"22","u":"ea"},{"c":"142278","d":"IMPORTED ORANGE PEPPER","p":"22","u":"ea"},{"c":"256651","d":"VARIETY PEPPERS BOX B (Anaheim, Cherry Hot, Finger Hot, Serrano)","p":"8","u":"lb"},{"c":"150217","d":"LOOSE HABANERO PEPPER","p":"5","u":"lb"},{"c":"270069","d":"LOOSE PABLANO PEPPER","p":"10","u":"lb"},{"c":"241036","d":"LOOSE JALAPENO PEPPER","p":"10","u":"lb"},{"c":"275380","d":"3PK RAINBOW PEPPER","p":"8","u":"ea"},{"c":"180421","d":"4PK MIXED BELL PEPPER","p":"6","u":"ea"},{"c":"105737","d":"6PK RAINBOW PEPPER","p":"4","u":"ea"},{"c":"103912","d":"24OZ CUBANELLE PEPPER","p":"9","u":"ea"},{"c":"295520","d":"BF CUBANELLE PEPPER 16Z","p":"8","u":"ea"},{"c":"143313","d":"AJICITOS PEPPERS TRAY PK 5 OZ","p":"6","u":"ea"},{"c":"143328","d":"SCOTCH BONNET TRAY PK 5 OZ","p":"6","u":"ea"},{"c":"143330","d":"THAI CHILI PEPPRS RED5Z","p":"12","u":"ea"},{"c":"143331","d":"CHILI PEPPER TRAY PK 5 OZ","p":"6","u":"ea"},{"c":"134827","d":"3OZ DRD ANCHO CHILI PEP","p":"12","u":"ea"},{"c":"134826","d":"3Z DRD GUAJILLO CHL PEP","p":"12","u":"ea"},{"c":"219909","d":"3OZ DRIED ARBOL CHILE","p":"12","u":"ea"},{"c":"90234","d":"MINI SWEET PEPPER 1LB","p":"12","u":"lb"},{"c":"110067","d":"RED PEPPERS 2LB","p":"10","u":"ea"},{"c":"35755","d":"8LB RUSSET POTATO","p":"6","u":"ea"},{"c":"40011","d":"5LB YELLOW POTATO","p":"10","u":"ea"},{"c":"40015","d":"5LB RED POTATO","p":"10","u":"ea"},{"c":"40034","d":"5LB RUSSET POTATO","p":"10","u":"ea"},{"c":"40002","d":"5LB WHITE POTATO","p":"10","u":"ea"},{"c":"40012","d":"LOOSE RED POTATO","p":"50","u":"lb"},{"c":"40013","d":"LOOSE RUSSET POTATO","p":"50","u":"lb"},{"c":"51723","d":"BULK YELLOW POTATO","p":"50","u":"lb"},{"c":"150442","d":"4ct TRAY RUSSET POTATO","p":"12","u":"ea"},{"c":"61726","d":"15LB RUSSET POTATO","p":"75","u":"ea"},{"c":"40045","d":"MICRO BAKE POTATO","p":"28","u":"ea"},{"c":"40046","d":"MICRO SWEET POTATO","p":"33","u":"ea"},{"c":"20086","d":"MICROWAVE SWEET POTATO","p":"30","u":"ea"},{"c":"20087","d":"MICROWAVE RUSSET POTATO","p":"30","u":"ea"},{"c":"26110","d":"STEAMABLE FINGERLING","p":"12","u":"ea"},{"c":"26111","d":"STEAMABLE RED POTATOES","p":"12","u":"ea"},{"c":"26103","d":"STEAMABLE SWEET POTATOES","p":"12","u":"ea"},{"c":"222887","d":"SB BABY RED POTATO 24Z","p":"12","u":"ea"},{"c":"222886","d":"SB BABY MEDLEY POTATOES 24Z","p":"12","u":"ea"},{"c":"222885","d":"SB BABY GOLD POTATO 24Z","p":"12","u":"ea"},{"c":"213417","d":"RUBY SENSATION","p":"10","u":"ea"},{"c":"213443","d":"HONEY GOLD","p":"10","u":"ea"},{"c":"162052","d":"MN WT POT 1.5LB","p":"8","u":"ea"},{"c":"162054","d":"MN DT PT 1.5LB","p":"8","u":"ea"},{"c":"241687","d":"QA POTATOES 2LB","p":"24","u":"ea"},{"c":"162053","d":"MN YL POT 3LB","p":"16","u":"ea"},{"c":"162056","d":"MN YL POT 5LB","p":"10","u":"ea"},{"c":"41924","d":"GREEN SQUASH","p":"20","u":"lb"},{"c":"41932","d":"YELLOW SQUASH","p":"20","u":"lb"},{"c":"41940","d":"ACORN SQUASH","p":"40","u":"lb"},{"c":"41948","d":"BUTTERNUT SQUASH","p":"40","u":"lb"},{"c":"41970","d":"SPAGHETTI SQUASH","p":"35","u":"lb"},{"c":"41952","d":"BUTTERCUP SQUASH","p":"32","u":"lb"},{"c":"41953","d":"RED TURBAN SQUASH","p":"35","u":"lb"},{"c":"41946","d":"RED KURIE SQUASH","p":"20","u":"lb"},{"c":"213354","d":"HONEYNUT SQUASH 1LB","p":"50","u":"lb"},{"c":"41692","d":"RW CELLO SQUASH 15LBS","p":"15","u":"ea"},{"c":"41780","d":"SB PEELED CUBED SQUASH","p":"12","u":"ea"},{"c":"119442","d":"DICED BUTTERNUT 4-48Z","p":"4","u":"ea"},{"c":"42023","d":"DELICATA SQUASH","p":"20","u":"lb"},{"c":"41463","d":"CARNIVAL SQUASH","p":"35","u":"lb"},{"c":"41911","d":"SB BLUE HUBBARD SQUASH","p":"35","u":"lb"},{"c":"41930","d":"SWEETDUMPLINGSQUASH","p":"20","u":"lb"},{"c":"41949","d":"WHITE ACORN SQUASH","p":"40","u":"lb"},{"c":"42029","d":"SB TURKS TURBAN SQUASH","p":"40","u":"lb"},{"c":"42031","d":"GOLDEN ACORN SQUASH","p":"35","u":"lb"},{"c":"41967","d":"LARGE PUMPKIN 45CT","p":"45","u":"ea"},{"c":"214469","d":"PUMPKIN PIE BIN","p":"250","u":"ea"},{"c":"110096","d":"PIE PUMPKIN","p":"12","u":"ea"},{"c":"229772","d":"PUMPKIN VARIETY BIN","p":"40","u":"ea"},{"c":"40035","d":"SWEET POTATOES","p":"40","u":"lb"},{"c":"241909","d":"SWEET POTATOES 5LB","p":"8","u":"lb"},{"c":"60895","d":"ANGEL SWEET TOMATO1.5LB","p":"6","u":"ea"},{"c":"8589","d":"ONE SWEET TOMATO 1.5LB","p":"6","u":"ea"},{"c":"279443","d":"1LB CAMPARI TOMATO","p":"10","u":"ea"},{"c":"163160","d":"WLD WNDR TOMATOS 1.5LB","p":"6","u":"ea"},{"c":"190463","d":"NAT SWT CHERUBS 16.5OZ","p":"15","u":"ea"},{"c":"103861","d":"TASTI LEE TOMATO 1LB","p":"12","u":"lb"},{"c":"182218","d":"RED N TASTY TOMATOES LB","p":"18","u":"lb"},{"c":"41801","d":"GRAPE TOMATO PINT","p":"12","u":"ea"},{"c":"214328","d":"NAT SWEET CHERUBS 10Z","p":"15","u":"ea"},{"c":"139184","d":"FLAVOR BOMBS 12Z","p":"8","u":"ea"},{"c":"214049","d":"WILD WONDER TOMATO 12Z","p":"10","u":"ea"},{"c":"102323","d":"SUGAR BOMBS 12Z","p":"8","u":"ea"},{"c":"150608","d":"CAMPARI TOMATO 2LB","p":"8","u":"ea"},{"c":"144159","d":"NS CHERUBS 24OZ","p":"9","u":"ea"},{"c":"284771","d":"ANGEL SWEET TOMATOES","p":"15","u":"ea"},{"c":"3174","d":"ORG COSMIC CRISP 3LB","p":"12","u":"ea"},{"c":"114836","d":"ORGANIC HONEYCRISP","p":"27","u":"lb"},{"c":"100968","d":"ORGANIC HONEYCRISP 2 LB","p":"12","u":"ea"},{"c":"146720","d":"ORG HYCRISP AP 4LB BAG","p":"9","u":"ea"},{"c":"41066","d":"ORGANIC STRAWBERRIES 1 LB","p":"8","u":"ea"},{"c":"159328","d":"ORG STRAWBERRY 2LB","p":"4","u":"ea"},{"c":"41086","d":"ORGANIC BLUEBERRIES 6 OZ","p":"12","u":"ea"},{"c":"110085","d":"ORG BLUEBERRY PINT","p":"12","u":"ea"},{"c":"137738","d":"NP ORG BLUEBERRY PINT","p":"12","u":"ea"},{"c":"225192","d":"ORGANIC BLUEBERRIES 18Z","p":"8","u":"ea"},{"c":"41004","d":"ORGANIC RASPBERRIES 6OZ","p":"12","u":"ea"},{"c":"41000","d":"ORGANIC BLACKBERRIES 6OZ","p":"12","u":"ea"},{"c":"101271","d":"ORG FRESH CRANBERRY 12Z","p":"24","u":"ea"},{"c":"41799","d":"ORG BAG AVOCADO","p":"8","u":"ea"},{"c":"35741","d":"ORG AVOCADO MINI","p":"14","u":"ea"},{"c":"41103","d":"ORG. BANANA","p":"40","u":"lb"},{"c":"268436","d":"NP ORG ORANGES 3LB","p":"9","u":"lb"},{"c":"135930","d":"CITRUS ORG ORNGS 28CT","p":"28","u":"ea"},{"c":"40480","d":"ORG RED GRAPEFRUIT 32","p":"18","u":"ea"},{"c":"214238","d":"ORGANIC MANDARINS 2LB","p":"9","u":"lb"},{"c":"228523","d":"ORGANIC MANDARIN 2LB","p":"12","u":"ea"},{"c":"214240","d":"NP ORGANIC LIMES 3CT","p":"6","u":"ea"},{"c":"90190","d":"NP ORGANIC LEMONS 3CT","p":"6","u":"ea"},{"c":"219412","d":"CHERRY ORG 1LB CLMSHL","p":"16","u":"lb"},{"c":"229804","d":"ORG GRN SDLS GRAPE 2LB","p":"10","u":"ea"},{"c":"229805","d":"ORG RED SDLS GRAPE 2LB","p":"10","u":"ea"},{"c":"3554","d":"ORG COTTON CANDY GRAPES","p":"16","u":"ea"},{"c":"40925","d":"ORG GREEN PEAR","p":"40","u":"lb"},{"c":"40662","d":"ORG GREEN PEAR","p":"27","u":"lb"},{"c":"226772","d":"ORG GREEN PEARS 2LB","p":"12","u":"lb"},{"c":"40906","d":"NP ORG NECTARINES","p":"18","u":"lb"},{"c":"41144","d":"NP ORGANIC PEACH","p":"18","u":"lb"},{"c":"158626","d":"NP ORG PEACH BAG 2LB","p":"12","u":"ea"},{"c":"158628","d":"NP ORG NECTARINE BAG2LB","p":"12","u":"ea"},{"c":"102407","d":"ORG KIWI 1LB","p":"16","u":"ea"},{"c":"16101","d":"ORG KIWI 1LB","p":"11","u":"lb"},{"c":"293801","d":"ORG SUNGOLD KIWI 1LB","p":"8","u":"lb"},{"c":"90228","d":"ORGANIC MANGO","p":"10","u":"ea"},{"c":"243664","d":"ORG. ASPARAGUS","p":"14","u":"ea"},{"c":"228519","d":"N.P. ORG GREEN BEANS 10OZ","p":"6","u":"ea"},{"c":"160805","d":"ORG. BEAN SPROUTS","p":"6","u":"ea"},{"c":"41565","d":"N.P. ORG BROCCOLI BUNCH","p":"20","u":"lb"},{"c":"2374","d":"N.P. ORG CAULIFLOWER","p":"12","u":"ea"},{"c":"59307","d":"ORG BRUSSEL SPROUTS","p":"8","u":"ea"},{"c":"41559","d":"ORG CABBAGE","p":"25","u":"lb"},{"c":"46138","d":"ORG RED CABBAGE","p":"14","u":"lb"},{"c":"41676","d":"N.P. ORG BABY PEELED 1# BAG","p":"24","u":"ea"},{"c":"41536","d":"NAT PRMS ORG CAROT 5LB","p":"10","u":"ea"},{"c":"41537","d":"N.P. ORG CARROTS 1LB","p":"48","u":"ea"},{"c":"41540","d":"ORG. BUNCH CARROT","p":"24","u":"ea"},{"c":"1732","d":"ORG PET CRT 12Z","p":"12","u":"ea"},{"c":"100733","d":"ORG GINGER ROOT 4Z","p":"12","u":"ea"},{"c":"279304","d":"N.P. ORG CELERY HEARTS","p":"12","u":"ea"},{"c":"42116","d":"ORG. KALE","p":"7","u":"lb"},{"c":"260107","d":"N.P. ORG KALE 16OZ","p":"8","u":"ea"},{"c":"114904","d":"ORG. HYDRO CUCUMBER","p":"12","u":"ea"},{"c":"279212","d":"ORGANIC CUCUMBER 2CT","p":"6","u":"ea"},{"c":"158704","d":"SB ORG MINI CUCUMBR","p":"12","u":"ea"},{"c":"118276","d":"ORGANIC SHALLOT","p":"12","u":"ea"},{"c":"150340","d":"ORG JUMBO BOX GRLC 2.5","p":"24","u":"ea"},{"c":"160975","d":"ORGANIC CHOPPED GARLIC","p":"12","u":"ea"},{"c":"214598","d":"NP ORG SHALLOT 3Z","p":"12","u":"ea"},{"c":"214599","d":"SB SHALLOT 3Z","p":"12","u":"ea"},{"c":"41607","d":"ORG. ROMAINE LEAF","p":"12","u":"ea"},{"c":"41625","d":"ORG ICEBERG LETTUCE","p":"12","u":"ea"},{"c":"214193","d":"ORG ICEBERG LETTUCE","p":"24","u":"ea"},{"c":"41606","d":"N.P. ORG ROMAINE HEARTS","p":"12","u":"ea"},{"c":"42045","d":"ORG. GREEN LEAF","p":"12","u":"ea"},{"c":"221407","d":"NP ORG BBELL MSHR","p":"6","u":"ea"},{"c":"221480","d":"ORG BB WHL BELLA MSH 8Z","p":"6","u":"ea"},{"c":"279225","d":"N.P. ORG PORTABELLA MUSHROOM CO","p":"6","u":"ea"},{"c":"278251","d":"NP ORG RED ONIONS 2LB","p":"8","u":"ea"},{"c":"262245","d":"NP 2LB YL ONION","p":"8","u":"ea"},{"c":"101513","d":"ORG SWEET ONIONS 3LB","p":"12","u":"ea"},{"c":"150557","d":"VIDALIA ORGANIC 3LB","p":"12","u":"ea"},{"c":"42049","d":"ORG. LEEKS","p":"12","u":"ea"},{"c":"113953","d":"ORGANIC MINI PEPPERS","p":"12","u":"lb"},{"c":"279213","d":"N.P. ORG VARIETY PEPPERS 2CT","p":"12","u":"ea"},{"c":"82667","d":"N.P. ORG RED POTATO24Z","p":"12","u":"ea"},{"c":"82674","d":"N.P. ORG GOLD POTATO24Z","p":"12","u":"ea"},{"c":"62035","d":"N.P. ORG MEDLEY POTATO24Z","p":"12","u":"ea"},{"c":"20927","d":"N.P. ORG GOLD POTATO24Z","p":"6","u":"ea"},{"c":"20928","d":"NP ORG MEDLEY POTATO24Z","p":"6","u":"ea"},{"c":"20943","d":"N.P. ORG RED POTATO24Z","p":"6","u":"ea"},{"c":"20888","d":"ORG YELLOW POTATO 3LB","p":"8","u":"ea"},{"c":"20889","d":"ORG RUSSET POTATO 3LB","p":"8","u":"ea"},{"c":"278413","d":"ORG YELLOW POTATOES 3LB","p":"16","u":"ea"},{"c":"278415","d":"ORG RUSSET POTATOES 3LB","p":"16","u":"ea"},{"c":"293541","d":"OB SWT POTATOS 3LB BAG","p":"12","u":"ea"},{"c":"279215","d":"N.P. ORG YELLOW SQUASH 2CT","p":"6","u":"ea"},{"c":"279216","d":"N.P. ORG GREEN SQUASH 2CT","p":"6","u":"ea"},{"c":"255706","d":"ORG BUTTERNUT SQUASH","p":"32","u":"lb"},{"c":"255787","d":"SB ORG ACORN SQUASH 1LB","p":"32","u":"lb"},{"c":"255788","d":"ORG SB SPGHTI SQUASH1LB","p":"32","u":"lb"},{"c":"100134","d":"NP ORG BTTRNT SQSH 14Z","p":"4","u":"ea"},{"c":"279699","d":"ORG SWEET POTATOES 3LB","p":"10","u":"ea"},{"c":"41957","d":"NP ORG GRAPE TOM 1PT","p":"12","u":"ea"},{"c":"159269","d":"ORG CAMPARI","p":"10","u":"ea"},{"c":"214684","d":"ORG WW TOMATOES 10Z","p":"15","u":"lb"},{"c":"41719","d":"ORG. TOV'S","p":"11","u":"lb"},{"c":"102322","d":"ORG ANGEL SWT TOM","p":"15","u":"ea"},{"c":"214255","d":"SNST ORG GRP TMTO 1.5LB","p":"6","u":"ea"},{"c":"147975","d":"NP 2CT TOMATOES","p":"12","u":"ea"},{"c":"191062","d":"ORG SWT BITE TOM 12Z","p":"8","u":"ea"},{"c":"266031","d":"ORG PEA SHOOTS","p":"6","u":"ea"},{"c":"136438","d":"ORG. BEETS","p":"12","u":"ea"},{"c":"136298","d":"SB VEG ORG BEETS GOLD","p":"12","u":"ea"},{"c":"191077","d":"NP ORG VEG TRAY 21.95Z","p":"2","u":"ea"},{"c":"127045","d":"NP ORG VEG TRAY 22Z","p":"2","u":"ea"},{"c":"247419","d":"NP ORG BABY ARUGULA 5OZ","p":"8","u":"ea"},{"c":"247421","d":"NP ORG BABY ROMAINE 5OZ","p":"8","u":"ea"},{"c":"247424","d":"NP ORG SPRING MIX BABY KALE 5Z","p":"8","u":"ea"},{"c":"247422","d":"NP ORG BABY SPINACH KALE 5Z","p":"8","u":"ea"},{"c":"247423","d":"NP ORG BABY SPINACH 5 OZ","p":"8","u":"ea"},{"c":"247427","d":"NP ORG SPRING MIX 5 OZ","p":"8","u":"ea"},{"c":"247429","d":"NP ORG SWEET LETTUCE 5OZ","p":"8","u":"ea"},{"c":"247425","d":"NP ORG SPRING MIX/BABY SPINACH 5OZ","p":"8","u":"ea"},{"c":"82705","d":"NP POWER BLEND","p":"8","u":"ea"},{"c":"3786","d":"NP BABY BUTTER","p":"8","u":"ea"},{"c":"67862","d":"NP ORG SMOOTHIE BLND","p":"6","u":"ea"},{"c":"67863","d":"NP ORG SPRING MX 11Z","p":"6","u":"ea"},{"c":"67864","d":"NP ORG BBY SPNCH 11Z","p":"6","u":"ea"},{"c":"67866","d":"NP ORG SPNCH SPG MX 11Z","p":"6","u":"ea"},{"c":"125069","d":"LTLE LF ROMAINE 4Z","p":"8","u":"ea"},{"c":"214210","d":"LTLE LF BABY RED&GRN 8Z","p":"6","u":"ea"},{"c":"214211","d":"LTLE LF BABY GREEN 8Z","p":"6","u":"ea"},{"c":"262563","d":"LTLE LF SOUTHWSTKIT7.5Z","p":"6","u":"ea"},{"c":"262562","d":"LTLE LF CAESAR KIT 7.4Z","p":"6","u":"ea"},{"c":"150137","d":"DOLE ENDLESS SUMMER KIT 13OZ","p":"6","u":"ea"},{"c":"279550","d":"DOLE SOUTHWEST SALAD 13OZ","p":"6","u":"ea"},{"c":"100257","d":"DOLE CHOPPED CAESAR KIT 10.8OZ","p":"6","u":"ea"},{"c":"143056","d":"DOLE CHOPPED CHIPOTLE CHEDDAR K","p":"6","u":"ea"},{"c":"144543","d":"DOLE CHP CRMY GRK10Z","p":"6","u":"ea"},{"c":"158702","d":"DOLE CHOPPED SUNFLOWER KIT 13.6","p":"6","u":"ea"},{"c":"158703","d":"DOLE CHOPPED SESAME KIT 13.6","p":"6","u":"ea"},{"c":"221143","d":"DOLE CHOPPED POMEGRANTE KIT 13.1","p":"6","u":"ea"},{"c":"221340","d":"DOLE CAESAR SLD 10Z","p":"12","u":"ea"},{"c":"221341","d":"DOLE CAESAR KT 11.3Z","p":"12","u":"ea"},{"c":"190478","d":"DOLE SHT PAN FRE ONION","p":"6","u":"ea"},{"c":"106149","d":"TOI ASIAN CHOP 13Z","p":"6","u":"ea"},{"c":"106147","d":"TOI SWEET KALE CHOP12Z","p":"6","u":"ea"},{"c":"106181","d":"TOI CAESAR CHOP11.15Z","p":"6","u":"ea"},{"c":"106185","d":"TOI EVTG BGEL CHP11.57Z","p":"6","u":"ea"},{"c":"106317","d":"TOI STHWST CHP 12.6Z","p":"6","u":"ea"},{"c":"106125","d":"TOI AVO RNCH CHOP 12.8Z","p":"6","u":"ea"},{"c":"115093","d":"DOLE CRNH TACO KIT9.6Z","p":"6","u":"ea"},{"c":"162098","d":"DOLE CAJUN RANCH 10.2Z","p":"6","u":"ea"},{"c":"144546","d":"DOLECHOPITALIANSUB 10.2Z","p":"6","u":"ea"},{"c":"214163","d":"DOLE FIESTA RANCH KIT","p":"6","u":"ea"},{"c":"214162","d":"DOLE LENTIL CUCUMBER KIT","p":"6","u":"ea"},{"c":"214161","d":"DOLE THAI KIT","p":"6","u":"ea"},{"c":"41634","d":"SB SPRING MIX 5 OZ","p":"6","u":"ea"},{"c":"208109","d":"SB BABY SPINACH SPRG MIX","p":"6","u":"ea"},{"c":"41667","d":"SB SPINACH SALAD 6Z","p":"6","u":"ea"},{"c":"41668","d":"SB CHOPPED ROMAINE 10Z","p":"6","u":"ea"},{"c":"41677","d":"SB AMERICAN BLEND 12OZ","p":"6","u":"ea"},{"c":"41678","d":"SB BUTTER LETTUCE 7OZ","p":"6","u":"ea"},{"c":"41683","d":"SB BABY ARUGULA BLND 5Z","p":"6","u":"ea"},{"c":"105249","d":"PRIMIVERAVEGBLEND11.75Z","p":"4","u":"ea"},{"c":"208115","d":"DOLE VEGGIE BLEND 10OZ","p":"6","u":"ea"},{"c":"208114","d":"DOLE PREM ROMAINE 9.5Z","p":"6","u":"ea"},{"c":"41581","d":"DOLE LIGHT CAESAR 10OZ","p":"6","u":"ea"},{"c":"113902","d":"DOLE FAMILY SIZE CLASSIC ROMAINE","p":"6","u":"ea"},{"c":"41630","d":"DOLE GREENER SELECT","p":"12","u":"ea"},{"c":"273740","d":"DOLE ROMAINE","p":"12","u":"ea"},{"c":"3781","d":"SB SALAD MIX 12 OZ","p":"12","u":"ea"},{"c":"279693","d":"DOLE SHREDDED LETTUCE 8OZ","p":"12","u":"ea"},{"c":"143060","d":"DOLE 50/50 BLEND 10 OZ","p":"6","u":"ea"},{"c":"274645","d":"DOLE SPINACH 10OZ","p":"6","u":"ea"},{"c":"274649","d":"DOLE SPRING MIX 10OZ","p":"6","u":"ea"},{"c":"213227","d":"DOLE SNKBT BLUE NUT 5Z","p":"6","u":"ea"},{"c":"279691","d":"DOLE COLE SLAW 14OZ","p":"12","u":"ea"},{"c":"70232","d":"CHICKEN CAESAR BOWL","p":"6","u":"ea"},{"c":"70231","d":"CHEF BOWL","p":"6","u":"ea"},{"c":"70235","d":"SANTA FE BOWL","p":"6","u":"ea"},{"c":"101226","d":"CHOPPED ITALIAN BOWL","p":"6","u":"ea"},{"c":"101456","d":"NATURES PROMISE SPINACH CHICKNE","p":"4","u":"ea"},{"c":"101449","d":"NATURES PROMISE CHICKEN CAESAR","p":"4","u":"ea"},{"c":"143529","d":"OLIVIAS SPNCH MISO KIT","p":"6","u":"ea"},{"c":"143531","d":"OLIVIA SPG MX VNGR","p":"6","u":"ea"},{"c":"67726","d":"PERO FRMS APL QUIN SLD","p":"6","u":"ea"},{"c":"67727","d":"PERO FRMS ITAL HRV SLD","p":"6","u":"ea"},{"c":"67728","d":"PERO FRMS SWT KALE SLD","p":"6","u":"ea"},{"c":"214213","d":"GRN GNT BURRITO BWL","p":"4","u":"ea"},{"c":"214214","d":"GRN GNT FRIED RC BWL","p":"4","u":"ea"},{"c":"214215","d":"GRN GNT RNCHEROS BWL","p":"4","u":"ea"},{"c":"100412","d":"Ready Pac Family - Santa Fe Chicken Salad","p":"4","u":"ea"},{"c":"100405","d":"Ready Pac Family - Chicken Bacon Caesar","p":"4","u":"ea"},{"c":"214347","d":"TAYLOR MDTRN CHP SLD11Z","p":"6","u":"ea"},{"c":"27954","d":"TF MPL BRBN BCN SLD12.8","p":"6","u":"ea"},{"c":"109886","d":"TF MXCN ST CORN 11.62OZ","p":"6","u":"ea"},{"c":"162115","d":"TF CHEDDAR RANCH 10.5Z","p":"6","u":"ea"},{"c":"162116","d":"TF GRN GODDESS KT 11.5Z","p":"6","u":"ea"},{"c":"190492","d":"BRT FRM CHKPEA CRNCH","p":"6","u":"ea"},{"c":"190491","d":"BRT FRM BACON CRNCH","p":"6","u":"ea"},{"c":"67861","d":"RP BSTRO CRBRY WLNT 4.5","p":"6","u":"ea"},{"c":"96868","d":"LITTLE LEAF BBY BTTER8Z","p":"6","u":"ea"},{"c":"56082","d":"LTLE LF BUTTER LETTUC4Z","p":"6","u":"ea"},{"c":"144039","d":"QOG UNRLY ARGL 4Z","p":"6","u":"ea"},{"c":"16243","d":"BF HARVEST CRUNCH 4Z","p":"6","u":"ea"},{"c":"162117","d":"BF MEDITRRNEAN CRNCH 6Z","p":"6","u":"ea"},{"c":"81631","d":"BRT FRM BABY RMN 4Z","p":"6","u":"ea"},{"c":"241860","d":"BRT FRM SNY CRNCH","p":"6","u":"ea"},{"c":"127558","d":"NP ORG BABY ARUGULA5Z","p":"12","u":"ea"},{"c":"127570","d":"NP ORG SPNCH SPG MX 11Z","p":"8","u":"ea"},{"c":"127575","d":"NP ORG BABY SPNCH 11Z","p":"8","u":"ea"},{"c":"127577","d":"NP ORG SMOOTHIE BLND11Z","p":"8","u":"ea"},{"c":"127640","d":"NP ORG SPRING MX 11Z","p":"8","u":"ea"},{"c":"127641","d":"NP ORG BABYBTR LTCE5Z","p":"12","u":"ea"},{"c":"127700","d":"NP ORG SPN&SPRG MIX 5Z","p":"12","u":"ea"},{"c":"127706","d":"NP ORG POWER BLND5Z","p":"12","u":"ea"},{"c":"127709","d":"NP ORG BBY SPNCH KAL5Z","p":"12","u":"ea"},{"c":"127712","d":"NP ORG MX BBY KAL 5Z","p":"12","u":"ea"},{"c":"127713","d":"NP ORGANIC SPINACH5Z","p":"12","u":"ea"},{"c":"127720","d":"NP ORG SPRING MIX5Z","p":"12","u":"ea"},{"c":"127744","d":"NP ORG SWEET LET5Z","p":"12","u":"ea"},{"c":"124522","d":"BISTRO APLBTRCHK5.8Z","p":"6","u":"ea"},{"c":"133235","d":"SB CHKN BCN CSR BOWL5.9","p":"6","u":"ea"},{"c":"293869","d":"Baja Ranch Kit","p":"6","u":"ea"},{"c":"293879","d":"Hummus Crunch Kit","p":"6","u":"ea"},{"c":"112242","d":"B&W WATERCRESS 4Z","p":"6","u":"ea"},{"c":"144959","d":"EB ROMAINE CRUNCH 4 OZ","p":"8","u":"ea"},{"c":"144963","d":"EB SPRING MIX 4 OZ","p":"8","u":"ea"},{"c":"144964","d":"EB CRISPY LETTUCE 4 OZ","p":"8","u":"ea"},{"c":"124974","d":"LK BBY SPNCH CRNCH 4Z","p":"8","u":"ea"},{"c":"124977","d":"LK SWT BBY CRNCH 4Z","p":"8","u":"ea"},{"c":"124979","d":"LK RED AND GRN CRNCH 4Z","p":"8","u":"ea"},{"c":"137739","d":"LCLY KNW BBY ARGL CRN4Z","p":"8","u":"ea"},{"c":"141038","d":"LL SESAME GINGER 6.45Z","p":"6","u":"ea"},{"c":"182205","d":"CAESR CHCKNBCN SLD .75Z","p":"6","u":"ea"},{"c":"182206","d":"HRD FIEST CHKNSLD 6.35Z","p":"6","u":"ea"},{"c":"182207","d":"HRD CHCKN CAES SALD 6Z","p":"6","u":"ea"},{"c":"182208","d":"HRD CHEF SALAD 7.26Z","p":"6","u":"ea"},{"c":"182272","d":"FUJI APPLE SALAD BOWL","p":"6","u":"ea"},{"c":"253503","d":"TOI MPL BRBN CHP 12.8OZ","p":"6","u":"ea"},{"c":"253497","d":"TOI MED CHOP 11.01Z","p":"6","u":"ea"},{"c":"20960","d":"NP GH SPG MX FAM8Z","p":"6","u":"ea"},{"c":"125001","d":"DOLE CHP SMSH BRGR10.6Z","p":"6","u":"ea"},{"c":"100261","d":"MANN'S SOUTHWEST BOWL","p":"4","u":"ea"},{"c":"100269","d":"MANN'S SESAME SIRACHA BOWL","p":"4","u":"ea"},{"c":"100319","d":"MANN'S MONTEREY RISOTO BOWL","p":"4","u":"ea"},{"c":"96294","d":"BYF BOLD MIX 4Z","p":"6","u":"ea"},{"c":"144040","d":"BYF ROM BLND 4Z","p":"6","u":"ea"},{"c":"144041","d":"BYF GRN&RED LF 4Z","p":"6","u":"ea"},{"c":"144042","d":"BYF SPRING MIX 4Z","p":"6","u":"ea"},{"c":"148736","d":"BYF KALE SPRING MIX 4Z","p":"6","u":"ea"},{"c":"293880","d":"LTLE LF SWEETCRISPY4Z","p":"8","u":"ea"},{"c":"42008","d":"BULK PARSLEY (CURLY)","p":"30","u":"ea"},{"c":"42016","d":"BULK ITALIAN PARSLEY (FLAT LEAF)","p":"30","u":"ea"},{"c":"241055","d":"BULK CILANTRO","p":"30","u":"ea"},{"c":"42080","d":"BUNCH DILL","p":"12","u":"ea"},{"c":"42112","d":"BUNCH MINT","p":"6","u":"ea"},{"c":"235656","d":"HYDRO BASIL","p":"6","u":"ea"},{"c":"101089","d":"GG TUBE LEMON GRASS4Z","p":"6","u":"ea"},{"c":"35901","d":"NP ORGANIC TARRAGON .5Z","p":"6","u":"ea"},{"c":"214516","d":"NP ORG MAJORAM .5Z","p":"6","u":"ea"},{"c":"214525","d":"NP ORG LMN GRASS .5Z","p":"6","u":"ea"},{"c":"62278","d":"ORG FRESH BASIL 1.5OZ","p":"6","u":"ea"},{"c":"279488","d":"POTTED BASIL 4IN","p":"6","u":"ea"},{"c":"35895","d":"NP ORG CILANTRO","p":"6","u":"ea"},{"c":"35896","d":"NP ORG DILL .5Z","p":"6","u":"ea"},{"c":"35898","d":"NP ORG POULTRY .5Z","p":"6","u":"ea"},{"c":"35899","d":"NP ORG ROASTING .5Z","p":"6","u":"ea"},{"c":"35900","d":"NP ORG SAGE .5Z","p":"6","u":"ea"},{"c":"67386","d":"NP ORG CHIVES .5Z","p":"6","u":"ea"},{"c":"67387","d":"NP ORG MINT .5Z","p":"6","u":"ea"},{"c":"67388","d":"NP ORG ROSEMARY .5Z","p":"6","u":"ea"},{"c":"67389","d":"NP ORG THYME .5Z","p":"6","u":"ea"},{"c":"214517","d":"NP ORG CILANTRO 2.5Z","p":"6","u":"ea"},{"c":"214520","d":"NP ORG BAY LEAF .5Z","p":"6","u":"ea"},{"c":"214523","d":"NP ORG BASIL 2.5Z","p":"6","u":"ea"},{"c":"214524","d":"NP ORG ITLN PARLSEY .5Z","p":"6","u":"ea"},{"c":"214526","d":"NP ORG MINT 2.5Z","p":"6","u":"ea"},{"c":"252560","d":"MICRO KALE","p":"6","u":"ea"},{"c":"279641","d":"GG TUBE BASIL 4OZ","p":"6","u":"ea"},{"c":"279639","d":"GG TUBE CILANTRO 4OZ","p":"6","u":"ea"},{"c":"279640","d":"GG TUBE GARLC 4OZ","p":"6","u":"ea"},{"c":"279638","d":"GG TUBE GINGER 4OZ","p":"6","u":"ea"},{"c":"279637","d":"GG TUBE PARSLEY 4OZ","p":"6","u":"ea"},{"c":"104551","d":"GG TUBE CHUNKY GARLIC 4OZ","p":"6","u":"ea"},{"c":"154070","d":"GG TUBE GRL HRB","p":"6","u":"ea"},{"c":"293508","d":"GG DRD PARS.35","p":"6","u":"ea"},{"c":"262244","d":"GG DR PAR 35Z","p":"6","u":"ea"},{"c":"113282","d":"L.H. DRIED BASIL","p":"6","u":"ea"},{"c":"113278","d":"L.H. DRIED CHIVES","p":"6","u":"ea"},{"c":"113294","d":"L.H. DRIED DILL","p":"6","u":"ea"},{"c":"113290","d":"L.H. DRIED PARSLEY","p":"6","u":"ea"},{"c":"113286","d":"L.H. DRIED RED ONION","p":"6","u":"ea"},{"c":"150149","d":"L.H. DRIED SPRING ONION","p":"6","u":"ea"},{"c":"70251","d":"L.H. DRIED GINGER","p":"6","u":"ea"},{"c":"70253","d":"L.H. ITALIAN","p":"6","u":"ea"},{"c":"70250","d":"L.H. MINT","p":"6","u":"ea"},{"c":"40151","d":"NAVEL ORANGES","p":"56","u":"ea"},{"c":"279247","d":"CARA CARA ORANGES","p":"48","u":"ea"},{"c":"40301","d":"SB ORANGE 4LB BAG","p":"8","u":"ea"},{"c":"116463","d":"SB 3LB CARA CARA","p":"12","u":"ea"},{"c":"61384","d":"SB 8LBS ORANGES","p":"6","u":"ea"},{"c":"273809","d":"CARA CARA NAVEL 3LB","p":"9","u":"ea"},{"c":"125033","d":"CUTIES 3 CT. MANDARINS","p":"21","u":"ea"},{"c":"159323","d":"ORANGE FOR JUICE","p":"100","u":"ea"},{"c":"112774","d":"ORANGES 3LB","p":"9","u":"ea"},{"c":"125099","d":"3 LB MINNEOLA","p":"12","u":"ea"},{"c":"273810","d":"2 LB RASPBERRY ORANGES","p":"18","u":"ea"},{"c":"190402","d":"RASPBERRY ORANGES 44CT","p":"44","u":"ea"},{"c":"262957","d":"6 LB. NAVEL ORANGES","p":"6","u":"ea"},{"c":"115253","d":"LPC GR GRL HRB","p":"6","u":"lb"},{"c":"115254","d":"LPC ONION & CHV","p":"6","u":"lb"},{"c":"125034","d":"LPC HOT HNEY POTATO 1LB","p":"6","u":"lb"},{"c":"214322","d":"LPC SVRY HRB POTATO 1LB","p":"6","u":"lb"},{"c":"214323","d":"LPC GRLC PRSLY POTA1LB","p":"6","u":"lb"},{"c":"222247","d":"LY POTATO 3LB","p":"8","u":"ea"},{"c":"222251","d":"LR POTATO 3LB","p":"8","u":"ea"},{"c":"280219","d":"LT POTATO 3LB","p":"8","u":"ea"},{"c":"280220","d":"LD POTATO 3LB","p":"8","u":"ea"},{"c":"272328","d":"TOI SVY GRL TRAY","p":"8","u":"ea"},{"c":"272330","d":"TOI SMKY BRBN & MPL TRY","p":"8","u":"ea"},{"c":"41686","d":"BAGGED RADISH","p":"14","u":"ea"},{"c":"43911","d":"DAIKON","p":"10","u":"lb"},{"c":"41490","d":"TOMATILLO","p":"10","u":"lb"},{"c":"134828","d":"YUCCA BREAD","p":"10","u":"ea"},{"c":"100917","d":"PASTELE STRING CMBO PK","p":"15","u":"ea"},{"c":"41975","d":"SOUR ORANGES","p":"80","u":"ea"},{"c":"271123","d":"NAME YELLOW","p":"40","u":"lb"},{"c":"271126","d":"NAME NEGRO","p":"38","u":"lb"},{"c":"271122","d":"NAME COSTA RICAN","p":"36","u":"lb"},{"c":"271125","d":"BATATA","p":"40","u":"lb"},{"c":"271127","d":"EDDOS","p":"36","u":"lb"},{"c":"271129","d":"YUCCA ROOT","p":"36","u":"lb"},{"c":"42140","d":"YAUTIA BLANCA (MALANGA WHITE)","p":"36","u":"lb"},{"c":"42086","d":"CALABAZA SQUASH","p":"40","u":"lb"},{"c":"279392","d":"CHAYOTE SQUASH","p":"24","u":"ea"},{"c":"42068","d":"HORSERADISH","p":"5","u":"lb"},{"c":"41378","d":"CELERY ROOT","p":"12","u":"lb"},{"c":"41402","d":"JICAMA","p":"20","u":"lb"},{"c":"551","d":"SWEET TAMARIND","p":"16","u":"lb"},{"c":"42036","d":"PARSLEY ROOT","p":"12","u":"ea"},{"c":"271132","d":"BREAD FRUIT","p":"35","u":"ea"},{"c":"113534","d":"MALANGA COCOA","p":"38","u":"lb"},{"c":"113538","d":"YAUTIA LILA (MALANGA RED)","p":"36","u":"lb"},{"c":"77237","d":"SUGAR CANE","p":"10","u":"ea"},{"c":"143348","d":"RECAO CULANTRO","p":"12","u":"ea"},{"c":"41432","d":"OB MICRO SPINACH","p":"6","u":"ea"},{"c":"104880","d":"SB SPINACH 8OZ","p":"12","u":"ea"},{"c":"41714","d":"TOMATOES ON THE VINE","p":"11","u":"lb"},{"c":"41747","d":"SB EX LG TOMATO","p":"15","u":"lb"},{"c":"279589","d":"TOMATOES 4PK-20Z","p":"14","u":"ea"},{"c":"41754","d":"PLUM TOMATO","p":"25","u":"lb"},{"c":"279076","d":"VAR HEIRLOOM TOM 1LB","p":"10","u":"lb"},{"c":"41899","d":"HOT HOUSE TOMATO 1LB","p":"15","u":"lb"},{"c":"262626","d":"SPRINKLE TOMATOES","p":"15","u":"ea"},{"c":"279163","d":"SUNSET KUMATO 3CT","p":"14","u":"ea"},{"c":"191053","d":"VINERIPE 16OZ","p":"12","u":"lb"},{"c":"148758","d":"VLG FARM MARZANO TOMATO","p":"6","u":"ea"},{"c":"182178","d":"VF SAN MARZANO PINT","p":"12","u":"ea"},{"c":"279325","d":"CAL SUN DRIED TOMATOES 3OZ","p":"12","u":"ea"},{"c":"279326","d":"CAL SUN DRIED TOMATOES JULIENNE","p":"12","u":"ea"},{"c":"214065","d":"CSD TOM JULIEN 16Z","p":"12","u":"ea"},{"c":"20879","d":"CSD TOM HALVES 8OZ","p":"12","u":"ea"},{"c":"20880","d":"CSD TOM JULIEN 8OZ","p":"12","u":"ea"},{"c":"20940","d":"CSD TOM JULIEN 16OZ","p":"12","u":"ea"},{"c":"113434","d":"CAL SUN DRIED TOMATOES JULIENNE","p":"12","u":"ea"},{"c":"44140","d":"CAL SUN DRY TOMATOES 8.5","p":"12","u":"ea"},{"c":"44141","d":"CAL SUN DRY TOMATOES-JULIENNE ST","p":"12","u":"ea"},{"c":"40138","d":"RUTABAGA","p":"25","u":"lb"},{"c":"40140","d":"WHITE TURNIP","p":"50","u":"lb"},{"c":"41994","d":"PARSNIPS 1 LB. BAG","p":"12","u":"ea"},{"c":"41986","d":"PURPLE TOP TURNIP","p":"25","u":"lb"},{"c":"40665","d":"NP ORG GALA","p":"27","u":"lb"},{"c":"40663","d":"NP ORG GRANNY EURO BOX","p":"27","u":"lb"},{"c":"40630","d":"ORG GRANNY SMITH","p":"40","u":"lb"},{"c":"40661","d":"NP ORGANIC FUJI","p":"27","u":"lb"},{"c":"114999","d":"SB ORG PINK LADY","p":"27","u":"lb"},{"c":"297757","d":"ORG CRIPPS PINK APPLE","p":"40","u":"lb"},{"c":"221328","d":"ORG COSMIC CRISP APPLES","p":"27","u":"lb"},{"c":"40570","d":"NP ORG GOLD DELIC 3LB","p":"40","u":"ea"},{"c":"40602","d":"ORGANIC GALA 3LB","p":"12","u":"ea"},{"c":"142251","d":"ORGANIC FUJI 3 LB","p":"12","u":"ea"},{"c":"40625","d":"NP ORG GRNNY SMITH3LB","p":"12","u":"ea"},{"c":"113508","d":"ORG CRIPPS PINK 3LB BAG","p":"12","u":"ea"},{"c":"70248","d":"L.H. CILANTRO","p":"6","u":"ea"},{"c":"70249","d":"L.H. GARLIC","p":"12","u":"ea"},{"c":"283635","d":"L.H. GUACAMOLE HERB","p":"6","u":"ea"}]</script>
+<script>
+"use strict";
+const LOGO_SM='data:image/webp;base64,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';
+const LOGO_MD='data:image/webp;base64,UklGRhw5AABXRUJQVlA4WAoAAAAQAAAAvwAAvwAAQUxQSDILAAABwIZtm2nbsd7vq5pzRRuxk2Zs20bbtm3bCHa6T8e2bdu2s9aMs+1ZVd/7Y44xtdb5fkfEBMCDiqU+/0soAFVgpx+df+4Y7z3v/E+tD4GLFes8Rn4VAQp89L7C+nnfFR1nIWgXqhOWyOovcXFpTZKAzW8hWXI2lpwTX1fIuFIAWgfIRBWwAxMz36/4ZGIprC/20jgTbLf/RpAKwcprQiYoiN7NnOw4HE3L7DbzDpHxpPgcuWAPCQCkqefNXlV0ggrYf1Exvn4+i7HrZIchYhxL83lbwPMRAQ34GnlQGAlBJhoJIQK4l4VkYY+Z3xxXio2LJTsbUQXymdnlzSY6Q5hIJAJAWHHJTzLTMnss9tISkPFFSzwEI8D615DZfnfAQQfs2ABUJwoNQNz3vSc8MvvZ22nsPfFHCBhXm3QcBGx+yWJmY/XoibsDcUKQCKz08/vZf+PMqSLja91FlvhB/QnJQpIl52wkz90GolXSCYgIIJ2A1HaIiEAqO6QWEBFgw1NeI3NOxUrpR86fgmJciz7Axdz2y0zZ2KUlo/0SCLETnaoABJWqqA0xCrqNMUbUCgA0v76QTIV9T7wcS8Sg40C0QwMUtzLzjoXF2Gs2Xr8OKpvNZjMAaDaBZrPZaALNRrPZbEIBoNloNgFtNpsKALHZ2WgCIyNL3EgmY//NZq6NTg1DB4QYFABWO8Ey+5w47+Ijjjhi2rGtVqv13OVXPNRqXXdXa6w11rro8tZYqzXWeuDxE6ZNu6o11mrd+8ATrbHWk9OmTfu/F1qdY60bb3957GVm42DnHzlt2l+2ezugOlSCye8AgHf949GHZ9DIbH1h5gRoHM65l30WCMOkuLl9w5+vuCVx0JZTZ+nMuZSSS2XOpTallEu3KaVUanMuxTj4lFIqJM/ZCGGormFlLsUG8v+n5cTp+0NkaESXf8AW52x0ZCLPEpVhgWKV163Ql5Z4KoIMSwOfTZnubPNIhCFRbDWL5g+2+Q/oUGhY/00aHWrJ1hEdClzMRJcmHoMwBEH2ayf61Mrcd0CHAOfSK8z8AMLAFO+eV8wryY5CHFiUvzHRq4WjIyIDEsFDzG5hLnsgDEixxkwzvyR+GHFAAXsw0zPvH4IfOOeDA4s4gck1Bw1KpPkgi2u+OzAsNZ3mmgsHhSBnMLnmrIFFHOWcs4fgZPf92W0hqgABezP7TAEgasAGC4q5SDRIdzj442ssBcgILmTyUAAADXWK35Lzxo7cBMCHmP0jgGy2ZxPQKsHIrLyYZLrpb+/+AIt7FPj1s4UvnLM/YkXEV0uiWSK5MNGxVYIVbiSZSdsP2tGQU5hI0nKiaxP/jCi67N1sF9LatnAbKADIsywdJM1883HEgKO4mJWJ11ZtMK9YjW8TP4AmdmZibSkbQwHsy0wnHYQYH2OpM25a8RcmL/0A+Cgz6wsPRABwnJ8ulpH7rBuznaBAvIXFS6djV2Z2wy07VppJ81GxB+N/mLowm7k6BPiIFTrZ+NhCdpvtUiiA99BNNHZfuI8EAH9ndhOLdVP4yhQRAFd5qvvEX+tIEOBCpxU+gE7FxU4zvnramUceOAnBa7X3bYtL3GYp5Tanb3We2yoTH3+Z5jka3W/mPf+bOa/Q+Zl/fprmuDavXfJMZq9ZynxpMl6mOS2TvHR16HXMLivkgv/uCQgu95kxn7YhoAL822NWeN/WQAgAcGAp7rLMTwmConKFN2neyvwaVFG7xJPuyrwWDUGXJzI5y8oz64t28xV3sfCZpkoXq883cxbb/DNiXcB1zN6yMmdlkZqGHMLkLSb+DrFGseni4q7Ch6LWIOBiS94yy5tCa6J8ltlbTPYFxBrIyLOluIv/6Cbi20zeyrwFoU500uMs7rqqGwTsaW3z1s1dIeDLzN76X3cScSmzq5J9ArEbqCw3m8VRxvbbIV0hYNe5yTw1fXnpARFfZvJT5tkI6LURjmU2LyV+ArEnUXyOufjIOHdlSE9AxNfJ7KLEKySgjxKx+wwmH30NsR9AxHYPshT3mM1dE9ofREy+iMzeSTwCEb1rDCGEBvC+Fq34pqQdJPSmqA6KqdOMyTNmYyMiPSnW/f3VV1192sZQBbZ5kJ5N/D0ielWs+zo7Z24kKgEjh88vbrEyY0VoLyJTR9nOOS/ixQhAUJzF5JXEQxDRa8B+zCRZ7FEIgBi+6RYr89YU7cOxJVXw/ir82i2JxyCgZ8GDzFUP1JzoljJ/XdF+3N3bUV7JdicEA7lPgggijnYLPyWhLw9Vmc1dGUAccUuxx5qCPgZMY+pg4aEbL9kAxCuJv0bsR8T3a2hMLz9/2C440ifFWquqiEhPiq1pVczsfHQ6zSOJJ2MkAghRell7AevNSip0auEBAJZZcTkA0pWE8CRLTWUxlySehE1+dfZL86df8J0lIN1EfJ2FDi487tHM6kfWFK0L2IfZPFSZUjHLi3gMQo3ISk9aoY9LMVZaWbgGtCroyUx0+Do1AVsx0ePr1kT5nTms8MXlRDpEcB+zvzJvg6JTsfGiYh47W0JFwJ7M9HfilxArGvgHk8t+3cUxLsu8XbTmf067Eb4zvraiSNXxLqNxMwkdET/0WbIjUfNxZo8ZF6wBBRCwu89YeL74joXrQDt28lrmbxCBhvyCyWeFzwJAxAVeY8kHIwDrzC/mtMRDEIGPlYUp+yzzYlXgCLq9cAwQTProZz9zuZnHrMxZH4rKR5kdxsx9ECAxNuQGp9l2CAAQ8TMml/EriFU/cp5iM7o8c3uEqrUWO233Kqhcz+wx27Um4mdMHuPeNQG7W/GX2dy1oBWKFebR3JV5BRTVQS9jdlfiPyTWRHyXyV92COoUO+Ri3ircF6FGMHUmvWU2fQ1oDYJcwOyswkchqI/4rCVnZf5IYheC1RaZ+crab4d0gaDnW3JVtvMQ0G3EwXQWP4HYlcikF1gcZZy/KqQrRHzHkqMSj0JA94Ips8z8ZGld0R4Q5BxmNyU7AwG9KladXsxJVriZ9IaIfzI5KfFwBPSusvpcMxdZWbCaSB+guNGyixL/iYB+RjmQyUOZd2hEf4Ocz+wfS29sKNonlbVmm7mnzZ+hgX4HfNmydzLvnhKlb4i4nMk3xZ5dHor+q241N5tnrG0HImKQEV9n8kyb30bEYKPezuyXNq8IUQak8u7puXilzVOWUMGgA77Mtk8s87LJUAy+gV+w7RHLPBwQDGPE4Wz7o2QeiagYSg2T72PyRiY/hSAYUkHzOLZ90eYrByBgeBU4g8n8UIzXbYCIYVbVH5DZCZbYPmoEEcMtwAEzmcwDmXx4Z4hi2CVioxvJ3L/SaVYqzYqZ0UiaWSmlGI1mLPVmpJFWilkppdjQlMyF/5qCKBiHEc3fLSBzf7Kxn5k5Z9YWZjKz20KascucbRhKJm/YGVCMTwXWOznTUukpF3K0c/6c0co3po/On/UWZ5N8dd7s0dHR0cK3uJgcG60em/kGOZNcNDr6+vTR0dHRt0gmG5BlI+/+MBAF41UCsPn5JHMuVmUlJ5L/2b4RYyO+Y63YiDHGqSvGd662wn6r77fffpPevkZsNOKmO6+w9/pb7tuM1c1Vl911q1V32n69GKesGBuNuML+H3uVTKV/ljPJe/dXiGI8awB2PuRpkrRKkiyX7IsJceW/ziBLLv2wXEjOOX/XCASMd1Vg6S8de/8CVpYHzv72u4EYpFNV6lUlaAhBVEVENEjQEKTbECQElfoQgbV/+TxJK9msm1wKyVeu++pqAAImwhAA4O2bV66HzoAJUSIwaeujnmMf3zx1x+UBhCCYICUGQa2EqIKJUiKAxh6/Pf/5WbQK49zz/3LgmgA0KoYSVlA4IMQtAADwigCdASrAAMAAPlUgjEQjoiEYer90OAVEtRm/24APIwKbanqvNPr/99/u3+B/1393/cD5XdcvW3l1dCf+D7s/mz/tv+z7F/6p/ovYI/Xb/hdUnzL/uZ+x3u7f839ufeP/WfUI/rv90///th+q36Fv7kenT+6Xwz/2b/sfuR7Sf//zov+d/i17b/Fj7n+SH7meuf5F9I/gfyr/eP3wf9Lx8dGf9n/LeqP8u+4v5D+7fuZ+bvzP/ovy7/Jn2p+QX9r6hH5D/N/8n/bf3P/v3nb99TbH0BfZ76p/qP8T+93+W+C/5r/p/lh7m/YH/cf4D8mfsB/l39B/0n97/eH/EfQP+s/439V8yX79/pf+b/qvgD/mn9e/4/97/d7/NfH7/t/6H/Zf+n/b+4P6Q/7f+d+Av+X/1X/b/4D/Of+H/Lf/////ed7F/3B9kn9bfvjeiahLfSxMURYohQdNSMLJl1x27L9fRAWWko0C/ftK42zYDnL9PkChiQi/1w1sn7fE0HDno8AZp/6Pa+VVUhTjJw3ZN8lJ7iwK/0g6H34KqSQ5/uBjJ2cvyPINI1SR4jKq0t20zo2cfF8oQ4srRBWenU2BSXK/ch+By1c/5L8uQYaLjJFptAirU/wrNAohtNiPjceaHcXEhoCrMtl2QmdxjqZCrhdNeki9ge3bByVu+qKh+Crm1PhIGUpq+Qy1fLnEIbnoyDz1yWkveIepeUVgYtbHTJEA/GLi3GWTu+gFiFNdpVdm5usvTNb4U5rP5qCWAcecWxcqk8LEQ/BgaAjJl1cA7bOLaTuOg9Qr+0o8krGGpNOAH6V/LhvOrYYRhp9o3cNSRBFEaVr2egmjslwRVYKceWcVNy1v4j4P5vnV8aYn2jfmLLLmHyfP564tWxKP1OOYQmpxUc70MGnejUVOj1m6mQl6TdgxnxQITXkNVMZSFfvo76Dt+SHDc1HMPgw782S1NUA8W0Qo21+56YuWW18jZNt9S+0XpJDpeCnBVj8pjVGjgZ29CA2KO5Gdq8wDKcYFVoTo5/g3eKaqFOoz9lV5yq1zy5Gi82CGJp/dURAT2UQI8ai6ABwgSa6tyhv5UmioUbSUY3coGja30K6TOIftGTk+alceLkDehMS2xC70VPAeX7JS0kiApnGUCSjif/BqQqlawo1YfzKEFLaXeMUHl8CPSJYE+NWdbOBUiOOJRp12xPy/eRxH3ZRAgqod7oKhaEpI18O8LXoBbbCllopcp7CKFqKrkiLeCgWPxwnZuem2j6stYRUZ4QwUCGrdqzxHAUOZSFxjCY0KW04oCou6VHrwFg+oyT5GUtlAbcba/FXYOB6ZprnFrLyTxx+NzOSwl+Oyjs55f00koUiUP0PfmKmVc0Jk2F0xtQ2ywMyNbiJTry/VV3MglbIoaJLZ0S2ajsyo/F8tlv+umQyl7QRzAV4ThNLmKXvyxd73MYlVs16YA/ynx7n1Tib23CQ7Zdl63dv0ABw5z+j97PaJPWBgAP7/QbiV/8qoR6Qj8BwyA7RihMxWUoOk9nyKm1ymkNWU/3fcCcjbCf8gFeI/gLifGvYwsDlUtb50T3+P6qzkOs6jd36nL3nS6Xsd0FFjgiltBkY4lPJu3JV2pVVRt6T8Z1biMIBSyRAomQhfVxNsout9/3aoylpWLVHZzUg0cKjqlYnSVc8ob2Wyy5AyAv4pdSJRPvs+UJVd45ArhEtH+iHPrBDrro49AaH3/qDCanXonNPACmM0Pa7RU5bAT95pOuGVG/EIg5ABGf180efLcXZHq3OXHbxYXcDXOkJXv8vqnSmb4VEEt/4ogaAe+hs7/pD7J5rPkShwpLs4pHK80MdELF5uqOkbq/WTn4+GEf8kfO4BZMIWG/knWr0E6nb2jZa0Jo0NlhCNKQz97ClEImpBEbtbJM0049liqQRaO/hC0QzP/XdiUfyv6biRcoab2hc7aUaycd/JVdSqOPG3ZIDJfMRXKONHIql81sVi7SShADSGZH/56Mc+sC26eHfsPSorqw0us3sIhTTJMw86uYN2My8V2vr5ItZBjvrb2i76meQlf2vE6cDuBQoyXAscU39cwsAnmgoHz2nQxDYi+hLDxDzApJriBglyq3K3Rm3ggA+qYR7YzkP/uGPcFAJAwGqm0/0fEnLUo6x6dqyPctZS3msRV58Gp/Rj9f4ryc61j5g/r1yV4kEXfvFR48Qzf1aYdzP28XK23BJ4SLLmY1JmDAa6rd/ug6vGA4s5Trv70mksAB9D/vuDuvFLdiTl6DpCXo96kfmG2rqH8U0dSAKARjBYmhdyuHj9fQqy9b3Ttr0eCT7CXt7HB81/rpY9c9jDuBmyP8Usb2lrm4SdM6KbAyTrp6qHXHuluany3r+Jy79q/cHcJrC4m+9FZ0LHrp9g21j2HvfY+/2WMZWn3uSG9spX3tbOS253awxyAnYn0S6RsCX39kkqNKt1bAP4IVbbLO1vam2wPUjyumr1vOK+7tTMF/LBpwz3KTNOPtt1q1umGo6nHFKR/vm5tZ2Nkkmb5Ht6rMys8b3IakUW0GXU+A8pEfSat21nCj7mX4xa+vIZektietMr7x/5LiCB/H5RXdVzWNnQPxg6GqD4bU8qJatpXZIi7vpWfRN/fg03GprLdTM4/jDaGjGQ9EbW2RHsZ9EnQLCkPM6zKY8lGh9vu8DtOqVLdN34/YTpVCcFi8qfvrqqiNiPT7sBHtYzorWoFKph3XJe1oW96b/5YwHwQ7Tsx0LETED2oiHlWh8zvv+Y5WaR/iICElmlv4afRupoig2y54OWHBwXQcYQ19NsEqq5N6hrnUmiTmhHR+v1r/54osZD9sNxk0qXubrDzPVtGjvWCRPi/7omLbms9OWjd/KYnCfvuhudLxbWQamwhOqj/qJvs3ar2i5ijziOJ0+Ip9G/2sG3ww2dP+7JFHzFn3Wd5/i3FTF0mVhC1dg0DOzJy9Hn88IYry2BoV/CL2cd0CSGpZmyD4GMLg+HOlCymhlB7LLNwN3IzeVk7uP5Nd2/qIwi+VMa/nkzWTprjP+L9nH9prnjxPoGC2c/fpdffMP8SoT/q4PhIyTdESw2qEJMv8wEEKJEioNNk+TS3MFcG5nCdsVwvMVkJ8GrXyWUaFBRZIH5rZ8hs2ECa1flJwHSOf/e1+56xSszpIg9El0o4SWXSlB+1t7AD9KHXzP+9RRMSRugsr98qCpNBHn4eODU5CvWneaXn6c9g4uUl+rtKGuup2OqtO434YiCDkotULm/K6NaKe9wjueWAACL2T/pKmZ3TP9xc9M2AD3lN2KFOT2UJdToQu9SlgJpEObjromc9YFH4vQwDen16/igkCixg/zZa+ha+m2Uj3tOGEvEpVrASgTRLN//jg2jr1BCAVk4aUIf9vYS/tY0qCNOpmqC3MdJWPnWV1rXB0zP4WA9clOyKktSL7ecLt6LvcvdIXlAV/rYHvQi5XkSCH/btyW0i5yGw5aTuElR4+7HRIstsla+DHEQ/FHqPthDt2ftbSbk7OifwvHZR4HglRWYYQeYO104baTSqoqmS+3XLsXYKLuQkqhCUMW9tGivXdIb2kR/qG+xpZeEN4+M6MvkKvLCcjlHBgVkAFSgSKKnpijSHtNjaF2P5V+uDxfawencjQWsVk4rk0fIFKz6tLWMm/jYxvtEnoy2GLs8AkcDxfS4dw0BCA7MqVDFK39ldA1hENnynQ8yVZPZMLv7oJiC/fj/zJ/0NXD1GJqom+T1raG7X8Sc7esagFecms8tkFfonYxiE/HeY3nbrbbBQDR3AiA5LRr/mmPg2cwKZn2GghmpSBcOYNtJ21jovsMW0YFnbsTFSu1eS0/JlhdxyZy612IuHpW/Voq3MPTkmVWkAZZ4te4AuwQrAqRdWlNCXSDodisptBKLKFCCtQFUugSlScHBGJOX+yUnTDpg1U+sSOuMvWwM2ZXEJKzyIh87etZj+aDT8dMKE/hqR7kLl/pc3jwI/gOSpn3xVohQjbKD+PZxBaq/6AUHWSZa+nZa1zzfAlB/K6zB6O9lUFP7JKl51LlK1UPIbGyQGmjN2L8eZDgEXU6HxDBh6CvcXckl39JGZJ9vvE3fU6QoSBamFb0afe9LB8FYt/BbPgIn1Z0Wphe839WFQUD/9swRBYeKRFFKYoGryNczBfw83qM2p3sc/eSs2LWMwkbFxlXYV1buGQ83jDyypOryf/v+5pkmmP15+gec46538qKR1x7eN359U8+iQtFI1WFrAHexpPvGxS1wk4H4/E2mti7s2n6p1VtIbDrY+qf3paFVneAarDOChvBbL35GrEPiM+DyR8zCOJLyojMysheOcZ5CMUPivr3I98VM3In0lDk1sEs2vnCvErjCwJ20INiKnd7L1xDbh8ESf3zbRe6f5PJefL5YM+s6LbO68cKY0cDoImeb5StMFyL/1vtL7j231pteaedJjsmlB21dxrY3YZ5y8XX9EJ2WuwndBjk07IhQ/qeahpEFq5wBUAALb2n3LJSNffsFAOORvCc/4f5VuNjNY/ZZltVELb9zRTBoQ5TuVoWgXo+y987B8cmd6SQ8TxpK5duFoRE0OpR0Xwc5uXMqe25X1ltsEhe9E0LU6umyN0YO+3zPmtTYtYtxou/PCYmkVnZxhuxtkuVOUBsJ0QBCKyYFahpC3EyUCUgAK6cv5vuI6ketX3h5udHyzdyqh1pMFxiMIBn7n2nreVngzrWXMx0xhLLqaU//Z8HFf5MdVcJAgT6zrYN1gqGvW/zYt+RcOwIX63D8GmXN2OxlGbn7A2bnhzOFHsEss0Dha18DBirE8+Lxa0f3aHV7GnbA42Epv4ZFXLDN2+q0lqwYUUR1XRZvBESv9dE4bCoTyaqJmrJLj9BZUHoyoXKbpkutV8rPQRABQXQU2GGGZCdhh8IjExdUe3r8/za9088RsQy/EnfnQDaCZ4hJcJcOlplce97IPv70OplCpyfj6fikMdBBWYb3vX+Sf3ysn7eDlXZehCejXSNLWw2LDIvhHEdu7Mf+AWK3WUkaSOmE18ws81loZNQvxZdpZEgkQSl9CIbfALsL3v8851cOYzW1oRMWpWegW2R1WICHVVhZPCOBjgZffT1DxwHAwdKrpXHXv5AblAWfBZeCjNvnyaqz+gjrHVEDCh2BYEoIYSzCK7uutfvx/asWPumyGsxsYHfWOugmBhP4U4r9jUVGHoL5G7fQqTGiNyTS+K6LN7+1aJTTM+eZoIAf+EGT4hFlr1FcHIIR0LGcYUARkXG9LrmVuN8j0VdH+0vEfpyNplcWAkOoIgeG5snTabFlvrXiH0Fzss8VtK7hXZCMDTgf7Yx0oalZtv5y7MC1FYMqdcZC8LGQy2zMz0nrYocBx0l5S51NXnIk1Z/7Sm0pIxa1L99HkJkbtbSCERAzsWFEGyE2EZIEeJn3ACvnK+DNwkRePt5JHNwYeS02FhV7MFPqcOsEy69P1272fGnChJ2H711g/FR8L7aH9ETwe7Iz2Qxl0i4j8qlMCmfC68LLgFiy8+ZEN/U2/E4zpL+dgiiiWgD+4J3ACfL80NuYk6hDWO7XSACMhCi7mZX9y572Q/wTYmZnkk088MOtcTBHa1JjOmNRnKlLIEXjGbMh/P/I/tmQ/jGpycsRxnIetq3l6WOCL9KJnPirwapo4v71hS7nE0CXHFdq2Ik1mZ31KCcP0MDP5pGgzhxBjOYhMQL51Um496FL664ZMsk1Jtw1u9DGRueiU7QBCGhWNUIVR5/gipdWW/IFsi4CnDwr8gQKeO82vFrERH/D9nwTiontJlVAyZa6B/efWx0OWECDZA9tV+WyB0slehRkPx9DU9/uRR/61TRAC3EPNHTb2731/WkMPpq8aS2bWJL5Kqbsog8XiaJz7Z6Y4lfRRvhhB3GAs5zqCXSQj3rQz9TLbziXKtl6KMGn7ptqb0CWV2jkIJN1L9OHcL2YljDjPzI7W0E1+lJRHqoDIUK+lPVA2+Vamt5rby+eSCPzZFPFvESza/D+/OjFnPLLt1fDn+LLYMA5X2TCOeu5w2Vik6xrqCQ09h/XtMt3v2MNqaQnisI/o+QwWKnz19AXPRpEQIlMpYK6HgQreQ4anKZAmxXl7UWmDTS+hMfmDBaNFXz1luco1uYwZFpdYKZ1cb31IjSAme+S/LBUec+HI6VvIs2I6VYAvQiOXzbi8MDxXCucPQ+kWiDC+xVmI0pWdgbUycr1VwyK6oEcurB1IdAv+ozjpDLwBEGCIR+V73W0Tr4Ev8c0KX1uHi3pLsvHKOWTejXENek3ir51wxqI/KTGnDDnFArbYjtBe/bbYAwTk1Nnj5wQtEIp0PxuYM8kRvMNmjTqLkN0dFOQ1CN0YDvVhAOlupDAdQpIyolaKvqsS92OALOW9JQAmOmRTg1onJk1bfxt04fkQENqPCXkaPOY4T4z1pPCsnhBvqKKOLQyFbZ0h65EUEVf34RcMB21E+HoKa7KnsRAy+Yj1p8mffOJovfHPBajJMUc29KHc2xJAoa/glZTBHsziqabyWcv6i7/vV3V1iDg9CYWq8hQdsQF8P87bBZwhJwouMUgpTu4aiF8aWibBv+nfNp0D36bboarMNtZk/Sz7T1VjWidUPG7S2vFomkGudfGI3Q27m8iE33CGmHQnqUYrbPRaK0XjA6KTrbClkjTNZN+PDzq17dVv/Ify0y5wK57mn14iAvxKx/KzkgTztWq8+zsbcHyxqoIqyh+Z3a6N9LUQdYzG6Syf8rruFZUUGrIgu0/Uo9X9OoGMU/Qus3XMi898Bsj7zb022751ZBBZ/GGqjnnuOJ0qWJctEytPsbbfyeM0T9qTp0fRrle4k1LjLPD3qfy6krvR5A369K2yaliF/dB3stvTLiD3BeZEKGuTNQCKihDNxHAMYL34MTwoQNjP7akBPGBsUBYsUmh0RO9YhVc3AcCMLwq9KoQMe1O4M3Sc6YJQXrxYo133aLU7BHWSnMqHyogG+hmduvHgIDJq7oqIj8YGvJN3yfB6qHov13gD0zZCdhhZifk9WD70nhlrEwrS+HhCSmehv+S3+9PdxYEbeceGH2R03GE2tCzUTGYJiv/xs6zUFveWpNh39iG5WImaVeyYcSMhoKTLN+XLzELZ8zSYrEGwBGD8l8qs3YQLguHEm83oUvxy3lTwTKrctJ1tpD4w+nfZei9b9aRD8uT/2oKaNaKr2V4r48bSGiW3Y25Tfp/9OHaKhYZnkDhYY3cplFsiE1XNTs5in37mYlqCaC5ftWgHXJnft+r30JhUeYBS/Y8P6S/tqhmHehFW6Av9H8bRIELtbAQDjMnrjgUzW9BqdvmjaS8PuMwY1rmOBLDafWxpiMV9EJt4VGoS3f4MKfOFlftLII6w9wg6vauAOH3Nqtj7bNY4QK/zCfHg6LFDkHlomkq4ehJZZe0jy0euzaDVBgfwkzum7bn0Jv4Mtar8ZUJNuPw9U1RxXQfoMMQ9t4Zs2KCyMt7uaQd97+pJ1qfAYtrLu8cWwXqdnHSryA6AD9tc0D6b6DYgmxQ1Gxt7rv/bB8B8V2b8dIYoiieBsZ7H5NMg6vFHajO94uQ/fLSay6AnNjcr5hzhS+KkZGGwZOY/qw1YBLo1WzUMmx/4uUIwDED9Q+7QFBeJnPFPrbZ9bBHClTHqYMPpaLN0FUJdtrZSlBFxunzz2T2/VLZZvFZ2px8Suks4fAm6YP+nmNM/rp5c8rn/YeuaZ+pMuiouf6dGtafqNekhu2KJ+GOkzd2XBQDvMn5UzQAmqRooKy9aIMSeApcrvziCzZBkhIcsnLVw7oiyt+fVDyBbKpVwn4hINOGY54VKVirDJ2acv0E/63yE/FGOBj6rs9hl254t1i/tf8oOc891FdXugAUFbH30Fmk9cdLskbrN6tpEL55r/Y5QVLvpOwghuAzq0iRIYi5I6Z1dVuwzoDfLjac7HW2pqBOTqT6GoRyG/vRKTkF1BLlk4T/beh+LFPrwGT3jwg9+02dzury0vJ+HRJDAWwFXpeIOkBxbY7R9IZE6BxYywMswsRjgo2QK5hN62Kw+9Guun7Bvrq8RBEKTMQIj6+6NrkJP3lFgNkW17LBecssxWakzDCVcPNWX8pwJfmHMU/y6zn0J5XtaEOAES2plMlQZ9J8EgMCO0AWmtTJlc1R34LWfIKn3y8o1oVc3aZB92ro3sdF29jC01fXZIIq5d0fsnOk0fGKvM2mMySaH2t+QId3iNuZoXthRfwqfTNFQV0mgDR38IBscJnnI6fbLGVgUN9U4r/ujynqIHZ4QqB+F9sGnQo2v5ZngGWchaav6jfpUZ0aZ2dZAXpdIbtZPpdADDbsOW4pNtrCwsXP5sWZfm9xFuPWnb/IJOFJuT9LN6veOKxorUlqRj518nmhKLkwCYzBNa4spVpWbIKcS898KutY7NqcJQMmNhIVaYDdlMdDWnPhR7TWBXO3uSr97mfApE++gNsGoXsieVWLMJUN7v1W8IYpTFB9oZ6VAToQYa/G1u/M4rcGDrI+ZroZ8Ljtk7r9nh9USJvEud7RsE1kMn1DmE0HQfuYj9ftd+1RxV57NYOn3skVTFu2MTb9vrFS+WKSofqY9fhrA7tXHBQ6Ww9F8R0gLDFdrwkKORNkRfmEWOIUPYP5rlwtV2CUg7X21hdqh1L3W5jGt1rV2VaNe4btVfrx3L8aD6lMxt+p0k5CJBtxr72RLB9pDlzdno4scZUoLO2N+r7xPlfCje9KQ1x1uXdt52SeqwSmMfmKQWHhHe4tvxyj8SdjYTIT98pE2/Yq6kdR+CkXTDEWBAoP/xyaF1H9sw7YkyBYxiaZYhsMFF5Az7sMQuRMVXe+/syUGR3uVzEkzao8EQrniDVqjy/lSYKhnVUapsqyjrgCRBSsX4l9ZERgK7lrf5lWr7uRmB9Ep/H6jG7qMy+8d3yUA3AOem84ci7lJX6aVGSfIQIq5LeGr5+gFVjk11g8Qqwu7E8QT7zeOJgo/GhPG3Al1HJ0kYq1a/mdz7gSE0yXBw5u1DrJgkTK+wDkpbxB605H8lIbWQgIs+1FOGqnkAhrnpnRpOOh/uyANinE6alOgfwS94N+HDYIhC8U0eivGNn6KsNPfRXXiQR6Bx1KyStokKBLY6lBpV1x9Hp7kpKBLisZJSg9wQAV4c4yW7tT7e50prv1IkhFeEUHfWJmEJGTBMTX8yPOikMTuNqumOEh4MH5JRZb5abxeKsH3at4mhaQ214K8stMD1WZZ6Ma+S+b6RrfK8/heMTxeM1cpzUqY5e9rjwX9XexZLVKHukSkkbDPOSq9inmistovcwwdJ9J3lzZK9w6ErnLSWejdERHrXNKBofL6CfIsZ9WABmIemFbCOBSU1O//LIOTP9x3QY/4L94dumPrU9i/vJMsZFX9+Zu4/i/ZzxxhouwgZDagq472RmCQY1vGH2x6UTtfzEWb9y7kdp08vy7CqRKjsFq0t7HWR5rrYg2rwtcsLGg1hUUUxWHnIfnuMbERZD7lG8qU8PpMyyBcmh6nXMruVwARNB/KSlQDatZqaEE5bY+yPvkqQZygNXrn5e5BYHA5xNPrSn83JRlD3mC+jB2qYyoLFHgrI9oMNP0WQgk5u7KjrS0mWhSEAPwedQ8rJEFfWuwcNZUwMs6eWKcgSzyOeE76Kv4nTsoMy3uC3pD4ji1j2do2/qec9rnE6S+YknrsBeEbFgLnlL+gPE9tStij0zN8fBtvoGT+2Lv8/FyT0PhxXzF4WrujIVX29mqAjQc+q/z2Nt/4pV1b+87SF0+az69gQ3p3IT1oGt2w2lS9sR0xXKnTO1JiTORWa33y/gwMLjuddYzMNaxkkNFdPoCP6CSPgufy/8Wk8cdd5th/YOJg3UZYo7cACB36RAPLKhnZqlhiPQBoMO6skXCRXV90qEvlBunoP4lCl0uGB8RCMdr/3wOGJ7KozlgXleMlTUX5v6iL1xNRropumNvRiU6EoJsr5gqi28XF0bF+MKsgwJd7Mt4JGBKOiNeb3PMuA1eB9tfBRF5geLd9eCu+jdanOfkfiFj/Z5f9KZL5+AmeIMKeqpeGfXek4U2+tvP5uz7iWGMBOMoru3r0tVYoATrMejB6QF9a06Dyg+mNBGMyJBJlSHuolZnGQq/tQuxFc1WRBWtb3gmSklHf8U1vbGczfsRWHYwiMgMF/qrohw8ym93BQnqDhvygTiTGA4Qt1B1vIls/4m6DSz72FpsYl/RrcLquGcCEZwj70SpyGInElYs6tW/8yhNVrPDjJmzsO7PxO9NIBqJ6/WPlCwQjXTxlyw5G09NvR9wn4omnyHgLFfcoUP7R4q4d5OKFT/GVnqKJnpj2VYYgsLu3yE/qd9FyvzF/c83YV9/SAj+djrY1JRwjCUzzMzfwRuhaX+7GrAqzlzD7lsubWH4g4gbCoiIqq+w/SBO2lpsSKUygevb6/EBvonWkEOVLEgy5HsXtnUBjul+cFYj6AH5n7LesTTT8oFsJ86UUlAC+ZpIW/j8SzCTg3ZaEs7Ba0v1cxh7X+c8anOmMX6jUz8/UfCTB+hpyvhw5gEW/E8942DkVgrn0oerFr1CnAfVBFMdQb2wkiJ2TfVzYayHJ3C9imT1fnr42/hM8DeFr58G49t9Cl7kPF0Ei8RSdx17vLvM3Gfid0W3Q7UkXCRXV90+cWuFWkasCm0Dps2OtR/pgjNp8Q+wsmFq/c/UfYBe3TfgADeDxBETQT/C0iN9fzfQOebjEleNk5Do8T1t0yG+haqdWpxU3QIjme8h2jFnn5tOU9KfdfCY9xOw9YbLjb1+wQ3lEtOsUvDQJxwiCSnVjI5BCQbK9c0e/Nnn80jTXplkevBd8d8z2fjHhQ1KMhI0Rb9gpEhmj9UTLpDJ7gavRY0FKt+J1SxGYz9gLTVBBes2MKOevauYAzjFdEd+FBPETDsf0NCNlo+L8ZtwjqWaRawDVJO1psBt6KciAxOg+3LFyiewrmQdJgrU6+4PYrm7wo9CuwMN/sv23IvY8o8UoyLncPyfCtt+BD/Lquv+RYcz2b1WjC4/MWAHoLkVbS5kgpMrmeJR14DuK2hHuwEAY8gvW8SNN0QKtwJQw2/onTJsM8Lo4vYARdjFlbT99x9Vg8EYgqpQh7mrTCrTPmUxKY7Tk9BMZgkDcnJxSuMjSFURX7rK0Cb6UxmtjyjUAzLpqKoTza3EFZrT6rZYzsI6NkoieZth7NRi1yLYj2t6o8CSmNxn+gtM29SgGsx4k5c9qHKqS20GqPLIYeQEDrwaURwBAWkLiaEEnLrzJcuGzQPN9EvVzNBJYPuvNQAkGB7lGQejDWFMG7CtUlF0odpBBjURB6Jjub028k6VLWPMBbak26RLCVCkiifSSFETQVYT7s5YdmKBI9P8iQ/tJp49eLY1Wxavz8lWWaQLxTKQZ4lvCuj8zZwZP9FHDv7SK/UKouedwO9XLQXwYbMPbgZqv3XUsgGADtVRSYGVBVrCQ3BtcFVXyFXv6WKs0FzUvM/24SaPlKb7oPOpPeR/swioKgWPlD+MCcvT7XOD/l+3flA7wgC7qjrkUo1h+DXG05+A0+fQKyeKvfWelJLoQCugcEgG73+Pn7RNKDjsOa1CQuNcT3Fh7edK4FxbL+3zWtAXVeZDJhhYSFA3LuarbOB6yvK8vzBS48xR9ia3UAx2UxI2yRTSaeWg/I1M1tbabM+LDLfyR2cHDNycAMeoDdKEyXqExCve9xLoBOAB6lrxxefmavWY6KGkgEmngdgqudemU8BOXt/b50/n/xhrQqx0HyV7NslT6Far/mov1gz7a4MYa+poHGanu6x9a0oIGEtupMSAy8zOeVbxK0f3ReIc1LfZ3QyWu53quCc1S5OPCFsbMJDXHlsEW55gvJbZymRBaQWOckULme/T4hyyRmvKmNY6e4rBuQbZh2iksvBv1//RgJKBGGcxjbD8VulDvwjDOEEyQcoCPsmWdMOvsfxdxl5cC2fa2dlFdof1J8Zhd/FiFd4FUtQhr0iChI8qIAXW7toK6gtqZsjObBhVvF2j6sCkk1uk6FeE+9vYm/UMXgKgWZmdGbpvM6d+kKyeFprhxAxWg+yBu5c9DWXQOm4yrqZ9cErQP2nEB0Xb+rIp4bptwJRd7RLfqnBxXJNR383Oyq7CnMRxtF4QHBicNUQbPWJJszX4j9ab8sml75SOfKb3k8h5x8iRhxwbt/a9iw8Z5oXyMqN5Lj+fraChDMJaaGLkm8CVLMOlOQVM0HrNH74MCT6LROxVDN8kkc7q3IK93SfnqC0wNOD1fXa2JkcdWB4LL+oegQ0aoxV1UFvonCPkM6DeboWXlFRpp21n8FQb2kmm+4GBRPMb+Bu8zKXaIjwZ3veF5VOvX8xvX1c71Gc4BadGW+1uTjXI9Nz4v0E01Kb9/SFC6NrShFhUU0JwWtNO8Qze8/oS4CPFWMY55k+6QhRgrLrl+I+xYfivEor28CzPwsoW+O0f3NOBJGWor1WrUwcpd84caCPRjEmzDsf+Z+Cus2ggXT1sW1ICvkPDtigzTsRDgJpDUpyaTLLGofWFOlsuoVm+m8xyFYY1XrJYN3/6FgrZDPOCDv5r/euiE17d5hrZw0xeZZVpDonnFa4qhv7SzfSHVkLRL1q2whxO1hxcYiVZo9pQ0aImaABcLXQ+oVsTMUzQO7DrYl+ixZEI2kgvtlyzZ6ScPle+7+iK4Rv6+cMVx9RuV53FkOtpzxaJKAjFw2iiMjv45CRGjpjzUVabXTa5gAzRIhT/rbB8J4gjenhMCsejYE0x34rtomUCTsT+9JEoGba4atOkyGzrOsqQ7shohv/5akOXS402Ql3qIMUkwYPszg2bI5zA1O3ZMBa1jDbeHFsrwjj4ak7SNHbKvGIpol0WkmsZTIgal3lt3w/f3Cd+iUJt+GXUo9pjS0w0vgWdSFbz5e8DuU5WxbU8wkMJUVW+PVW8xbyjCU+TfjCl3kSMv4YkKnEPipETqPw+X6brIfcJ8q1y4YNpvLE00TCuxshpCqm7JEzNTVOn1S+fFEsU6vR5j+cAO4swSWmj0vUFiZq5kEdZjj8zUgEYurqYiZ/8gv4h81LRATD8XOqxn+fMcRHy9U81qJxlYjafoI9rRe8LpQdbqenXzmm7tvXMR3S/88Qnv3gaRYoCtz4S3UsMkPc4bs0HMyTYL1WG8vgJp0Qv80J3u954TLxCgUtgkJNXebzobf5GJSJoMFoYcfZyqb0fItUnnr5EHLPmh2ER5LcfieVM2e60mBYRQUcfLht8NSkgQiZjOq7iIFjOmibrD3nd71/Tcc8biuf9ijyMnG+jkXYZqsl+VC/4iYkynQ01F342T4yAny8ZNX2qL/2uiAlSPbx977YISoEvIyTETk44b1tL+1NhCEYZZo7O9HufQ1Hw19cXoZlUBzFu/wkKdEkcda1HDY82CZjjX5kJzh5eAdhUjvarLAr0tvgVj/4rF76ASxX4LuJqrlj+UYXaUbKQ/8lkm/okthDKrwyxbl+bt9Q26ZtENDU+z7xomicRTzTf/m/GIvRB5Jvdm8RIAbWFvzbN6dLLhUzhS7/9AEysHfyx0vxCloAhv0zKnBqgpwkTcT9INPGxNKBaj9E0HACY+og/068qEDndff138z5kMPOIURBfpFMjL/P+hYIP6NzSBGlmhql53UY7M9st8EtTve77l0V1piHyznGg3rzeQ+XRGpmuJxzh77rO4cRfUu434bXOQ3t8zr6MzbWCzmSusBVelsL2PAFBOXMahc623qAbBP6ug4jFUBsVTRCSNtlchXw7KMQw1+YQUM3Jy/Z8RJf27Btmogmif5eUHR3dh6OJWnkO11naf0xp2eCb//xLpEl3jMFc3obwCCIJjvNJPkTNLP0d87CPJpVPCDsy21rYLJGAAcf7i7wymoW4pAoD05oUInsA++dZzxjK1M05pbt6kLiapi7/FzZvVhH8iYf+kFgjbaa8p/wWfSt5U39eC9AH0Sg8Ib9sN81mbLo6QkFG9lm4qeFU0iuT7KSJD5sykfzJ4fj6b689kJOAaADFbcJPlAgPoTliFxaRH/v7kQehgs+YmN5hXXeqxZfBAwzD+DRYMxEiv2iwORhvE4Hb9wsClNwIuSRCeWLH1PCFC219TGOvNRAIkb+2RplhJ1QEytRRA7/xMZn80OM+ZL4uWW9qzbvyZA02xlQgzAZ1JOVVcmksGtwLhPcnQlhloK2uq+3RsBL3n91ZYscLYbqr5r6aT5/fl0MJHspr5XgBpWV6vQE1yYV5lv2ppljEo8N2aqksTam37FH/4xA2+bc7IdjTnfigOGaRHXIOXVYmOR30nlspzPMUA6z3zid9LPp0YYPpghAaJB6+8p/1T15y3yparCn7Okpianbz1Zmig3aXZnaYjlf6I3BAS8SOGxEBujPK1jLNb//E7JGY3phEJdOhZIYQLuVrv/az/gVA8J39f8DL/VUJVJqp5lfSvRZLXz4pRWmr6JoaJMFNsyPSdMoZoH5EuEy5xNogsSIHK1c3Ws4YWZQeA9ZLE2q26vlwU2EESNqrkNAT1besYlV6N8WBPFkNgO4b2189O85emrMc5HtXmYyuaJXSECsozfbtYAxD4OgnP8FsxXuhTKi0DWMhqXwnwl2zgIJ9zZozoqiGSVqH/Kl0ymhEetd3b0E5vKP0GpaE0GNRW0B/qbfbXBDKz4VU2tgYZzZgwc89C8EgpzdM/bA5hwgtPlZ0+7OOv5Cd8llRaBw5rPvWU+b86f/fiOvubu/mEJRk4tqZGkNURq67YvLfSOjCzQU3oRMRp+iuF5zG17LgXOOdq5br94o5nPOXfVN/E+yLm6QMpkzqfw6oGyhLOqAqsc9BLX2/cxdM2iyeh4c3peQeqmch9JAMXsnRG7N8sNvc2I9sYM3q6hdH18P4crTvbi5cSsJimdLoCbpb0oNIYuK3IfBCsHWLU0C8M0f0EpkrGBFu8CBRAyHsDMzOMiqbt7TeR+6czn0OnwGNguibRdUAh9G5upabVFgvU6ODAi20PThkaGYiiljrGc6fCMiGoR2d+w+8pehONG5kYUAe5YlFQ6VJx5bfCO/jmA6tOH73ueTyjX+HVAz95ZpSje0ky1vexf979iJLpkUcu/I9ztO0cWB2ykdXWjbVl6xusI9MyENQR9lVJ/Jj52Mcn9rxoxK+AMX5rIDWM6ApgjCieE5aigpTllOe0jVxTK+QieRUF11U3fwEzclf70Nn0E1RlANhW+Qw4wEHlimZPCWMlZXaDuCwb8ldlPcKnWlLGLyx0e3nIh4kSLcOAKRTMafPP53oDUJNm+TuUcUxfsj5sen6kzXtK2j0mvXl6WDFdi+4ugfGIm96zAkARDkmpCNXOLIzWJzcit3foED4wPxnEmLcNjSKv8rTI7Qdpbe7RCY8fx6V295gKcaBJ0khvbNuNxd2uHjc/sC5X921wglAzdIXKpii2sj3XWFj9YmprrzHNM0u0pjDpZfqfvovFz9VtX2ruQCGFOZfFKgF8jaFFpZxos1zYR8H5L6Z8irz9A5gEGWfveAGeP1bt6Ci8QUmFadWSDtsbDLzIAMTdXAaFhZ3vbEGRMyD165qljSi9vG4QuCTEFe1hgOH9/QY25qI8ulLaM7X/mVP//b+v/9ve///t2wAi+agQAAA';
+
+/* ======= Icons ======= */
+const I = {
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.6 12 3l9 7.6"/><path d="M5.4 9.4V20a1 1 0 0 0 1 1H17.6a1 1 0 0 0 1-1V9.4"/><path d="M9.6 21v-6.2h4.8V21"/></svg>',
+  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
+  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 6h11.5M8.5 12h11.5M8.5 18h11.5"/><circle cx="4.2" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="4.2" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="4.2" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>',
+  cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="16" rx="2.5"/><path d="M3.5 9h17M8 2.5v4M16 2.5v4"/></svg>',
+  tools:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg>',
+  calc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="2.5" width="15" height="19" rx="2.5"/><path d="M8 6.5h8M8 11h.01M12 11h.01M16 11h.01M8 14.5h.01M12 14.5h.01M16 14.5v3.5M8 18h4"/></svg>',
+  clip:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4.5" width="14" height="17" rx="2.5"/><path d="M9 4.5a3 3 0 0 1 6 0M8.5 11h7M8.5 15h5"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  chev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>',
+  pen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 4.5l3 3L8 19l-4 1 1-4z"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V6A2.5 2.5 0 0 0 13 3.5H6A2.5 2.5 0 0 0 3.5 6v7A2.5 2.5 0 0 0 6 15.5h2.5"/></svg>',
+  upload:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V5M7.5 9.5L12 5l4.5 4.5"/><path d="M5 16v2.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V16"/></svg>',
+  download:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.5 11L12 15.5 16.5 11M5 19h14"/></svg>',
+  expand:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H5a1 1 0 0 0-1 1v4M15 4h4a1 1 0 0 1 1 1v4M9 20H5a1 1 0 0 1-1-1v-4M15 20h4a1 1 0 0 0 1-1v-4"/></svg>',
+  pog:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>',
+  filter:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>',
+  gev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12l2 2 4-4"/></svg>',
+  scan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5a2 2 0 0 1 2-2h3"/><path d="M15 3h3a2 2 0 0 1 2 2v2"/><path d="M20 17v2a2 2 0 0 1-2 2h-3"/><path d="M9 21H6a2 2 0 0 1-2-2v-2"/><path d="M4 12h16"/></svg>',
+  pen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>'
+};
+
+/* ======= Master Stencil ======= */
+const STENCIL_CUSTOM_KEY="pdp_stencil_custom_v1";
+const STENCIL_EDITS_KEY="pdp_stencil_edits_v1";
+function loadCustomStencil(){ try{ return JSON.parse(localStorage.getItem(STENCIL_CUSTOM_KEY))||[]; }catch(e){ return []; } }
+function saveCustomStencil(arr){ try{ localStorage.setItem(STENCIL_CUSTOM_KEY,JSON.stringify(arr)); }catch(e){} }
+function loadStencilEdits(){ try{ return JSON.parse(localStorage.getItem(STENCIL_EDITS_KEY))||{}; }catch(e){ return {}; } }
+function saveStencilEdits(obj){ try{ localStorage.setItem(STENCIL_EDITS_KEY,JSON.stringify(obj)); }catch(e){} }
+
+let stencilCustom=loadCustomStencil();
+let stencilEdits=loadStencilEdits();
+
+function buildStencil(){
+  let arr=[];
+  try{ arr=JSON.parse(document.getElementById("stencil-data").textContent); }catch(e){ arr=[]; }
+  /* Apply edits to embedded items */
+  arr.forEach((it,i)=>{
+    it.id="s"+i;
+    if(stencilEdits[it.c]){
+      const e=stencilEdits[it.c];
+      if(e.d) it.d=e.d;
+      if(e.p) it.p=e.p;
+      if(e.u) it.u=e.u;
+    }
+    it._d=(it.d||"").toLowerCase();
+  });
+  /* Append custom items */
+  stencilCustom.forEach((it,i)=>{
+    it.id="cx"+i; it._d=(it.d||"").toLowerCase(); it._custom=true;
+    arr.push(it);
+  });
+  return arr;
+}
+let STENCIL=buildStencil();
+function refreshStencil(){ STENCIL=buildStencil(); }
+let stencilEdit=false;
+
+/* ======= Category inference ======= */
+
+/* ======= GEV List Data ======= */
+const GEV = [
+  {cat:"\u{1F34E} PR APPLES",items:["APPLES_FUJI_LB","APPLES_GALA_3LB_BAG_CO","APPLES_GALA_LB","APPLES_GRANNY_SMITH_3LB_BAG_CO","APPLES_GRANNY_SMITH_LB","APPLES_RED_DEL_LB","APPLES_HONEYCRISP_LB"]},
+  {cat:"\u{1F34C} PR BANANA",items:["BANANA_PLANTAINS_CO"]},
+  {cat:"\u{1F353} PR BERRIES",items:["BERRIES_BLACKBERRIES_4.4OZ_6OZ","BERRIES_BLUEBERRIES_18OZ_CO","BERRIES_RASPBERRIES_4.4OZ_6OZ","ORGANIC_STRAWBERRIES_LB"]},
+  {cat:"\u{1F966} PR BROCCOLI CAULIFLR",items:["BROCCOLI_CROWNS_LB","CAULIFLOWER_CO"]},
+  {cat:"\u{1F96C} PR CABBAGE",items:["CABBAGE_GREEN_LB"]},
+  {cat:"\u{1F955} PR CARROTS",items:["CARROTS_BABY_PEELED_16OZ_CO","CARROTS_BABY_PEELED_32OZ_CO","CARROTS_COOKING_2LB_CO","CARROTS_PETITE_12OZ_CO","NP_CARROTS_ORGANIC_1_LB"]},
+  {cat:"\u{1F33F} PR CELERY",items:["CELERY_STICKS_16OZ_CO","CELERY_HEART_16OZ_CO"]},
+  {cat:"\u{1F352} PR CHERRIES",items:["CHERRIES_BULK_LB"]},
+  {cat:"\u{1F34B} PR CITRUS",items:["CITRUS_LEMONS_CO","CITRUS_LIMES_CO","CITRUS_MANDARINS_2LB_HALO","CITRUS_MANDARINS_3LB_BAG","CITRUS_NAVELS_CO","CITRUS_LEMONS_2LB_BAG_CO","CITRUS_NAVELS_4LB_BAG_CO","SB_LIME_BAG_2LB"]},
+  {cat:"\u{1F96C} PR COOKING GREENS",items:["SB_BAG-KALE_16OZ"]},
+  {cat:"\u{1F346} PR COOKING VEGETABLE",items:["FRESH_EGGPLANT_ASST"]},
+  {cat:"\u{1F952} PR CUCUMBERS",items:["CUKES_BULK_CO","CUKES_HOT_HOUSE_CO","CUKES_MINI_14OZ_CO"]},
+  {cat:"\u{1F9C4} PR GARLIC",items:["GARLIC_BULK","NP_ORG_PEELED_GARLIC_6OZ"]},
+  {cat:"\u{1F347} PR GRAPES",items:["GRAPES_FLVR_PROMISE_2_LB","GRAPES_RED_SDLS_LB"]},
+  {cat:"\u{1F33F} PR HERBS",items:["NP_ORG_HERBS_0.5_OZ","SB_ASST_PARSLEY_CO","SB_CILANTRO_CO"]},
+  {cat:"\u{1F96C} PR LETTUCE",items:["LETTUCE_CELLO_CO","LETTUCE_LEAF_GREEN_RED_CO","LETTUCE_ROMAINE_GREEN_LB","LETTUCE_ROMAINE_HEARTS_3CT_CO"]},
+  {cat:"\u{1F349} PR MELONS",items:["CANTALOUPES_CO","HONEYDEW_CO","PERSONAL_SEEDLESS_WATERMELON_CO"]},
+  {cat:"\u{1F344} PR MUSHROOMS",items:["SB_MUSHROOMS_8_OZ","SB_MUSHROOMS_BELLA_8_OZ","SB_MUSHROOMS_SLICED_WHITE_16OZ"]},
+  {cat:"\u{1F9C5} PR ONIONS",items:["ONIONS_RED_LB","ONIONS_SWEET_LB"]},
+  {cat:"\u{1F957} PR PACKAGED SALAD",items:["DOLE_BLENDS_KITS_5_12_OZ","LITTLE_LEAF_MIXES_5_12_OZ","NP_ORG_PKG_SALAD_5_OZ","SB_BLENDS_5_TO_12_OZ","SB_RTE_SALAD_KITS_OZ"]},
+  {cat:"\u{1F350} PR PEAR",items:["PEAR_ANJOU_LB","PEAR_BARTLETT_LB","PEAR_BOSC_LB"]},
+  {cat:"\u{1FAD1} PR PEPPERS",items:["PEPPERS_IMPORTED_YELLOW_ORANGE_CO","PEPPERS_RAINBOW_3PK_CO"]},
+  {cat:"\u{1F954} PR POTATOES",items:["POTATOES_RUSSET_5LB_BAG_CO","POTATOES_RUSSET_LB","POTATOES_RUSSET_MICROWAVE_CO","POTATOES_SWT_POTATO_LB","POTATOES-ASSTD_BABY_24OZ"]},
+  {cat:"\u{1F95C} PR PRODUCE NUTS",items:["WONDERFUL_PISTACHIOS_16_OZ","HAMPTON_PEANUTS_48_OZ"]}
+];
+const GEV_KEY="pdp_gev_v1";
+let gevCrossed;
+(function loadGev(){
+  const raw=readK(GEV_KEY);
+  if(raw){ try{ gevCrossed=JSON.parse(raw); }catch(e){ gevCrossed={}; } }
+  if(!gevCrossed||typeof gevCrossed!=="object") gevCrossed={};
+})();
+function saveGev(){ writeK(GEV_KEY,JSON.stringify(gevCrossed)); }
+const CAT_ORDER = ["Apples","Pears","Stone Fruit","Berries","Grapes","Melons","Citrus",
+  "Tropical & Exotic","Tomatoes","Peppers","Potatoes & Onions","Salads & Greens",
+  "Herbs","Vegetables","Other"];
+function catOf(desc){
+  const s=(desc||"").toUpperCase();
+  const has=(...k)=>k.some(w=>s.indexOf(w)>=0);
+  if(has("TOMATO")) return "Tomatoes";
+  if(has("STRAWBERR","BLUEBERR","RASPBERR","BLACKBERR","BLKBERR","BERRY","BERRIES")) return "Berries";
+  if(has("GRAPE")) return "Grapes";
+  if(has("WATERMELON","CANTALOUP","HONEYDEW","MELON")) return "Melons";
+  if(has("APPLE"," GALA","FUJI","HONEYCRISP","MCINTOSH","CORTLAND","MACOUN","EMPIRE","GRANNY","PINK LADY","PINKLDY","RED DELICIOUS","GLD DEL","GOLD DEL","GOLDEN DEL","CRISP APPL")) return "Apples";
+  if(has("PEAR","BARTLETT","BOSC","ANJOU","COMICE","BARLETT")) return "Pears";
+  if(has("PEACH","NECTARINE","PLUM","APRICOT","CHERR","PLUOT")) return "Stone Fruit";
+  if(has("ORANGE","LEMON","LIME","GRAPEFRUIT","MANDARIN","CLEMENT","TANGERINE","CUTIE","NAVEL","CITRUS")) return "Citrus";
+  if(has("MANGO","PINEAPPLE","PAPAYA","KIWI","AVOCADO","COCONUT","PLANTAIN","DRAGON","PASSION","GUAVA","BANANA","PERSIMMON","POMEGRAN","LYCHEE","STARFRUIT","FIG")) return "Tropical & Exotic";
+  if(has("PEPPER","JALAPENO","JALAPEÑO","SERRANO","POBLANO","HABANERO","BELL","CHILI","CHILE")) return "Peppers";
+  if(has("POTATO","RUSSET","YUKON","YAM","ONION","SHALLOT","FINGERLING")) return "Potatoes & Onions";
+  if(has("SALAD","ROMAINE","ICEBERG","LETTUCE","SPRING MIX","SPINACH","KALE","ARUGULA","SLAW","SPRING","CHARD","ENDIVE","ESCAROLE","BUTTER LETT")) return "Salads & Greens";
+  if(has("CILANTRO","PARSLEY","BASIL","MINT","DILL","THYME","ROSEMARY"," SAGE","HERB","L.H.","LH ","GARLIC","CHIVE")) return "Herbs";
+  if(has("BROCCOLI","CAULIFLOWER","CELERY","CUCUMBER","ZUCCHINI","SQUASH","BEAN","ASPARAGUS","MUSHROOM","CARROT","CABBAGE","BRUSSEL","CORN","BEET","RADISH","TURNIP","EGGPLANT","OKRA","ARTICHOKE","FENNEL","LEEK","SPROUT","PEA","KOHLRABI","BOK")) return "Vegetables";
+  return "Other";
+}
+
+/* ======= State / storage ======= */
+const KEY = "produce_pull_list_v5";
+let memFallback=null, memSched=null;
+function readK(k){ try{ return localStorage.getItem(k); }catch(e){ return k===KEY?memFallback:memSched; } }
+function writeK(k,v){ try{ localStorage.setItem(k,v); }catch(e){ if(k===KEY)memFallback=v; else memSched=v; return false; } return true; }
+
+let uidc=0;
+const uid=()=>"i"+Date.now().toString(36)+(uidc++).toString(36);
+function P(a){ return a.map(n=>({id:uid(),name:n})); }
+function seed(){
+  return { version:1, sections:[
+    { id:uid(), name:"Promo Tables", subsections:[
+      { id:uid(), name:"Front", products:P([]) },
+      { id:uid(), name:"Veg End", products:P([]) } ] },
+    { id:uid(), name:"Endcaps", subsections:[
+      { id:uid(), name:"Apple end", products:P(["Gala","Fuji","Honeycrisp","Granny Smith","Red Delicious","Pink Lady"]) },
+      { id:uid(), name:"Berry end", products:P(["Strawberries","Blueberries","Raspberries","Blackberries"]) },
+      { id:uid(), name:"Grapes", products:P(["Red Seedless","Green Seedless","Black Seedless","Cotton Candy"]) },
+      { id:uid(), name:"Melons", products:P(["Watermelon","Mini Watermelon","Cantaloupe","Honeydew"]) },
+      { id:uid(), name:"Pears", products:P(["Bartlett","Bosc","Anjou","Red Anjou","Comice"]) } ] },
+    { id:uid(), name:"Veg Wall", products:P(["Broccoli","Cauliflower","Celery","Cucumbers","Zucchini","Yellow Squash","Green Beans","Asparagus","Mushrooms","Carrots","Cabbage","Brussels Sprouts","Romaine","Iceberg","Spring Mix","Spinach","Kale","Green Onions"]) },
+    { id:uid(), name:"Stone fruit", products:P(["Peaches","Nectarines","Plums","Apricots","Cherries","Pluots"]) },
+    { id:uid(), name:"Apples", products:P(["Gala","Fuji","Honeycrisp","Granny Smith","Red Delicious","Golden Delicious","Pink Lady"]) },
+    { id:uid(), name:"Berries", products:P(["Strawberries","Blueberries","Raspberries","Blackberries"]) },
+    { id:uid(), name:"Seasonal", products:P([]) },
+    { id:uid(), name:"Ethnic", products:P([]) },
+    { id:uid(), name:"Tomatoes", products:P(["Roma","Vine Ripe","Cherry","Grape","Heirloom","Beefsteak"]) },
+    { id:uid(), name:"Citrus", products:P(["Navel Oranges","Lemons","Limes","Grapefruit","Mandarins / Cuties","Tangerines"]) },
+    { id:uid(), name:"Peppers", products:P(["Green Bell","Red Bell","Yellow Bell","Jalapeño","Serrano","Poblano"]) },
+    { id:uid(), name:"Potatoes", products:P(["Russet","Red","Yukon Gold","Sweet Potatoes","Yams","Fingerling"]) }
+  ], pull:[] };
+}
+
+let state;
+(function loadState(){
+  const raw=readK(KEY);
+  if(raw){ try{ state=JSON.parse(raw); }catch(e){ state=seed(); }
+    if(!state||!state.sections) state=seed(); if(!state.pull) state.pull=[]; }
+  else state=seed();
+})();
+function save(){ writeK(KEY,JSON.stringify(state)); }
+
+const SCHKEY="pdp_schedule_v3";
+const SCH_DAYS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const SCH_DAYS_SHORT=["S","M","T","W","T","F","S"];
+function seedSched(){ return { weeks:[
+  { label:"This Week", employees:[] },
+  { label:"Next Week", employees:[] }
+]}; }
+let sched;
+(function loadSched(){
+  const raw=readK(SCHKEY);
+  if(raw){ try{ sched=JSON.parse(raw); }catch(e){ sched=null; } }
+  if(!sched||!sched.weeks) sched=seedSched();
+})();
+function saveSched(){ return writeK(SCHKEY,JSON.stringify(sched)); }
+let schWeek=0;
+let schOpen={};
+let schEdit=false;
+
+const UNFOUND_KEY="pdp_unfound_v1";
+let unfound;
+(function loadUnfound(){
+  const raw=readK(UNFOUND_KEY);
+  if(raw){ try{ unfound=JSON.parse(raw); }catch(e){ unfound=[]; } }
+  if(!Array.isArray(unfound)) unfound=[];
+})();
+function saveUnfound(){ writeK(UNFOUND_KEY,JSON.stringify(unfound)); }
+
+/* ======= Helpers ======= */
+function esc(s){ return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function sectionById(id){ return state.sections.find(s=>s.id===id); }
+function isGrouped(s){ return Array.isArray(s.subsections); }
+function subById(s,id){ return (s.subsections||[]).find(x=>x.id===id); }
+function pullCountFor(id){ return state.pull.filter(p=>p.sectionId===id).length; }
+function subCountFor(id){ return state.pull.filter(p=>p.subId===id).length; }
+function isOnList(pid){ return state.pull.some(p=>p.productId===pid); }
+function toggleProduct(sectionId,subId,pid){
+  const i=state.pull.findIndex(p=>p.productId===pid);
+  if(i>-1){ state.pull.splice(i,1); }
+  else{ const sec=sectionById(sectionId); let prod,subName=null;
+    if(subId){ const sub=subById(sec,subId); prod=sub.products.find(p=>p.id===pid); subName=sub.name; }
+    else prod=sec.products.find(p=>p.id===pid);
+    state.pull.push({id:uid(),productId:pid,sectionId,sectionName:sec.name,subId:subId||null,subName,
+      name:prod.name,note:"",done:false}); }
+  save();
+}
+
+/* ======= PLU helpers ======= */
+function isOnPLU(code){ return state.pull.some(p=>p.pluCode===code); }
+function togglePLU(it){
+  const i=state.pull.findIndex(p=>p.pluCode===it.c);
+  if(i>-1) state.pull.splice(i,1);
+  else state.pull.push({id:uid(),pluCode:it.c,name:it.d,pack:it.p||"",unit:it.u||"",
+    cat:catOf(it.d),note:"",done:false});
+  save();
+}
+function metaStr(pack,unit){ const a=[]; if(pack) a.push("Pack "+pack); if(unit) a.push(unit==="lb"?"by lb":"by ea"); return a.join(" · "); }
+
+/* ======= Stencil search ======= */
+function reEsc(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"); }
+function searchStencil(q){
+  q=q.trim().toLowerCase(); if(!q) return [];
+  const toks=q.split(/\s+/).filter(Boolean);
+  const res=[];
+  for(const it of STENCIL){
+    const d=it._d; let ok=true, score=0;
+    for(const t of toks){
+      const i=d.indexOf(t);
+      const inCode=it.c.indexOf(t)>=0;
+      if(i<0 && !inCode){ ok=false; break; }
+      if(d.startsWith(t)) score+=4;
+      else if(d.indexOf(" "+t)>=0) score+=3;
+      else if(i>=0) score+=1;
+      if(inCode) score+=2;
+    }
+    if(ok) res.push([score,d.length,it]);
+  }
+  res.sort((a,b)=> b[0]-a[0] || a[1]-b[1] || (a[2].d<b[2].d?-1:1));
+  return res.map(x=>x[2]);
+}
+function highlight(desc,q){
+  let h=esc(desc);
+  q.trim().toLowerCase().split(/\s+/).filter(Boolean).forEach(t=>{
+    try{ h=h.replace(new RegExp("("+reEsc(esc(t))+")","ig"),"<mark>$1</mark>"); }catch(e){}
+  });
+  return h;
+}
+
+/* ======= Stencil suggest for add-product inputs ======= */
+function wireStencilSuggest(inputId, addFn){
+  const inp=document.getElementById(inputId);
+  const sg=document.getElementById("sg_"+inputId);
+  if(!inp||!sg) return;
+  let blurTimer=null;
+  const showSg=()=>{
+    const q=inp.value.trim();
+    if(q.length<2){ sg.classList.remove("open"); sg.innerHTML=""; return; }
+    const hits=searchStencil(q).slice(0,6);
+    if(!hits.length){ sg.classList.remove("open"); sg.innerHTML=""; return; }
+    sg.innerHTML=hits.map(it=>{
+      const meta=metaStr(it.p,it.u);
+      return `<button class="sg-item" data-sgname="${esc(it.d)}">
+        <div class="sg-name">${highlight(it.d,q)}</div>
+        ${it.c?`<span class="sg-code">#${esc(it.c)}</span>`:""}
+        ${meta?`<span class="sg-meta">${esc(meta)}</span>`:""}
+      </button>`;
+    }).join("");
+    sg.classList.add("open");
+    sg.querySelectorAll(".sg-item").forEach(b=>{
+      b.onpointerdown=e=>e.preventDefault();
+      b.onclick=()=>{
+        inp.value=b.dataset.sgname;
+        sg.classList.remove("open"); sg.innerHTML="";
+        addFn();
+      };
+    });
+  };
+  inp.addEventListener("input",showSg);
+  inp.addEventListener("focus",()=>{ if(inp.value.trim().length>=2) showSg(); });
+  inp.addEventListener("blur",()=>{ blurTimer=setTimeout(()=>{ sg.classList.remove("open"); sg.innerHTML=""; },200); });
+  inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){ sg.classList.remove("open"); sg.innerHTML=""; } });
+}
+
+/* ======= App navigation ======= */
+let tab="home";
+let stencilState={ query:"", showAll:true };
+let ll={ screen:"sections", sectionId:null, open:{}, edit:false };
+
+const topbar=document.getElementById("topbar");
+const view=document.getElementById("view");
+const tabbar=document.getElementById("tabbar");
+
+function setTab(t){ tab=t;
+  if(t==="loadlist"&&ll.screen==="section"&&!sectionById(ll.sectionId)) ll.screen="sections";
+  render(); window.scrollTo(0,0);
+}
+function render(){ renderTopbar(); renderTabbar();
+  if(tab==="home") renderHome();
+  else if(tab==="stencil") renderStencil();
+  else if(tab==="loadlist") renderLoadList();
+  else if(tab==="schedule") renderSchedule();
+  else if(tab==="gev") renderGEV();
+  else if(tab==="tools") renderTools();
+}
+
+/* ---- Top bar ---- */
+function renderTopbar(){
+  let title="PDP", right="";
+  if(tab==="stencil"){ title="Stencil";
+    right=`<button class="tb-act" id="stencilEditAct">${stencilEdit?"Done":"Edit"}</button>`;
+  } else if(tab==="loadlist"){ title="Holes";
+    if(ll.screen!=="list"&&ll.screen!=="unfound") right=`<button class="tb-act" id="editAct">${ll.edit?"Done":"Edit"}</button>`;
+  } else if(tab==="schedule"){ title="Schedule";
+    right=`<button class="tb-act" id="schScanAct" style="gap:4px;display:inline-flex;align-items:center"><span style="width:14px;height:14px;display:inline-flex">${I.scan}</span>Scan</button><button class="tb-act" id="schEditAct">${schEdit?"Done":"Edit"}</button>`;
+  } else if(tab==="gev") title="GEV List";
+  else if(tab==="tools") title="Tools";
+  topbar.innerHTML=`<div class="brand"><img src="${LOGO_SM}" alt="PDP"></div><div class="tb-tt"><h1>${title}</h1></div>${right}`;
+  const ea=document.getElementById("editAct"); if(ea) ea.onclick=()=>{ ll.edit=!ll.edit; render(); };
+  const stea=document.getElementById("stencilEditAct"); if(stea) stea.onclick=()=>{ stencilEdit=!stencilEdit; render(); };
+  const sea=document.getElementById("schEditAct"); if(sea) sea.onclick=()=>{ schEdit=!schEdit; render(); };
+  const ssa=document.getElementById("schScanAct"); if(ssa) ssa.onclick=()=>openScanOverlay();
+}
+
+/* ---- Tab bar ---- */
+function renderTabbar(){
+  const tabs=[["home","Home",I.home],["stencil","Stencil",I.search],["loadlist","Holes",I.clip],["gev","GEV",I.gev],["schedule","Schedule",I.cal],["tools","Tools",I.tools]];
+  tabbar.innerHTML=tabs.map(([id,label,ic])=>
+    `<button class="tab${tab===id?" active":""}" data-tab="${id}"><span class="ic">${ic}</span><span>${label}</span></button>`).join("");
+  tabbar.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+}
+
+/* ---- Home ---- */
+function renderHome(){
+  const date=new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
+  const tiles=[
+    {tab:"stencil",ic:I.search,cls:"",t:"Stencil",s:`Browse & filter ${STENCIL.length} items`},
+    {tab:"loadlist",ic:I.clip,cls:"",t:"Holes",s:"Build & track your daily pull"},
+    {tab:"gev",ic:I.gev,cls:"",t:"GEV List",s:""},
+    {tab:"schedule",ic:I.cal,cls:"",t:"Schedule",s:"Scan or build the weekly schedule"},
+    {tab:"tools",ic:I.calc,cls:"amber",t:"Claims",s:"Quick Claims Calculator"}
+  ];
+  view.innerHTML=
+    `<div class="hero">
+       <div style="display:flex;align-items:center;gap:14px;margin-bottom:4px;">
+         <img src="${LOGO_MD}" alt="PDP" style="width:60px;height:60px;object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));">
+         <div>
+           <div class="ey">Produce Department</div>
+           <h2 style="margin-top:4px">Portal</h2>
+         </div>
+       </div>
+       <div class="date">${date}</div>
+     </div>
+     <div class="lbl">Open</div>
+     <div class="tiles">
+       ${tiles.map((x,i)=>`
+         <button class="tile" data-go="${x.tab}" style="animation-delay:${0.06+i*0.06}s">
+           <div class="chip ${x.cls}">${x.ic}</div>
+           <div class="tx"><div class="tt">${x.t}</div><div class="sub">${x.s}</div></div>
+           <div class="go">${I.chev}</div>
+         </button>`).join("")}
+     </div>
+     <div class="lbl">Coming Soon</div>
+     <div class="tiles">
+       <div class="tile" style="opacity:.65;cursor:default;animation-delay:.36s">
+         <div class="chip" style="background:var(--surface-3);color:var(--ink-3)">${I.pog}</div>
+         <div class="tx"><div class="tt">Plan-O-Grams</div><div class="sub">Section layouts & resets</div></div>
+         <div class="go" style="color:var(--ink-3);font-size:10px;font-weight:700;letter-spacing:.06em">SOON</div>
+       </div>
+     </div>
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v2.9.1</div>`;
+  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
+}
+
+/* ================= STENCIL ================= */
+function renderStencil(){
+  const q=stencilState.query;
+  let body="";
+
+  /* Add Item form in edit mode */
+  if(stencilEdit){
+    body+=`<div class="addrow" style="flex-wrap:wrap;gap:6px;">
+      <input id="newStCode" placeholder="Item code" style="width:80px;flex:none" autocomplete="off">
+      <input id="newStDesc" placeholder="Description" style="flex:1;min-width:120px" autocomplete="off">
+      <input id="newStPack" placeholder="Pack" style="width:50px;flex:none" autocomplete="off">
+      <select id="newStUnit" style="flex:none;font:inherit;font-size:13px;padding:8px;border-radius:9px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink)"><option value="ea">ea</option><option value="lb">lb</option></select>
+      <button id="addStItem" class="btn" style="flex:none">Add</button>
+    </div>`;
+  }
+
+  if(q.trim()){
+    const hits=searchStencil(q);
+    if(!hits.length){
+      body+=`<div class="empty"><div class="ei">${I.search}</div>No stencil items match <b>"${esc(q)}"</b>.<br>Try a shorter fragment.</div>`;
+    } else {
+      const cap=Math.min(hits.length,80);
+      body+=`<div class="smeta"><span><b>${hits.length}</b> match${hits.length!==1?"es":""}${hits.length>cap?` · showing ${cap}`:""}</span>${stencilEdit?"":`<span>Tap +/− holes list</span>`}</div>`;
+      for(let i=0;i<cap;i++) body+=stencilRow(hits[i],q,true);
+    }
+  } else {
+    const byCat={};
+    for(const it of STENCIL){
+      const cat=it._custom?"★ Custom Items":catOf(it.d);
+      if(!byCat[cat]) byCat[cat]=[];
+      byCat[cat].push(it);
+    }
+    const totalCustom=stencilCustom.length;
+    body+=`<div class="smeta"><span><b>${STENCIL.length}</b> items · ${CAT_ORDER.length} categories${totalCustom?` · ${totalCustom} custom`:""}</span>${stencilEdit?"":`<span>Tap +/− holes list</span>`}</div>`;
+    /* Show custom items first */
+    if(byCat["★ Custom Items"]&&byCat["★ Custom Items"].length){
+      body+=`<div class="grp">★ Custom Items<span class="gc tnum">${byCat["★ Custom Items"].length}</span></div>`;
+      for(const it of byCat["★ Custom Items"]) body+=stencilRow(it,null,false);
+    }
+    for(const cat of CAT_ORDER){
+      const items=byCat[cat];
+      if(!items||!items.length) continue;
+      body+=`<div class="grp">${esc(cat)}<span class="gc tnum">${items.length}</span></div>`;
+      for(const it of items) body+=stencilRow(it,null,false);
+    }
+  }
+
+  view.innerHTML=`<div class="search">
+      <span class="si">${I.filter}</span>
+      <input id="sq" type="search" inputmode="search" autocomplete="off" autocorrect="off" autocapitalize="off"
+        placeholder="Filter stencil — name, code, keyword…" value="${esc(q)}">
+      <button class="clr${q?" show":""}" id="sclr" aria-label="Clear">${I.x}</button>
+    </div>${body}`;
+
+  /* Wire search */
+  const inp=document.getElementById("sq"), clr=document.getElementById("sclr");
+  if(inp){
+    inp.oninput=()=>{ stencilState.query=inp.value; const pos=inp.selectionStart; renderStencil();
+      const f=document.getElementById("sq"); if(f){ f.focus(); try{f.setSelectionRange(pos,pos);}catch(e){} } };
+    if(stencilState.query) { inp.focus(); try{inp.setSelectionRange(stencilState.query.length,stencilState.query.length);}catch(e){} }
+  }
+  if(clr) clr.onclick=()=>{ stencilState.query=""; renderStencil(); const f=document.getElementById("sq"); if(f) f.focus(); };
+
+  /* Wire PLU toggle (non-edit mode) */
+  if(!stencilEdit){
+    view.querySelectorAll("[data-plu]").forEach(b=>b.onclick=()=>{
+      const it=STENCIL.find(x=>x.id===b.dataset.plu); if(!it) return;
+      togglePLU(it);
+      const sc=window.scrollY; renderStencil(); window.scrollTo(0,sc);
+    });
+  }
+
+  /* Wire edit mode controls */
+  if(stencilEdit){
+    /* Add item */
+    const addBtn=document.getElementById("addStItem");
+    if(addBtn) addBtn.onclick=()=>{
+      const c=(document.getElementById("newStCode").value||"").trim();
+      const d=(document.getElementById("newStDesc").value||"").trim();
+      const p=(document.getElementById("newStPack").value||"").trim();
+      const u=document.getElementById("newStUnit").value||"ea";
+      if(!d){ alert("Description is required."); return; }
+      stencilCustom.push({c:c||("C"+Date.now()),d,p:p||"1",u});
+      saveCustomStencil(stencilCustom); refreshStencil(); renderStencil();
+    };
+    /* Edit item */
+    view.querySelectorAll("[data-stedit]").forEach(b=>b.onclick=()=>{
+      const id=b.dataset.stedit;
+      const it=STENCIL.find(x=>x.id===id); if(!it) return;
+      const nd=prompt("Description:",it.d); if(nd===null) return;
+      const np=prompt("Pack size:",it.p); if(np===null) return;
+      const nu=prompt("Unit (ea/lb):",it.u); if(nu===null) return;
+      if(it._custom){
+        const ci=stencilCustom.findIndex(x=>"cx"+stencilCustom.indexOf(x)===id||x.c===it.c);
+        if(ci>=0){ if(nd) stencilCustom[ci].d=nd; if(np) stencilCustom[ci].p=np; if(nu) stencilCustom[ci].u=nu; saveCustomStencil(stencilCustom); }
+      } else {
+        stencilEdits[it.c]={d:nd||it.d, p:np||it.p, u:nu||it.u};
+        saveStencilEdits(stencilEdits);
+      }
+      refreshStencil(); const sc=window.scrollY; renderStencil(); window.scrollTo(0,sc);
+    });
+    /* Delete custom item */
+    view.querySelectorAll("[data-stdel]").forEach(b=>b.onclick=()=>{
+      const code=b.dataset.stdel;
+      if(!confirm("Delete this custom item?")) return;
+      stencilCustom=stencilCustom.filter(x=>x.c!==code);
+      saveCustomStencil(stencilCustom); refreshStencil(); renderStencil();
+    });
+  }
+}
+
+function stencilRow(it,q,useHighlight){
+  const on=isOnPLU(it.c); const meta=metaStr(it.p,it.u);
+  const nameHtml=useHighlight&&q?highlight(it.d,q):esc(it.d);
+  if(stencilEdit){
+    return `<div class="sr" style="cursor:default;display:flex;align-items:center;gap:8px;">
+      <div class="bd" style="flex:1"><div class="nm">${nameHtml}${it._custom?'<span style="color:var(--brand);font-size:10px;font-weight:700;margin-left:6px">CUSTOM</span>':""}</div>
+        <div class="mt">${it.c?`<span class="code">#${esc(it.c)}</span>`:""}${meta?`<span>${esc(meta)}</span>`:""}</div></div>
+      <button class="sch-sm-btn" data-stedit="${it.id}" style="flex:none;padding:6px">${I.pen}</button>
+      ${it._custom?`<button class="del" data-stdel="${esc(it.c)}" style="flex:none">${I.x}</button>`:""}
+    </div>`;
+  }
+  return `<button class="sr${on?" on":""}" data-plu="${it.id}">
+    <div class="add">${on?I.check:I.plus}</div>
+    <div class="bd"><div class="nm">${nameHtml}</div>
+      <div class="mt">${it.c?`<span class="code">#${esc(it.c)}</span>`:""}${meta?`<span>${esc(meta)}</span>`:""}</div></div>
+  </button>`;
+}
+
+/* ================= LOAD LIST ================= */
+function renderLoadList(){
+  const n=state.pull.length;
+  const un=unfound.length;
+  const seg=`<div class="seg">
+      <button class="${ll.screen!=="list"&&ll.screen!=="unfound"?"on":""}" data-seg="browse">Sections</button>
+      <button class="${ll.screen==="list"?"on":""}" data-seg="list">List <span class="pill tnum">${n}</span></button>
+      <button class="${ll.screen==="unfound"?"on":""}" data-seg="unfound">Inv. Check${un?` <span class="pill tnum">${un}</span>`:""}</button>
+    </div>`;
+  let body="";
+  if(ll.screen==="list") body=compiledListHTML();
+  else if(ll.screen==="unfound") body=unfoundHTML();
+  else if(ll.screen==="section"){ const sec=sectionById(ll.sectionId);
+    if(!sec){ ll.screen="sections"; return renderLoadList(); }
+    body=`<button class="backlink" id="llBack">${I.back} All sections</button>`+ (isGrouped(sec)?groupedHTML(sec):productsHTML(sec,sec,null)); }
+  else body=sectionsHTML();
+  view.innerHTML=seg+body;
+
+  view.querySelectorAll("[data-seg]").forEach(b=>b.onclick=()=>{
+    ll.screen = b.dataset.seg==="list" ? "list" : b.dataset.seg==="unfound" ? "unfound" : "sections"; render(); window.scrollTo(0,0); });
+  const bk=document.getElementById("llBack"); if(bk) bk.onclick=()=>{ ll.screen="sections"; ll.edit=false; render(); window.scrollTo(0,0); };
+
+  if(ll.screen==="sections") wireSections();
+  else if(ll.screen==="section"){ const sec=sectionById(ll.sectionId); isGrouped(sec)?wireGrouped(sec):wireProducts(sec,sec,null); }
+  else if(ll.screen==="unfound") wireUnfound();
+  else wireCompiledList();
+}
+
+function sectionsHTML(){
+  let h="";
+  state.sections.forEach(sec=>{ const c=pullCountFor(sec.id);
+    if(ll.edit){
+      h+=`<div class="row editing"><input class="rn" data-rn="${sec.id}" value="${esc(sec.name)}">
+        <button class="del" data-delsec="${sec.id}">${I.x}</button></div>`;
+    } else {
+      h+=`<button class="row" data-sec="${sec.id}">
+        <div class="nm">${esc(sec.name)}</div>${c?`<div class="cnt tnum">${c}</div>`:""}
+        <div class="chev">${I.chev}</div></button>`;
+    }});
+  if(ll.edit) h+=`<div class="addrow"><input id="newSec" placeholder="New section name…" autocomplete="off"><button id="addSec">Add</button></div>`;
+  if(!state.sections.length&&!ll.edit) h=`<div class="empty"><div class="ei">${I.list}</div>No sections yet.<br>Tap <b>Edit</b> to add one.</div>`+h;
+  return h;
+}
+function wireSections(){
+  if(ll.edit){
+    view.querySelectorAll("[data-rn]").forEach(inp=>inp.onchange=()=>{ const s=sectionById(inp.dataset.rn); s.name=inp.value.trim()||s.name; save(); render(); });
+    view.querySelectorAll("[data-delsec]").forEach(b=>b.onclick=()=>{ const s=sectionById(b.dataset.delsec);
+      if(confirm(`Delete "${s.name}"? Its items leave the holes list too.`)){ state.pull=state.pull.filter(p=>p.sectionId!==s.id); state.sections=state.sections.filter(x=>x.id!==s.id); save(); render(); } });
+    const ns=document.getElementById("newSec"),as=document.getElementById("addSec");
+    const add=()=>{ const v=ns.value.trim(); if(!v) return; state.sections.push({id:uid(),name:v,products:[]}); save(); render(); const f=document.getElementById("newSec"); if(f) f.focus(); };
+    as.onclick=add; ns.onkeydown=e=>{ if(e.key==="Enter") add(); };
+  } else view.querySelectorAll("[data-sec]").forEach(b=>b.onclick=()=>{ ll.sectionId=b.dataset.sec; ll.screen="section"; render(); window.scrollTo(0,0); });
+}
+
+function groupedHTML(sec){
+  let h="";
+  sec.subsections.forEach(sub=>{ const c=subCountFor(sub.id); const open=ll.edit||!!ll.open[sub.id];
+    if(ll.edit){
+      h+=`<div class="row editing openhdr"><input class="rn" data-rnsub="${sub.id}" value="${esc(sub.name)}">
+        <button class="del" data-delsub="${sub.id}">${I.x}</button></div>`;
+    } else {
+      h+=`<button class="row${open?" openhdr":""}" data-toggle="${sub.id}">
+        <div class="nm">${esc(sub.name)}</div>${c?`<div class="cnt tnum">${c}</div>`:""}
+        <div class="chev">${I.chev}</div></button>`;
+    }
+    if(open){ let b="";
+      sub.products.forEach(p=>{ if(ll.edit){
+          b+=`<div class="item" style="cursor:default"><div class="pn">${esc(p.name)}</div><button class="del" data-delprod="${p.id}" data-psub="${sub.id}">${I.x}</button></div>`;
+        } else { const on=isOnList(p.id);
+          b+=`<button class="item${on?" on":""}" data-prod="${p.id}" data-psub="${sub.id}"><div class="tick">${I.check}</div><div class="pn">${esc(p.name)}</div></button>`; }});
+      if(ll.edit) b+=`<div class="addrow-wrap"><div class="addrow"><input id="np_${sub.id}" placeholder="Add to ${esc(sub.name)}…" autocomplete="off"><button data-addprod="${sub.id}">Add</button></div><div class="sg" id="sg_np_${sub.id}"></div></div>`;
+      else if(!sub.products.length) b=`<div class="empty" style="padding:14px 8px">No items yet — tap <b>Edit</b>.</div>`;
+      h+=`<div class="endbody">${b}</div>`;
+    }});
+  if(ll.edit) h+=`<div class="addrow"><input id="newSub" placeholder="New end name…" autocomplete="off"><button id="addSub">Add</button></div>`;
+  return h;
+}
+function wireGrouped(sec){
+  if(!ll.edit){
+    view.querySelectorAll("[data-toggle]").forEach(b=>b.onclick=()=>{ const id=b.dataset.toggle; ll.open[id]=!ll.open[id]; render(); });
+    view.querySelectorAll("[data-prod]").forEach(b=>b.onclick=()=>{ toggleProduct(sec.id,b.dataset.psub,b.dataset.prod); render(); });
+  } else {
+    view.querySelectorAll("[data-rnsub]").forEach(inp=>inp.onchange=()=>{ const s=subById(sec,inp.dataset.rnsub); s.name=inp.value.trim()||s.name; save(); render(); });
+    view.querySelectorAll("[data-delsub]").forEach(b=>b.onclick=()=>{ const sub=subById(sec,b.dataset.delsub);
+      if(confirm(`Delete "${sub.name}"?`)){ state.pull=state.pull.filter(p=>p.subId!==sub.id); sec.subsections=sec.subsections.filter(x=>x.id!==sub.id); save(); render(); } });
+    view.querySelectorAll("[data-delprod]").forEach(b=>b.onclick=()=>{ const sub=subById(sec,b.dataset.psub),pid=b.dataset.delprod; sub.products=sub.products.filter(x=>x.id!==pid); state.pull=state.pull.filter(p=>p.productId!==pid); save(); render(); });
+    view.querySelectorAll("[data-addprod]").forEach(b=>{ const run=()=>{ const sub=subById(sec,b.dataset.addprod),inp=document.getElementById("np_"+b.dataset.addprod); const v=inp.value.trim(); if(!v) return; sub.products.push({id:uid(),name:v}); save(); render(); const f=document.getElementById("np_"+b.dataset.addprod); if(f) f.focus(); };
+      b.onclick=run; const inp=document.getElementById("np_"+b.dataset.addprod); if(inp) inp.onkeydown=e=>{ if(e.key==="Enter") run(); };
+      wireStencilSuggest("np_"+b.dataset.addprod,run); });
+    const ns=document.getElementById("newSub"),as=document.getElementById("addSub");
+    const add=()=>{ const v=ns.value.trim(); if(!v) return; sec.subsections.push({id:uid(),name:v,products:[]}); save(); render(); const f=document.getElementById("newSub"); if(f) f.focus(); };
+    as.onclick=add; ns.onkeydown=e=>{ if(e.key==="Enter") add(); };
+  }
+}
+
+function productsHTML(sec,cont,subId){
+  let h="";
+  cont.products.forEach(p=>{ if(ll.edit){
+      h+=`<div class="item" style="cursor:default"><div class="pn">${esc(p.name)}</div><button class="del" data-delprod="${p.id}">${I.x}</button></div>`;
+    } else { const on=isOnList(p.id);
+      h+=`<button class="item${on?" on":""}" data-prod="${p.id}"><div class="tick">${I.check}</div><div class="pn">${esc(p.name)}</div></button>`; }});
+  if(ll.edit) h+=`<div class="addrow-wrap"><div class="addrow"><input id="newProd" placeholder="Add product to ${esc(cont.name)}…" autocomplete="off"><button id="addProd">Add</button></div><div class="sg" id="sg_newProd"></div></div>`;
+  if(!cont.products.length&&!ll.edit) h=`<div class="empty"><div class="ei">${I.clip}</div>No products here yet.<br>Tap <b>Edit</b> to add some.</div>`+h;
+  return h;
+}
+function wireProducts(sec,cont,subId){
+  if(ll.edit){
+    view.querySelectorAll("[data-delprod]").forEach(b=>b.onclick=()=>{ const pid=b.dataset.delprod; cont.products=cont.products.filter(x=>x.id!==pid); state.pull=state.pull.filter(p=>p.productId!==pid); save(); render(); });
+    const np=document.getElementById("newProd"),ap=document.getElementById("addProd");
+    const add=()=>{ const v=np.value.trim(); if(!v) return; cont.products.push({id:uid(),name:v}); save(); render(); const f=document.getElementById("newProd"); if(f) f.focus(); };
+    ap.onclick=add; np.onkeydown=e=>{ if(e.key==="Enter") add(); };
+    wireStencilSuggest("newProd",add);
+  } else view.querySelectorAll("[data-prod]").forEach(b=>b.onclick=()=>{ toggleProduct(sec.id,subId,b.dataset.prod); render(); });
+}
+
+/* -- Compiled list -- */
+function sortDone(a){ return a.slice().sort((x,y)=>(x.done?1:0)-(y.done?1:0)); }
+function liHTML(it){
+  const hasMeta = it.pluCode || it.pack || it.unit;
+  const meta = hasMeta ? metaStr(it.pack,it.unit) : "";
+  return `<div class="li${it.done?" done":""}">
+    <div class="li-main"><div class="li-check" data-done="${it.id}">${I.check}</div>
+      <div class="li-bd"><div class="li-name">${esc(it.name)}</div>
+        ${hasMeta?`<div class="li-mt">${it.pluCode?`<span class="code">#${esc(it.pluCode)}</span>`:""}${meta?`<span>${esc(meta)}</span>`:""}</div>`:""}
+        ${it.note?`<div class="li-note">${I.pen}${esc(it.note)}</div>`:""}</div>
+      <button class="li-act" data-note="${it.id}">${I.pen}</button>
+      <button class="li-act rm" data-rm="${it.id}">${I.x}</button></div>
+    <div class="li-note-edit" id="ne_${it.id}"><input data-noteinput="${it.id}" value="${esc(it.note)}" placeholder="Add a note (e.g. half case only)…" autocomplete="off"></div>
+  </div>`;
+}
+function compiledListHTML(){
+  if(!state.pull.length) return `<div class="empty"><div class="ei">${I.clip}</div>
+    Your holes list is empty.<br>Browse <b>Sections</b> or use the <b>Stencil</b> to add items.</div>`;
+  let h="";
+  const sectionItems = state.pull.filter(p=>p.sectionId);
+  const pluItems = state.pull.filter(p=>!p.sectionId);
+
+  state.sections.forEach(sec=>{ const items=sectionItems.filter(p=>p.sectionId===sec.id); if(!items.length) return;
+    h+=`<div class="grp">${esc(sec.name)}<span class="gc tnum">${items.length}</span></div>`;
+    if(isGrouped(sec)){
+      sec.subsections.forEach(sub=>{ const its=sortDone(items.filter(p=>p.subId===sub.id)); if(!its.length) return;
+        h+=`<div class="subgrp">${esc(sub.name)}</div>`; its.forEach(it=>h+=liHTML(it)); });
+      const ids=new Set(sec.subsections.map(s=>s.id));
+      sortDone(items.filter(p=>!p.subId||!ids.has(p.subId))).forEach(it=>h+=liHTML(it));
+    } else sortDone(items).forEach(it=>h+=liHTML(it));
+  });
+  const knownSec=new Set(state.sections.map(s=>s.id));
+  const orphSec=sortDone(sectionItems.filter(p=>!knownSec.has(p.sectionId)));
+  if(orphSec.length){ h+=`<div class="grp">Other<span class="gc tnum">${orphSec.length}</span></div>`; orphSec.forEach(it=>h+=liHTML(it)); }
+
+  if(pluItems.length){
+    if(sectionItems.length) h+=`<div style="height:6px"></div>`;
+    CAT_ORDER.forEach(cat=>{
+      const its=sortDone(pluItems.filter(p=>(p.cat||catOf(p.name))===cat));
+      if(!its.length) return;
+      h+=`<div class="grp">${esc(cat)} (Stencil)<span class="gc tnum">${its.length}</span></div>`;
+      its.forEach(it=>h+=liHTML(it));
+    });
+  }
+  const uncheckedCount=state.pull.filter(p=>!p.done).length;
+  const checkedCount=state.pull.length-uncheckedCount;
+  h+=`<div class="ll-actions">
+    <div class="ll-summary">${checkedCount} found · ${uncheckedCount} remaining</div>
+    ${uncheckedCount?`<button class="btn" id="saveUnfound">${I.download} Save Inv. Check</button>`:""}
+    <button class="btn ghost danger-txt" id="clearAll">${I.x} Clear List</button>
+  </div>`;
+  return h;
+}
+function wireCompiledList(){
+  view.querySelectorAll("[data-done]").forEach(el=>el.onclick=()=>{ const it=state.pull.find(p=>p.id===el.dataset.done); if(it){it.done=!it.done; save(); render();} });
+  view.querySelectorAll("[data-rm]").forEach(el=>el.onclick=()=>{ state.pull=state.pull.filter(p=>p.id!==el.dataset.rm); save(); render(); });
+  view.querySelectorAll("[data-note]").forEach(el=>el.onclick=()=>{ const box=document.getElementById("ne_"+el.dataset.note); const open=box.classList.toggle("open"); if(open){ const i=box.querySelector("input"); i.focus(); try{i.setSelectionRange(i.value.length,i.value.length);}catch(e){} } });
+  view.querySelectorAll("[data-noteinput]").forEach(inp=>{ inp.oninput=()=>{ const it=state.pull.find(p=>p.id===inp.dataset.noteinput); if(it){ it.note=inp.value; save(); } }; inp.onkeydown=e=>{ if(e.key==="Enter"){ inp.blur(); render(); } }; });
+  const su=document.getElementById("saveUnfound"); if(su) su.onclick=saveUnfoundItems;
+  const ca=document.getElementById("clearAll"); if(ca) ca.onclick=clearList;
+}
+function clearList(){ if(!state.pull.length) return; if(confirm("Clear the entire holes list? This can't be undone.")){ state.pull=[]; save(); render(); } }
+function saveUnfoundItems(){
+  const unchecked=state.pull.filter(p=>!p.done);
+  if(!unchecked.length){ alert("No unchecked items to save."); return; }
+  const stamp=new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+  const entry={ date:stamp, ts:Date.now(), items:unchecked.map(p=>({name:p.name,note:p.note||"",code:p.pluCode||"",section:p.sectionName||p.cat||"",sub:p.subName||""})) };
+  unfound.unshift(entry);
+  if(unfound.length>10) unfound=unfound.slice(0,10);
+  saveUnfound();
+  state.pull=[]; save();
+  ll.screen="unfound"; render(); window.scrollTo(0,0);
+}
+
+/* ---- Unfound view ---- */
+function unfoundHTML(){
+  if(!unfound.length) return `<div class="empty"><div class="ei">${I.clip}</div>No saved inventory check items yet.<br>Use <b>Save Inv. Check</b> from the List view to snapshot unchecked items for order adjustments.</div>`;
+  let h="";
+  unfound.forEach((entry,ei)=>{
+    h+=`<div class="grp">${esc(entry.date)}<span class="gc tnum">${entry.items.length} item${entry.items.length!==1?"s":""}</span></div>`;
+    entry.items.forEach(it=>{
+      h+=`<div class="uf-item"><div class="uf-name">${esc(it.name)}</div>`;
+      const meta=[];
+      if(it.code) meta.push("#"+esc(it.code));
+      if(it.section) meta.push(esc(it.section));
+      if(it.sub) meta.push(esc(it.sub));
+      if(it.note) meta.push(esc(it.note));
+      if(meta.length) h+=`<div class="uf-meta">${meta.join(" · ")}</div>`;
+      h+=`</div>`;
+    });
+  });
+  h+=`<button class="btn ghost block" id="clearUnfound" style="margin-top:18px">${I.x} Clear Saved Checks</button>`;
+  return h;
+}
+function wireUnfound(){
+  const cu=document.getElementById("clearUnfound");
+  if(cu){ cu.addEventListener("click",function(e){
+    e.preventDefault(); e.stopPropagation();
+    if(confirm("Clear all saved inventory check items?")){ unfound=[]; saveUnfound(); render(); }
+  }); }
+}
+
+/* ================= SCHEDULE ================= */
+function renderSchedule(){
+  const w=sched.weeks[schWeek];
+  const seg=`<div class="seg">
+    <button class="${schWeek===0?"on":""}" data-schw="0">${sched.weeks[0].label}</button>
+    <button class="${schWeek===1?"on":""}" data-schw="1">${sched.weeks[1].label}</button>
+  </div>`;
+  let body="";
+  if(!w.employees.length && !schEdit){
+    body=`<div class="empty"><div class="ei">${I.cal}</div>No employees added yet.<br>Tap <b>Scan</b> to photograph a schedule, or <b>Edit</b> to add manually.</div>`;
+  } else {
+    w.employees.forEach((emp,ei)=>{
+      const open=!!schOpen["w"+schWeek+"e"+ei];
+      const totalHrs=calcWeekHrs(emp);
+      if(schEdit){
+        body+=`<div class="sch-card open">
+          <div class="sch-emp-edit">
+            <input data-schname="${ei}" value="${esc(emp.name)}" placeholder="Employee name…" autocomplete="off">
+            <button class="del" data-schdel="${ei}">${I.x}</button>
+          </div>
+          <div class="sch-days">
+            <div class="sch-grid">
+              ${SCH_DAYS_SHORT.map(d=>`<div class="sch-day-lbl">${d}</div>`).join("")}
+              ${SCH_DAYS.map(d=>{
+                const v=emp.shifts[d.toLowerCase()]||"";
+                return `<div class="sch-cell" data-schedit="${ei}_${d.toLowerCase()}"><input data-schshift="${ei}_${d.toLowerCase()}" value="${esc(v)}" placeholder="—" autocomplete="off"></div>`;
+              }).join("")}
+            </div>
+          </div>
+        </div>`;
+      } else {
+        body+=`<div class="sch-card${open?" open":""}">
+          <div class="sch-card-hdr" data-schtoggle="${ei}">
+            <div class="sch-emp-name">${esc(emp.name)}</div>
+            ${totalHrs?`<div class="sch-emp-hrs">${totalHrs}h</div>`:""}
+            <div class="chev">${I.chev}</div>
+          </div>
+          <div class="sch-days">
+            <div class="sch-grid">
+              ${SCH_DAYS_SHORT.map(d=>`<div class="sch-day-lbl">${d}</div>`).join("")}
+              ${SCH_DAYS.map(d=>{
+                const v=emp.shifts[d.toLowerCase()]||"";
+                const isOff=v.toLowerCase()==="off";
+                const cls=isOff?"off":(!v?"empty":"");
+                return `<div class="sch-cell ${cls}" data-schcell="${ei}_${d.toLowerCase()}">${v||"—"}</div>`;
+              }).join("")}
+            </div>
+          </div>
+        </div>`;
+      }
+    });
+    if(schEdit){
+      body+=`<div class="addrow"><input id="newEmp" placeholder="New employee name…" autocomplete="off"><button id="addEmp">Add</button></div>`;
+    }
+  }
+  if(!w.employees.length && schEdit){
+    body=`<div class="addrow"><input id="newEmp" placeholder="New employee name…" autocomplete="off"><button id="addEmp">Add</button></div>`;
+  }
+  body+=`<div class="sch-note">${w.employees.length} employee${w.employees.length!==1?"s":""} · tap a shift to edit · stored on device</div>`;
+  view.innerHTML=seg+body;
+
+  /* Wire week tabs */
+  view.querySelectorAll("[data-schw]").forEach(b=>b.onclick=()=>{ schWeek=parseInt(b.dataset.schw); render(); });
+
+  if(schEdit){
+    /* Wire name inputs */
+    view.querySelectorAll("[data-schname]").forEach(inp=>inp.onchange=()=>{
+      const i=parseInt(inp.dataset.schname); w.employees[i].name=inp.value.trim()||w.employees[i].name; saveSched(); });
+    /* Wire shift inputs */
+    view.querySelectorAll("[data-schshift]").forEach(inp=>{
+      inp.onfocus=()=>inp.parentElement.classList.add("editing");
+      inp.onblur=()=>{ inp.parentElement.classList.remove("editing");
+        const [ei,day]=inp.dataset.schshift.split("_"); w.employees[parseInt(ei)].shifts[day]=inp.value.trim(); saveSched(); };
+      inp.onkeydown=e=>{ if(e.key==="Enter") inp.blur(); };
+    });
+    /* Wire delete */
+    view.querySelectorAll("[data-schdel]").forEach(b=>b.onclick=()=>{
+      const i=parseInt(b.dataset.schdel);
+      if(confirm(`Remove ${w.employees[i].name}?`)){ w.employees.splice(i,1); saveSched(); render(); }
+    });
+    /* Wire add */
+    const ne=document.getElementById("newEmp"), ae=document.getElementById("addEmp");
+    if(ne&&ae){
+      const add=()=>{ const v=ne.value.trim(); if(!v) return;
+        w.employees.push({name:v,shifts:{sun:"",mon:"",tue:"",wed:"",thu:"",fri:"",sat:""}});
+        saveSched(); render(); const f=document.getElementById("newEmp"); if(f) f.focus(); };
+      ae.onclick=add; ne.onkeydown=e=>{ if(e.key==="Enter") add(); };
+    }
+  } else {
+    /* Wire toggle */
+    view.querySelectorAll("[data-schtoggle]").forEach(b=>b.onclick=()=>{
+      const k="w"+schWeek+"e"+b.dataset.schtoggle; schOpen[k]=!schOpen[k]; render(); });
+    /* Wire inline cell edit */
+    view.querySelectorAll("[data-schcell]").forEach(cell=>cell.onclick=()=>{
+      const [ei,day]=cell.dataset.schcell.split("_");
+      const emp=w.employees[parseInt(ei)];
+      const cur=emp.shifts[day]||"";
+      const val=prompt(`${emp.name} — ${SCH_DAYS[SCH_DAYS.map(d=>d.toLowerCase()).indexOf(day)]} shift:`,cur);
+      if(val!==null){ emp.shifts[day]=val.trim(); saveSched(); render(); }
+    });
+  }
+}
+function calcWeekHrs(emp){
+  let total=0;
+  for(const d of SCH_DAYS){
+    const v=(emp.shifts[d.toLowerCase()]||"").trim().toLowerCase();
+    if(!v||v==="off") continue;
+    const m=v.match(/(\d{1,2})(?::(\d{2}))?\s*(a|p)?.*?(\d{1,2})(?::(\d{2}))?\s*(a|p)?/i);
+    if(!m) continue;
+    let h1=parseInt(m[1]),min1=parseInt(m[2]||0),ap1=(m[3]||"").toLowerCase();
+    let h2=parseInt(m[4]),min2=parseInt(m[5]||0),ap2=(m[6]||"").toLowerCase();
+    if(ap1==="p"&&h1<12) h1+=12; if(ap1==="a"&&h1===12) h1=0;
+    if(ap2==="p"&&h2<12) h2+=12; if(ap2==="a"&&h2===12) h2=0;
+    let diff=(h2*60+min2)-(h1*60+min1);
+    if(diff<0) diff+=1440;
+    total+=diff;
+  }
+  return total>0?Math.round(total/60*10)/10:0;
+}
+
+/* ================= GEV LIST ================= */
+function renderGEV(){
+  const totalGev=GEV.reduce((s,g)=>s+g.items.length,0);
+  const crossedGev=Object.keys(gevCrossed).filter(k=>gevCrossed[k]).length;
+  let h=`<div class="gev-summary"><span><b>${totalGev - crossedGev}</b> of <b>${totalGev}</b> remaining</span><button class="btn ghost" id="gevReset" style="padding:6px 12px;font-size:11px;">Reset</button></div>`;
+  GEV.forEach(g=>{
+    h+=`<div class="gev-cat">${esc(g.cat)}<span class="gc tnum">${g.items.length}</span></div>`;
+    g.items.forEach(item=>{
+      const crossed=!!gevCrossed[item];
+      h+=`<div class="gev-item${crossed?" crossed":""}" data-gev="${esc(item)}">
+        <div class="gev-tick">${I.check}</div>
+        <div class="gev-name">${esc(item)}</div></div>`;
+    });
+  });
+  view.innerHTML=h;
+  view.querySelectorAll("[data-gev]").forEach(el=>el.onclick=()=>{
+    const key=el.dataset.gev;
+    gevCrossed[key]=!gevCrossed[key];
+    saveGev();
+    const sc=window.scrollY; renderGEV(); window.scrollTo(0,sc);
+  });
+  const gr=document.getElementById("gevReset");
+  if(gr) gr.onclick=()=>{ if(confirm("Reset all GEV items?")){ gevCrossed={}; saveGev(); renderGEV(); } };
+}
+
+/* ================= TOOLS ================= */
+function renderTools(){
+  view.innerHTML=
+    `<div class="panel">
+       <div class="panel-h"><div class="chip amber">${I.calc}</div><div><h3>Claims Calculator</h3><p>Quick Claims Calculator</p></div></div>
+       <div class="field"><label>Invoice / total amount</label>
+         <div class="money"><span class="cur">$</span><input id="claimAmt" type="number" inputmode="decimal" placeholder="0.00"></div></div>
+       <div class="result"><div><div class="rl">3% Claim</div><div class="rv tnum" id="claimOut">$0.00</div></div>
+         <button class="copy" id="claimCopy">${I.copy}<span id="copyLbl">Copy</span></button></div>
+       <div class="hintline">Calculates 3% of the entered amount. Tap copy to grab the figure for your claim sheet.</div>
+     </div>
+     <div class="panel">
+       <div class="panel-h"><div class="chip">${I.search}</div><div><h3>Stencil</h3><p>${STENCIL.length} items loaded</p></div></div>
+       <div class="hintline">Browse or filter items under the <b>Stencil</b> tab. Items you add show up on your holes list automatically. Everything works offline.</div>
+     </div>
+     <div class="panel">
+       <div class="panel-h"><div class="chip" style="background:var(--surface-3);color:var(--ink-3)">${I.pog}</div><div><h3>Plan-O-Grams</h3><p>Coming soon</p></div></div>
+       <div class="hintline">Section layout diagrams and reset guides will be available in a future update.</div>
+     </div>`;
+  const amt=document.getElementById("claimAmt"), out=document.getElementById("claimOut");
+  const fmt=n=>"$"+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  const calc=()=>{ const v=parseFloat(amt.value)||0; out.textContent=fmt(v*0.03); };
+  amt.oninput=calc; calc();
+  document.getElementById("claimCopy").onclick=async()=>{
+    const v=(parseFloat(amt.value)||0)*0.03; const txt=v.toFixed(2); const lbl=document.getElementById("copyLbl");
+    try{ await navigator.clipboard.writeText(txt); }catch(e){ const t=document.createElement("textarea"); t.value=txt; document.body.appendChild(t); t.select(); try{document.execCommand("copy");}catch(_){} t.remove(); }
+    lbl.textContent="Copied"; setTimeout(()=>lbl.textContent="Copy",1400);
+  };
+}
+
+/* ================= AI SCAN PIPELINE ================= */
+const scanOverlay=document.getElementById("scanOverlay");
+const scanBody=document.getElementById("scanBody");
+const scanFileInput=document.getElementById("scanFileInput");
+const APIKEY_KEY="pdp_api_key";
+let scanParsed=null;
+
+function getApiKey(){ try{ return localStorage.getItem(APIKEY_KEY)||""; }catch(e){ return ""; } }
+function saveApiKey(k){ try{ localStorage.setItem(APIKEY_KEY,k); }catch(e){} }
+
+document.getElementById("scanClose").onclick=closeScanOverlay;
+
+function openScanOverlay(){
+  scanParsed=null;
+  const hasKey=!!getApiKey();
+  scanBody.innerHTML=`
+    ${!hasKey?`
+    <div class="scan-step"><div class="num">!</div>API key needed (one-time setup)</div>
+    <div style="padding:0 4px;font-size:12px;color:var(--ink-3);line-height:1.6;margin-bottom:10px;">
+      The scanner sends your photo to Claude AI for accurate reading. You need an Anthropic API key — get one free at <b>console.anthropic.com</b>. It stays on your device only.</div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;">
+      <input id="apiKeyInput" type="password" placeholder="sk-ant-..." style="flex:1;font:inherit;font-size:13px;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:10px 12px;color:var(--ink);">
+      <button class="btn" id="apiKeySave" style="flex:none">Save</button>
+    </div>`:""}
+    <div class="scan-step"><div class="num">1</div>Take a photo of the printed schedule</div>
+    <div style="text-align:center;padding:16px 0">
+      <button class="btn block" id="scanCapture" ${!hasKey?"disabled style='opacity:.4;pointer-events:none'":""}>${I.scan} Capture Schedule Photo</button>
+    </div>
+    <div class="hintline" style="text-align:center">Point your camera at the schedule. Claude will read the grid and extract every employee name and shift.</div>
+    ${hasKey?`<div style="margin-top:12px;text-align:center"><button class="sch-sm-btn" id="changeKey">Change API key</button></div>`:""}`;
+
+  scanOverlay.classList.add("open");
+  document.body.style.overflow="hidden";
+
+  const captureBtn=document.getElementById("scanCapture");
+  if(captureBtn) captureBtn.onclick=()=>scanFileInput.click();
+
+  const saveBtn=document.getElementById("apiKeySave");
+  if(saveBtn) saveBtn.onclick=()=>{
+    const inp=document.getElementById("apiKeyInput");
+    const k=(inp?inp.value:"").trim();
+    if(!k||!k.startsWith("sk-")){ alert("Enter a valid API key starting with sk-"); return; }
+    saveApiKey(k);
+    openScanOverlay(); /* Refresh UI with key saved */
+  };
+
+  const changeBtn=document.getElementById("changeKey");
+  if(changeBtn) changeBtn.onclick=()=>{
+    saveApiKey("");
+    openScanOverlay();
+  };
+}
+function closeScanOverlay(){
+  scanOverlay.classList.remove("open");
+  document.body.style.overflow="";
+}
+
+scanFileInput.onchange=async function(){
+  const file=scanFileInput.files&&scanFileInput.files[0];
+  if(!file) return;
+  scanFileInput.value="";
+
+  const apiKey=getApiKey();
+  if(!apiKey){ alert("No API key saved."); return; }
+
+  const reader=new FileReader();
+  reader.onload=async()=>{
+    const imgSrc=reader.result;
+
+    /* Compress image for API (keep quality, reduce size) */
+    const img=new Image();
+    await new Promise((ok,fail)=>{ img.onload=ok; img.onerror=fail; img.src=imgSrc; });
+    const MAX=1800; let w=img.width, h=img.height;
+    const scale=Math.min(1, MAX/Math.max(w,h));
+    w=Math.round(w*scale); h=Math.round(h*scale);
+    const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
+    cv.getContext("2d").drawImage(img,0,0,w,h);
+    const compressed=cv.toDataURL("image/jpeg",0.85);
+    const b64=compressed.split(",")[1];
+
+    scanBody.innerHTML=`
+      <div class="scan-step"><div class="num">1</div>Photo captured</div>
+      <img src="${imgSrc}" class="scan-preview" alt="Schedule photo">
+      <div class="scan-step"><div class="num">2</div>Claude is reading the schedule…</div>
+      <div class="scan-progress"><div class="scan-progress-bar" id="scanBar" style="width:30%;animation:pulse 1.5s ease-in-out infinite"></div></div>
+      <div class="scan-status" id="scanStatus">Sending to Claude AI…</div>`;
+
+    const status=document.getElementById("scanStatus");
+    const bar=document.getElementById("scanBar");
+
+    try{
+      status.textContent="Analyzing schedule image…";
+      bar.style.width="60%";
+
+      const resp=await fetch("https://api.anthropic.com/v1/messages",{
+        method:"POST",
+        headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+        body:JSON.stringify({
+          model:"claude-sonnet-4-6",
+          max_tokens:2000,
+          messages:[{role:"user",content:[
+            {type:"image",source:{type:"base64",media_type:"image/jpeg",data:b64}},
+            {type:"text",text:`Extract the employee schedule from this image. Return ONLY a JSON array, no other text or markdown fences.
+
+Format:
+[{"name":"Firstname Lastname","shifts":{"sun":"7:00A-3:30P","mon":"","tue":"OFF","wed":"REQ OFF","thu":"UNAVAIL","fri":"8:00A-4:30P","sat":""}}]
+
+Rules:
+- Convert "LASTNAME, FIRSTNAME M" to "Firstname Lastname"
+- Format shifts as H:MMA-H:MMP (e.g. "7:00A-3:30P")
+- Empty string "" for days with no shift / hatched cells
+- "OFF" for off days, "REQ OFF" for Request Off, "UNAVAIL" for Unavailable  
+- Include ALL employees in the schedule
+- Days run Sun through Sat (left to right in the grid)`}
+          ]}]
+        })
+      });
+
+      if(!resp.ok){
+        const err=await resp.json().catch(()=>({}));
+        const msg=err.error?.message||"Unknown error";
+        const type=err.error?.type||"";
+        throw new Error(`API ${resp.status}: ${type?type+" — ":""}${msg}`);
+      }
+
+      const data=await resp.json();
+      bar.style.width="90%";
+      status.textContent="Parsing results…";
+
+      /* Extract JSON from response */
+      let jsonText=data.content.map(b=>b.text||"").join("");
+      /* Strip markdown fences if present */
+      jsonText=jsonText.replace(/```json\s*/g,"").replace(/```\s*/g,"").trim();
+
+      let parsed;
+      try{ parsed=JSON.parse(jsonText); }catch(e){
+        throw new Error("Could not parse AI response as JSON. Raw: "+jsonText.substring(0,200));
+      }
+
+      if(!Array.isArray(parsed)||!parsed.length){
+        throw new Error("No employees found in the response.");
+      }
+
+      /* Normalize the parsed data */
+      scanParsed=parsed.map(emp=>({
+        name:emp.name||"Unknown",
+        shifts:{
+          sun:emp.shifts?.sun||"",
+          mon:emp.shifts?.mon||"",
+          tue:emp.shifts?.tue||"",
+          wed:emp.shifts?.wed||"",
+          thu:emp.shifts?.thu||"",
+          fri:emp.shifts?.fri||"",
+          sat:emp.shifts?.sat||""
+        }
+      }));
+
+      bar.style.width="100%";
+
+      /* Show results */
+      let preview="";
+      scanParsed.forEach(emp=>{
+        preview+=`<div class="scan-emp"><div class="scan-emp-name">${esc(emp.name)}</div>
+          <div class="scan-emp-shifts">
+            ${SCH_DAYS_SHORT.map(d=>`<div class="scan-day-hd">${d}</div>`).join("")}
+            ${SCH_DAYS.map(d=>`<div class="scan-shift">${esc(emp.shifts[d.toLowerCase()]||"—")}</div>`).join("")}
+          </div></div>`;
+      });
+
+      scanBody.innerHTML=`
+        <div class="scan-step"><div class="num">1</div>Photo captured</div>
+        <img src="${imgSrc}" class="scan-preview" alt="Schedule photo">
+        <div class="scan-step"><div class="num">2</div>Done — ${scanParsed.length} employee${scanParsed.length!==1?"s":""} found</div>
+        <div class="scan-result">${preview}</div>
+        <div class="scan-step"><div class="num">3</div>Apply to ${sched.weeks[schWeek].label}</div>
+        <div class="scan-actions">
+          <button class="btn ghost" id="scanRetry">Retry</button>
+          <button class="btn" id="scanApply">${I.check} Apply</button>
+        </div>`;
+      document.getElementById("scanRetry").onclick=openScanOverlay;
+      document.getElementById("scanApply").onclick=applyScanResults;
+
+    }catch(err){
+      bar.style.width="100%";
+      bar.style.background="var(--danger)";
+      status.textContent="";
+      scanBody.innerHTML+=`
+        <div style="margin-top:12px;padding:14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);">
+          <div style="font-weight:700;color:var(--ink);margin-bottom:6px;">Scan failed</div>
+          <div style="font-size:12px;color:var(--ink-3)">${esc(err.message)}</div>
+        </div>
+        <div class="scan-actions" style="margin-top:12px">
+          <button class="btn ghost" onclick="openScanOverlay()">Retry</button>
+          <button class="btn ghost" onclick="closeScanOverlay()">Cancel</button>
+        </div>`;
+    }
+  };
+  reader.readAsDataURL(file);
+};
+
+function applyScanResults(){
+  if(!scanParsed||!scanParsed.length) return;
+  const w=sched.weeks[schWeek];
+  const merge=w.employees.length>0 && !confirm("Replace existing employees?\n\nOK = Replace all\nCancel = Add to existing");
+  if(!merge) w.employees=[];
+  scanParsed.forEach(emp=>{
+    w.employees.push({name:emp.name,shifts:{...emp.shifts}});
+  });
+  saveSched();
+  closeScanOverlay();
+  render();
+}
+
+/* ================= Boot ================= */
+render();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
