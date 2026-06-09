@@ -9,8 +9,8 @@
 <meta name="theme-color" content="#1a1e17">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png">
+<link rel="apple-touch-icon" href="icon192.png">
 <style>
   :root{
     --bg:#1a1e17; --surface:#262b22; --surface-2:#2c322a; --surface-3:#21261e;
@@ -1409,7 +1409,7 @@ scanFileInput.onchange=async function(){
         method:"POST",
         headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
         body:JSON.stringify({
-          model:"claude-sonnet-4-20250514",
+          model:"claude-sonnet-4-6",
           max_tokens:2000,
           messages:[{role:"user",content:[
             {type:"image",source:{type:"base64",media_type:"image/jpeg",data:b64}},
