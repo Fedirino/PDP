@@ -584,8 +584,8 @@ const SCH_DAYS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const SCH_KEYS=["sun","mon","tue","wed","thu","fri","sat"];
 const SCH_DAYS_SHORT=["S","M","T","W","T","F","S"];
 function seedSched(){ return { weeks:[
-  { label:"This Week", employees:[] },
-  { label:"Next Week", employees:[] }
+  { label:"This Week", startDate:"", employees:[] },
+  { label:"Next Week", startDate:"", employees:[] }
 ]}; }
 let sched;
 (function loadSched(){
@@ -790,7 +790,7 @@ function renderHome(){
          <div class="go" style="color:var(--ink-3);font-size:10px;font-weight:700;letter-spacing:.06em">SOON</div>
        </div>
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v3.1.0</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v3.2.0</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
 }
 
@@ -1195,8 +1195,13 @@ function renderSchedule(){
     body+=`<div class="addrow"><input id="newEmp" placeholder="New employee name…" autocomplete="off"><button id="addEmp">Add</button></div>`;
   } else {
     /* View mode: compact table — everyone on one screen */
+    const dateLine=w.startDate?getWeekDates(w.startDate):null;
+    body+=`<div style="display:flex;align-items:center;gap:8px;margin:0 2px 10px;">
+      <span style="font-size:11px;font-weight:600;color:var(--ink-3)">Week of</span>
+      <input type="date" id="schDate" value="${w.startDate||""}" style="font:inherit;font-size:13px;font-weight:600;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px;color:var(--ink);flex:1;">
+    </div>`;
     body+=`<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;"><table class="sch-table"><thead><tr>
-      <th></th>${SCH_DAYS.map((d,i)=>`<th>${d.substring(0,2)}</th>`).join("")}<th>Hrs</th>
+      <th></th>${SCH_DAYS.map((d,i)=>`<th>${d.substring(0,2)}${dateLine?`<br><span style="font-weight:500;font-size:9px;opacity:.7">${dateLine[i]}</span>`:""}</th>`).join("")}<th>Hrs</th>
     </tr></thead><tbody>`;
     w.employees.forEach((emp,ei)=>{
       const hrs=calcWeekHrs(emp);
@@ -1224,6 +1229,8 @@ function renderSchedule(){
 
   /* Wire week tabs */
   view.querySelectorAll("[data-schw]").forEach(b=>b.onclick=()=>{ schWeek=parseInt(b.dataset.schw); render(); });
+  const dateInp=document.getElementById("schDate");
+  if(dateInp) dateInp.onchange=()=>{ w.startDate=dateInp.value; saveSched(); render(); };
 
   if(schEdit){
     /* Wire name inputs */
@@ -1267,6 +1274,14 @@ function shortName(n){
   const parts=n.trim().split(/\s+/);
   if(parts.length<=1) return n;
   return parts[0]+" "+parts[parts.length-1].charAt(0)+".";
+}
+function getWeekDates(startStr){
+  const d=new Date(startStr+"T12:00:00");
+  if(isNaN(d)) return null;
+  const day=d.getDay(); d.setDate(d.getDate()-day);
+  const dates=[];
+  for(let i=0;i<7;i++){ dates.push((d.getMonth()+1)+"/"+d.getDate()); d.setDate(d.getDate()+1); }
+  return dates;
 }
 function shortShift(v){
   /* "7:00A-3:30P" → "7-3:30" for compact display */
@@ -1360,6 +1375,7 @@ const scanUploadInput=document.getElementById("scanUploadInput");
 const APIKEY_KEY="pdp_api_key";
 let scanParsed=null;
 let scanMode="schedule"; /* "schedule" or "gev" */
+let scanWeekStart="";
 
 function getApiKey(){ try{ return localStorage.getItem(APIKEY_KEY)||""; }catch(e){ return ""; } }
 function saveApiKey(k){ try{ localStorage.setItem(APIKEY_KEY,k); }catch(e){} }
@@ -1451,30 +1467,34 @@ function handleScanFile(file){
       status.textContent="Analyzing image…";
       bar.style.width="60%";
 
-      const schedulePrompt=`You are reading a grocery store "Wall Schedule" for a produce department. It's a grid/table with:
+      const schedulePrompt=`You are reading a grocery store "Wall Schedule" for a produce department. It's a printed grid/table.
+
+STRUCTURE:
+- Header shows a date range like "6/21/2026 - 6/27/2026"
 - Employee names in the leftmost column (ALL CAPS: "LASTNAME, FIRSTNAME M")
-- Day columns running left to right. There may be TWO Saturday columns — IGNORE THE FIRST SATURDAY (left edge). Only use: Sun, Mon, Tue, Wed, Thu, Fri, Sat (the SECOND/rightmost Saturday).
-- Each cell contains a shift time like "7:00A - 3:30P", or is empty/hatched (no shift), or says "UNAVAILABLE" or "Request Off"
-- Below each shift time is a role (MANAGER, CLERK, HEADCLERK) — IGNORE these
-- Below the role is meal info like "Meal 30 min" or "Meal 60 min" — EXTRACT the meal minutes
+- Day columns: there may be TWO Saturday columns — ALWAYS IGNORE THE FIRST/LEFTMOST SATURDAY. Only extract: Sun, Mon, Tue, Wed, Thu, Fri, Sat (the rightmost Saturday).
+- Each cell has a shift time like "7:00A - 3:30P", OR is empty/hatched (diagonal lines = no shift), OR says "UNAVAILABLE" or "Request Off"
+- Below shift times: role (MANAGER, CLERK) — IGNORE
+- Below role: meal info like "Meal 30 min" — EXTRACT the meal minutes
 
-Extract EVERY employee and their shift for EACH day (Sun-Sat only). Read times very carefully — pay close attention to AM/PM.
+CRITICAL — BLANK/EMPTY CELLS:
+Many cells will be BLANK, EMPTY, or show diagonal hatching lines. These mean the employee does NOT work that day. You MUST use "" (empty string) for these. Do NOT fill in shifts for days that are blank. If a cell has no time written in it, it is EMPTY — use "".
 
-Return ONLY a valid JSON array. No markdown, no backticks, no explanation.
+Return ONLY valid JSON. No markdown, no backticks, no explanation.
 
-[{"name":"Firstname Lastname","shifts":{"sun":"7:00A-3:30P","mon":"8:00A-4:30P","tue":"","wed":"","thu":"REQ OFF","fri":"UNAVAIL","sat":""},"meals":{"sun":30,"mon":30,"tue":0,"wed":0,"thu":0,"fri":0,"sat":0}}]
+{"weekStart":"2026-06-21","employees":[{"name":"Firstname Lastname","shifts":{"sun":"7:00A-3:30P","mon":"","tue":"","wed":"","thu":"","fri":"8:00A-4:30P","sat":""},"meals":{"sun":30,"mon":0,"tue":0,"wed":0,"thu":0,"fri":30,"sat":0}}]}
 
-CRITICAL RULES:
+RULES:
+- weekStart: the SUNDAY date from the header date range, format "YYYY-MM-DD"
 - Convert names: "DUTKIEWICZ, GAVIN S" → "Gavin Dutkiewicz"
 - Shift format: "7:00A-3:30P" (no spaces around dash)
-- Empty/hatched cells (diagonal lines, no text) = "" (empty string)
-- "Request Off" = "REQ OFF"
-- "UNAVAILABLE" = "UNAVAIL"
-- meals: integer minutes for that day's meal break (30 or 60 typically). Use 0 if no meal listed or no shift.
-- Read EVERY row — do not skip any employee
-- IGNORE the first/leftmost Saturday column entirely
-- If a time is hard to read, give your best interpretation rather than leaving it blank
-- Double-check AM/PM (A or P) is correct for each time`;
+- "" (empty string) for ANY cell that is blank, hatched, has no time, or has diagonal lines
+- "REQ OFF" for "Request Off"
+- "UNAVAIL" for "UNAVAILABLE"
+- meals: integer minutes (30 or 60). Use 0 if no meal or no shift that day.
+- Read EVERY employee row — do not skip anyone
+- IGNORE the first/leftmost Saturday column
+- Double-check: if a cell has NO time written in it, use "" — do NOT guess or copy from adjacent cells`;
 
       const gevPrompt=`You are reading a grocery store GEV (Guaranteed Everyday Variety) checklist. It lists categories of produce items that must always be stocked.
 
@@ -1553,12 +1573,15 @@ RULES:
       }
 
       /* Schedule mode */
-      if(!Array.isArray(parsed)||!parsed.length){
+      let empArr=parsed;
+      let weekStart="";
+      if(parsed.employees){ empArr=parsed.employees; weekStart=parsed.weekStart||""; }
+      if(!Array.isArray(empArr)||!empArr.length){
         throw new Error("No employees found in the response.");
       }
 
       /* Normalize the parsed data */
-      scanParsed=parsed.map(emp=>({
+      scanParsed=empArr.map(emp=>({
         name:emp.name||"Unknown",
         shifts:{
           sun:emp.shifts?.sun||"",mon:emp.shifts?.mon||"",tue:emp.shifts?.tue||"",
@@ -1571,6 +1594,7 @@ RULES:
           sat:parseInt(emp.meals?.sat)||0
         }
       }));
+      scanWeekStart=weekStart;
 
       bar.style.width="100%";
 
@@ -1623,6 +1647,7 @@ function applyScanResults(){
   const w=sched.weeks[schWeek];
   const merge=w.employees.length>0 && !confirm("Replace existing employees?\n\nOK = Replace all\nCancel = Add to existing");
   if(!merge) w.employees=[];
+  if(scanWeekStart) w.startDate=scanWeekStart;
   scanParsed.forEach(emp=>{
     w.employees.push({name:emp.name,shifts:{...emp.shifts},meals:{...emp.meals}});
   });
