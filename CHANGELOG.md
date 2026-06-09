@@ -4,6 +4,28 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [2.9.0] — 2026-06-09
+
+### Added
+- **Editable Stencil**: Tap Edit in the Stencil topbar to enter edit mode. Add custom items (code, description, pack, unit), edit any item (custom or built-in), and delete custom items. Custom items appear under "★ Custom Items" at the top of the list with a CUSTOM badge.
+- **Stencil custom storage**: Custom items saved in `pdp_stencil_custom_v1`, edits to built-in items saved in `pdp_stencil_edits_v1`
+- **Pencil edit icon**: New icon in the icon set
+
+### Changed
+- **GEV tile description removed**: Home tile for GEV List no longer shows a subtitle
+- Stencil item count now includes custom items
+- Version bumped to v2.9.0
+
+### Files
+- `index.html` — Main app (v2.9.0)
+- `pdp-v2_5_0.html` — Archived v2.5.0
+- `icon192.png` / `icon512.png` — PWA icons (circular)
+- `sw.js` — Service worker (cache v2.9.0)
+- `manifest.json` — PWA manifest
+- `CHANGELOG.md` — This file
+
+---
+
 ## [2.8.0] — 2026-06-09
 
 ### Changed
