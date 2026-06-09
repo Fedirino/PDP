@@ -326,43 +326,38 @@
   .uf-meta{font-size:11px;color:var(--ink-3);margin-top:2px;line-height:1.4;}
 
   .sch-section{margin-bottom:18px;}
-  .sch-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
-    display:flex;align-items:center;gap:8px;}
-  .sch-label::before{content:"";width:12px;height:3px;border-radius:2px;background:var(--brand);flex:none;}
-  .sch-lbl-row{display:flex;align-items:center;justify-content:space-between;margin:0 4px 10px;}
-  .sch-sm-btn{appearance:none;border:none;background:none;font:inherit;font-size:11px;font-weight:600;
-    color:var(--ink-3);cursor:pointer;padding:4px 0;display:flex;align-items:center;gap:4px;}
-  .sch-sm-btn svg{width:12px;height:12px;}
-  .sch-sm-btn:active{color:var(--brand);}
   .sch-note{font-size:12px;color:var(--ink-3);margin:12px 4px 0;line-height:1.55;text-align:center;}
-  
-  .sch-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
-    box-shadow:var(--sh-sm);margin-bottom:10px;overflow:hidden;}
-  .sch-card-hdr{display:flex;align-items:center;gap:10px;padding:11px 13px;cursor:pointer;}
-  .sch-card-hdr .sch-emp-name{flex:1;font-size:15px;font-weight:600;letter-spacing:-.01em;}
-  .sch-card-hdr .sch-emp-hrs{flex:none;font-size:11px;font-weight:700;color:var(--brand-ink);
-    background:var(--brand-tint);padding:3px 8px;border-radius:6px;font-variant-numeric:tabular-nums;}
-  .sch-card-hdr .chev{flex:none;color:var(--ink-3);transition:transform .2s ease;}
-  .sch-card-hdr .chev svg{width:17px;height:17px;}
-  .sch-card.open .sch-card-hdr .chev{transform:rotate(90deg);color:var(--brand);}
-  .sch-days{display:none;padding:0 13px 13px;}
-  .sch-card.open .sch-days{display:block;}
-  .sch-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
-  .sch-day-lbl{text-align:center;font-size:10px;font-weight:700;color:var(--ink-3);
-    letter-spacing:.04em;text-transform:uppercase;padding-bottom:3px;}
-  .sch-cell{background:var(--surface-2);border:1px solid var(--line);border-radius:7px;
-    padding:7px 2px;text-align:center;font-size:11px;font-weight:600;color:var(--ink);
-    min-height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;
-    transition:border-color .15s ease;word-break:break-all;line-height:1.2;}
-  .sch-cell:active{border-color:var(--brand);}
-  .sch-cell.off{color:var(--danger);font-weight:600;font-size:10px;text-transform:uppercase;}
-  .sch-cell.empty{color:var(--ink-3);font-size:14px;}
-  .sch-cell input{width:100%;border:none;background:none;font:inherit;font-size:11px;font-weight:600;
-    text-align:center;color:var(--ink);outline:none;padding:0;min-width:0;}
-  .sch-emp-edit{display:flex;align-items:center;gap:8px;padding:11px 13px;}
-  .sch-emp-edit input{flex:1;font:inherit;font-size:15px;font-weight:600;background:var(--surface-2);
-    border:1px solid var(--line);border-radius:9px;padding:10px 12px;color:var(--ink);min-width:0;}
-  .sch-emp-edit input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint);}
+
+  .sch-table{width:100%;border-collapse:separate;border-spacing:0;background:var(--surface);
+    border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh-sm);}
+  .sch-table th,.sch-table td{padding:6px 3px;text-align:center;border-bottom:1px solid var(--line);
+    font-size:11px;font-weight:600;vertical-align:middle;}
+  .sch-table th{background:var(--surface-2);color:var(--ink-3);font-size:10px;font-weight:700;
+    letter-spacing:.04em;text-transform:uppercase;position:sticky;top:0;z-index:2;}
+  .sch-table th:first-child{text-align:left;padding-left:10px;min-width:80px;}
+  .sch-table td:first-child{text-align:left;padding-left:10px;font-weight:700;font-size:12px;
+    color:var(--ink);white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis;}
+  .sch-table td{color:var(--ink);cursor:pointer;transition:background .1s ease;}
+  .sch-table td:active{background:var(--brand-tint);}
+  .sch-table td.off{color:var(--danger);font-weight:700;font-size:10px;}
+  .sch-table td.unavail{color:#b08600;font-size:9px;}
+  .sch-table td.reqoff{color:var(--ink-3);font-size:9px;font-style:italic;}
+  .sch-table td.empty{color:var(--ink-3);}
+  .sch-table td.hrs{font-size:10px;font-weight:700;color:var(--brand-ink);background:var(--brand-tint);
+    cursor:default;min-width:32px;}
+  .sch-table tr:last-child td{border-bottom:none;}
+
+  .sch-edit-row{display:flex;align-items:center;gap:6px;padding:8px 10px;border-bottom:1px solid var(--line);background:var(--surface);}
+  .sch-edit-row input{flex:1;font:inherit;font-size:12px;background:var(--surface-2);border:1px solid var(--line);
+    border-radius:7px;padding:7px 8px;color:var(--ink);min-width:0;}
+  .sch-edit-row input:focus{outline:none;border-color:var(--brand);}
+  .sch-edit-row .del{flex:none;}
+  .sch-edit-shifts{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;padding:4px 10px 10px;}
+  .sch-edit-shifts input{width:100%;font:inherit;font-size:10px;font-weight:600;text-align:center;
+    background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:6px 1px;color:var(--ink);min-width:0;}
+  .sch-edit-shifts input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 2px var(--brand-tint);}
+  .sch-edit-hdr{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;padding:4px 10px 0;}
+  .sch-edit-hdr span{text-align:center;font-size:9px;font-weight:700;color:var(--ink-3);text-transform:uppercase;}
 
   .scan-overlay{position:fixed;inset:0;z-index:80;background:rgba(8,18,12,.96);display:none;flex-direction:column;
     overflow-y:auto;-webkit-overflow-scrolling:touch;}
@@ -387,7 +382,7 @@
   .scan-emp{margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--line);}
   .scan-emp:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none;}
   .scan-emp-name{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:5px;}
-  .scan-emp-shifts{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+  .scan-emp-shifts{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;}
   .scan-emp-shifts .scan-day-hd{font-size:9px;font-weight:700;color:var(--ink-3);text-align:center;text-transform:uppercase;}
   .scan-emp-shifts .scan-shift{font-size:10px;font-weight:600;color:var(--ink);text-align:center;
     background:var(--surface-2);border-radius:5px;padding:4px 1px;}
@@ -579,8 +574,9 @@ let state;
 function save(){ writeK(KEY,JSON.stringify(state)); }
 
 const SCHKEY="pdp_schedule_v3";
-const SCH_DAYS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-const SCH_DAYS_SHORT=["S","M","T","W","T","F","S"];
+const SCH_DAYS=["Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const SCH_KEYS=["sat","sun","mon","tue","wed","thu","fri","sat2"];
+const SCH_DAYS_SHORT=["S","S","M","T","W","T","F","S"];
 function seedSched(){ return { weeks:[
   { label:"This Week", employees:[] },
   { label:"Next Week", employees:[] }
@@ -786,7 +782,7 @@ function renderHome(){
          <div class="go" style="color:var(--ink-3);font-size:10px;font-weight:700;letter-spacing:.06em">SOON</div>
        </div>
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v2.9.1</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v3.0.0</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
 }
 
@@ -1146,50 +1142,46 @@ function renderSchedule(){
   let body="";
   if(!w.employees.length && !schEdit){
     body=`<div class="empty"><div class="ei">${I.cal}</div>No employees added yet.<br>Tap <b>Scan</b> to photograph a schedule, or <b>Edit</b> to add manually.</div>`;
-  } else {
+  } else if(schEdit){
+    /* Edit mode: inline name + shift inputs per employee */
     w.employees.forEach((emp,ei)=>{
-      const open=!!schOpen["w"+schWeek+"e"+ei];
-      const totalHrs=calcWeekHrs(emp);
-      if(schEdit){
-        body+=`<div class="sch-card open">
-          <div class="sch-emp-edit">
-            <input data-schname="${ei}" value="${esc(emp.name)}" placeholder="Employee name…" autocomplete="off">
-            <button class="del" data-schdel="${ei}">${I.x}</button>
-          </div>
-          <div class="sch-days">
-            <div class="sch-grid">
-              ${SCH_DAYS_SHORT.map(d=>`<div class="sch-day-lbl">${d}</div>`).join("")}
-              ${SCH_DAYS.map(d=>{
-                const v=emp.shifts[d.toLowerCase()]||"";
-                return `<div class="sch-cell" data-schedit="${ei}_${d.toLowerCase()}"><input data-schshift="${ei}_${d.toLowerCase()}" value="${esc(v)}" placeholder="—" autocomplete="off"></div>`;
-              }).join("")}
-            </div>
-          </div>
-        </div>`;
-      } else {
-        body+=`<div class="sch-card${open?" open":""}">
-          <div class="sch-card-hdr" data-schtoggle="${ei}">
-            <div class="sch-emp-name">${esc(emp.name)}</div>
-            ${totalHrs?`<div class="sch-emp-hrs">${totalHrs}h</div>`:""}
-            <div class="chev">${I.chev}</div>
-          </div>
-          <div class="sch-days">
-            <div class="sch-grid">
-              ${SCH_DAYS_SHORT.map(d=>`<div class="sch-day-lbl">${d}</div>`).join("")}
-              ${SCH_DAYS.map(d=>{
-                const v=emp.shifts[d.toLowerCase()]||"";
-                const isOff=v.toLowerCase()==="off";
-                const cls=isOff?"off":(!v?"empty":"");
-                return `<div class="sch-cell ${cls}" data-schcell="${ei}_${d.toLowerCase()}">${v||"—"}</div>`;
-              }).join("")}
-            </div>
-          </div>
-        </div>`;
-      }
+      body+=`<div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin-bottom:8px;overflow:hidden;">
+        <div class="sch-edit-row">
+          <input data-schname="${ei}" value="${esc(emp.name)}" placeholder="Employee name…" autocomplete="off">
+          <button class="del" data-schdel="${ei}">${I.x}</button>
+        </div>
+        <div class="sch-edit-hdr">${SCH_DAYS_SHORT.map((d,i)=>`<span>${SCH_DAYS[i].substring(0,2)}</span>`).join("")}</div>
+        <div class="sch-edit-shifts">
+          ${SCH_KEYS.map((k,i)=>{
+            const v=emp.shifts[k]||"";
+            return `<input data-schshift="${ei}_${k}" value="${esc(v)}" placeholder="—" autocomplete="off">`;
+          }).join("")}
+        </div>
+      </div>`;
     });
-    if(schEdit){
-      body+=`<div class="addrow"><input id="newEmp" placeholder="New employee name…" autocomplete="off"><button id="addEmp">Add</button></div>`;
-    }
+    body+=`<div class="addrow"><input id="newEmp" placeholder="New employee name…" autocomplete="off"><button id="addEmp">Add</button></div>`;
+  } else {
+    /* View mode: compact table — everyone on one screen */
+    body+=`<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;"><table class="sch-table"><thead><tr>
+      <th></th>${SCH_DAYS.map((d,i)=>`<th>${d.substring(0,2)}</th>`).join("")}<th>Hrs</th>
+    </tr></thead><tbody>`;
+    w.employees.forEach((emp,ei)=>{
+      const hrs=calcWeekHrs(emp);
+      body+=`<tr><td title="${esc(emp.name)}">${esc(shortName(emp.name))}</td>`;
+      SCH_KEYS.forEach(k=>{
+        const v=emp.shifts[k]||"";
+        const vl=v.toLowerCase();
+        let cls="",display=v;
+        if(!v){ cls="empty"; display="—"; }
+        else if(vl==="off") cls="off";
+        else if(vl==="unavail"||vl==="unavailable") { cls="unavail"; display="UNAVL"; }
+        else if(vl==="req off"||vl==="request off") { cls="reqoff"; display="REQ"; }
+        else display=shortShift(v);
+        body+=`<td class="${cls}" data-schcell="${ei}_${k}">${display}</td>`;
+      });
+      body+=`<td class="hrs">${hrs||"—"}</td></tr>`;
+    });
+    body+=`</tbody></table></div>`;
   }
   if(!w.employees.length && schEdit){
     body=`<div class="addrow"><input id="newEmp" placeholder="New employee name…" autocomplete="off"><button id="addEmp">Add</button></div>`;
@@ -1206,9 +1198,9 @@ function renderSchedule(){
       const i=parseInt(inp.dataset.schname); w.employees[i].name=inp.value.trim()||w.employees[i].name; saveSched(); });
     /* Wire shift inputs */
     view.querySelectorAll("[data-schshift]").forEach(inp=>{
-      inp.onfocus=()=>inp.parentElement.classList.add("editing");
-      inp.onblur=()=>{ inp.parentElement.classList.remove("editing");
-        const [ei,day]=inp.dataset.schshift.split("_"); w.employees[parseInt(ei)].shifts[day]=inp.value.trim(); saveSched(); };
+      inp.onblur=()=>{
+        const [ei,key]=inp.dataset.schshift.split("_");
+        w.employees[parseInt(ei)].shifts[key]=inp.value.trim(); saveSched(); };
       inp.onkeydown=e=>{ if(e.key==="Enter") inp.blur(); };
     });
     /* Wire delete */
@@ -1220,29 +1212,42 @@ function renderSchedule(){
     const ne=document.getElementById("newEmp"), ae=document.getElementById("addEmp");
     if(ne&&ae){
       const add=()=>{ const v=ne.value.trim(); if(!v) return;
-        w.employees.push({name:v,shifts:{sun:"",mon:"",tue:"",wed:"",thu:"",fri:"",sat:""}});
-        saveSched(); render(); const f=document.getElementById("newEmp"); if(f) f.focus(); };
+        w.employees.push({name:v,shifts:{sat:"",sun:"",mon:"",tue:"",wed:"",thu:"",fri:"",sat2:""}});
+        saveSched(); render(); };
       ae.onclick=add; ne.onkeydown=e=>{ if(e.key==="Enter") add(); };
     }
   } else {
-    /* Wire toggle */
-    view.querySelectorAll("[data-schtoggle]").forEach(b=>b.onclick=()=>{
-      const k="w"+schWeek+"e"+b.dataset.schtoggle; schOpen[k]=!schOpen[k]; render(); });
-    /* Wire inline cell edit */
+    /* Wire inline cell edit via prompt */
     view.querySelectorAll("[data-schcell]").forEach(cell=>cell.onclick=()=>{
-      const [ei,day]=cell.dataset.schcell.split("_");
+      const [ei,key]=cell.dataset.schcell.split("_");
       const emp=w.employees[parseInt(ei)];
-      const cur=emp.shifts[day]||"";
-      const val=prompt(`${emp.name} — ${SCH_DAYS[SCH_DAYS.map(d=>d.toLowerCase()).indexOf(day)]} shift:`,cur);
-      if(val!==null){ emp.shifts[day]=val.trim(); saveSched(); render(); }
+      const dayIdx=SCH_KEYS.indexOf(key);
+      const dayLabel=dayIdx>=0?SCH_DAYS[dayIdx]:"";
+      const cur=emp.shifts[key]||"";
+      const val=prompt(`${emp.name} — ${dayLabel} shift:`,cur);
+      if(val!==null){ emp.shifts[key]=val.trim(); saveSched(); render(); }
     });
   }
 }
+function shortName(n){
+  /* "Gavin Dutkiewicz" → "Gavin D." */
+  const parts=n.trim().split(/\s+/);
+  if(parts.length<=1) return n;
+  return parts[0]+" "+parts[parts.length-1].charAt(0)+".";
+}
+function shortShift(v){
+  /* "7:00A-3:30P" → "7-3:30" for compact display */
+  const m=v.match(/(\d{1,2}):(\d{2})([AP])\s*-\s*(\d{1,2}):(\d{2})([AP])/i);
+  if(!m) return v;
+  let start=m[2]==="00"?m[1]:m[1]+":"+m[2];
+  let end=m[5]==="00"?m[4]:m[4]+":"+m[5];
+  return start+m[3].toLowerCase()+"-"+end+m[6].toLowerCase();
+}
 function calcWeekHrs(emp){
   let total=0;
-  for(const d of SCH_DAYS){
-    const v=(emp.shifts[d.toLowerCase()]||"").trim().toLowerCase();
-    if(!v||v==="off") continue;
+  for(const k of SCH_KEYS){
+    const v=(emp.shifts[k]||"").trim().toLowerCase();
+    if(!v||v==="off"||v==="req off"||v==="unavail"||v==="unavailable"||v==="request off") continue;
     const m=v.match(/(\d{1,2})(?::(\d{2}))?\s*(a|p)?.*?(\d{1,2})(?::(\d{2}))?\s*(a|p)?/i);
     if(!m) continue;
     let h1=parseInt(m[1]),min1=parseInt(m[2]||0),ap1=(m[3]||"").toLowerCase();
@@ -1413,18 +1418,29 @@ scanFileInput.onchange=async function(){
           max_tokens:2000,
           messages:[{role:"user",content:[
             {type:"image",source:{type:"base64",media_type:"image/jpeg",data:b64}},
-            {type:"text",text:`Extract the employee schedule from this image. Return ONLY a JSON array, no other text or markdown fences.
+            {type:"text",text:`You are reading a grocery store "Wall Schedule" for a produce department. It's a grid/table with:
+- Employee names in the leftmost column (ALL CAPS: "LASTNAME, FIRSTNAME M")
+- Day columns running left to right: Sat, Sun, Mon, Tue, Wed, Thu, Fri, Sat (or Sun through Sat)
+- Each cell contains a shift time like "7:00A - 3:30P", or is empty/hatched (no shift), or says "UNAVAILABLE" or "Request Off"
+- Below each shift time is a role (MANAGER, CLERK, HEADCLERK) and meal info — IGNORE these, only extract the shift time
+- There are also "Total Hours" and "Weekly Hours" columns — IGNORE these
 
-Format:
-[{"name":"Firstname Lastname","shifts":{"sun":"7:00A-3:30P","mon":"","tue":"OFF","wed":"REQ OFF","thu":"UNAVAIL","fri":"8:00A-4:30P","sat":""}}]
+Extract EVERY employee and their shift for EACH day. Read the times very carefully — pay close attention to AM/PM markers and exact hour:minute values.
 
-Rules:
-- Convert "LASTNAME, FIRSTNAME M" to "Firstname Lastname"
-- Format shifts as H:MMA-H:MMP (e.g. "7:00A-3:30P")
-- Empty string "" for days with no shift / hatched cells
-- "OFF" for off days, "REQ OFF" for Request Off, "UNAVAIL" for Unavailable  
-- Include ALL employees in the schedule
-- Days run Sun through Sat (left to right in the grid)`}
+Return ONLY a valid JSON array. No markdown, no backticks, no explanation.
+
+[{"name":"Firstname Lastname","shifts":{"sat":"","sun":"7:00A-3:30P","mon":"8:00A-4:30P","tue":"","wed":"OFF","thu":"REQ OFF","fri":"UNAVAIL","sat2":""}}]
+
+CRITICAL RULES:
+- The schedule may have TWO Saturday columns (start and end of week). Use "sat" for the first Saturday and "sat2" for the second Saturday. If there's only one Saturday column, omit "sat2".
+- Convert names: "DUTKIEWICZ, GAVIN S" → "Gavin Dutkiewicz"
+- Shift format: "7:00A-3:30P" (no spaces around dash)
+- Empty/hatched cells (diagonal lines, no text) = "" (empty string)  
+- "Request Off" = "REQ OFF"
+- "UNAVAILABLE" = "UNAVAIL"
+- Read EVERY row — do not skip any employee
+- If a time is hard to read, give your best interpretation rather than leaving it blank
+- Double-check that AM/PM (A or P) is correct for each time`}
           ]}]
         })
       });
@@ -1458,13 +1474,14 @@ Rules:
       scanParsed=parsed.map(emp=>({
         name:emp.name||"Unknown",
         shifts:{
+          sat:emp.shifts?.sat||"",
           sun:emp.shifts?.sun||"",
           mon:emp.shifts?.mon||"",
           tue:emp.shifts?.tue||"",
           wed:emp.shifts?.wed||"",
           thu:emp.shifts?.thu||"",
           fri:emp.shifts?.fri||"",
-          sat:emp.shifts?.sat||""
+          sat2:emp.shifts?.sat2||""
         }
       }));
 
@@ -1475,8 +1492,8 @@ Rules:
       scanParsed.forEach(emp=>{
         preview+=`<div class="scan-emp"><div class="scan-emp-name">${esc(emp.name)}</div>
           <div class="scan-emp-shifts">
-            ${SCH_DAYS_SHORT.map(d=>`<div class="scan-day-hd">${d}</div>`).join("")}
-            ${SCH_DAYS.map(d=>`<div class="scan-shift">${esc(emp.shifts[d.toLowerCase()]||"—")}</div>`).join("")}
+            ${SCH_DAYS.map(d=>`<div class="scan-day-hd">${d.substring(0,2)}</div>`).join("")}
+            ${SCH_KEYS.map(k=>`<div class="scan-shift">${esc(emp.shifts[k]||"—")}</div>`).join("")}
           </div></div>`;
       });
 
