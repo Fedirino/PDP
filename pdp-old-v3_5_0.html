@@ -374,62 +374,6 @@
   .uf-name{font-size:13px;font-weight:600;color:var(--ink);}
   .uf-meta{font-size:11px;color:var(--ink-3);margin-top:2px;line-height:1.4;}
 
-  /* ======= Tools Hub ======= */
-  .tool-card{text-align:left;appearance:none;border:1px solid var(--line);background:var(--surface);
-    border-radius:var(--r);padding:14px 15px;cursor:pointer;font:inherit;color:inherit;box-shadow:var(--sh-sm);
-    display:flex;align-items:center;gap:13px;width:100%;margin-bottom:9px;
-    transition:transform .08s ease,box-shadow .16s ease;}
-  .tool-card:active{transform:scale(.985);}
-  .tool-card .chip{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;}
-  .tool-card svg{width:21px;height:21px;}
-  .tool-card .tx{flex:1;min-width:0;}
-  .tool-card .tt{font-size:15px;font-weight:700;letter-spacing:-.015em;}
-  .tool-card .sub{font-size:12px;color:var(--ink-3);margin-top:2px;font-weight:500;}
-  .tool-card .go{flex:none;color:var(--ink-3);}
-  .tool-card .go svg{width:18px;height:18px;}
-
-  /* ======= Notes ======= */
-  .note-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
-    padding:14px 15px;margin-bottom:9px;box-shadow:var(--sh-sm);cursor:pointer;
-    transition:transform .08s ease;}
-  .note-card:active{transform:scale(.985);}
-  .note-card .note-title{font-size:15px;font-weight:700;letter-spacing:-.01em;margin-bottom:4px;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .note-card .note-preview{font-size:12.5px;color:var(--ink-2);line-height:1.45;
-    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-  .note-card .note-date{font-size:10.5px;color:var(--ink-3);margin-top:6px;font-weight:500;}
-  .note-editor textarea{width:100%;font:inherit;font-size:14px;background:var(--surface);
-    border:1px solid var(--line-2);border-radius:var(--r);padding:12px 14px;color:var(--ink);
-    min-height:180px;resize:vertical;line-height:1.55;}
-  .note-editor textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint);}
-  .note-editor input{width:100%;font:inherit;font-size:16px;font-weight:700;background:var(--surface);
-    border:1px solid var(--line-2);border-radius:var(--r);padding:12px 14px;color:var(--ink);margin-bottom:10px;}
-  .note-editor input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint);}
-
-  /* ======= Calendar / Reminders ======= */
-  .rem-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
-    padding:13px 15px;margin-bottom:8px;box-shadow:var(--sh-sm);display:flex;align-items:center;gap:12px;}
-  .rem-card .rem-icon{width:36px;height:36px;flex:none;border-radius:10px;display:grid;place-items:center;
-    background:var(--amber-tint);color:var(--amber);}
-  .rem-card .rem-icon svg{width:18px;height:18px;}
-  .rem-card .rem-icon.past{background:var(--surface-3);color:var(--ink-3);}
-  .rem-card .rem-bd{flex:1;min-width:0;}
-  .rem-card .rem-title{font-size:14px;font-weight:700;letter-spacing:-.01em;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .rem-card .rem-time{font-size:12px;color:var(--ink-3);margin-top:2px;font-weight:500;}
-  .rem-card .rem-del{appearance:none;border:none;background:none;cursor:pointer;padding:6px;
-    color:var(--ink-3);border-radius:8px;flex:none;}
-  .rem-card .rem-del:active{color:var(--danger);background:var(--danger-tint);}
-  .rem-card .rem-del svg{width:16px;height:16px;}
-  .rem-form{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
-    padding:16px;box-shadow:var(--sh-sm);margin-bottom:14px;}
-  .rem-form label{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;
-    text-transform:uppercase;color:var(--ink-3);margin-bottom:6px;}
-  .rem-form input{width:100%;font:inherit;font-size:14px;background:var(--surface-2);
-    border:1px solid var(--line);border-radius:9px;padding:10px 12px;color:var(--ink);margin-bottom:12px;}
-  .rem-form input:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint);}
-  .rem-form input[type="datetime-local"]{color-scheme:dark;}
-
   .sch-section{margin-bottom:18px;}
   .sch-note{font-size:12px;color:var(--ink-3);margin:12px 4px 0;line-height:1.55;text-align:center;}
 
@@ -533,9 +477,6 @@ const I = {
   copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V6A2.5 2.5 0 0 0 13 3.5H6A2.5 2.5 0 0 0 3.5 6v7A2.5 2.5 0 0 0 6 15.5h2.5"/></svg>',
   upload:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V5M7.5 9.5L12 5l4.5 4.5"/><path d="M5 16v2.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V16"/></svg>',
   download:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.5 11L12 15.5 16.5 11M5 19h14"/></svg>',
-  note:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6.5A2.5 2.5 0 0 0 4 5.5v13A2.5 2.5 0 0 0 6.5 21h11A2.5 2.5 0 0 0 20 18.5V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>',
-  bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',
-  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>',
   expand:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H5a1 1 0 0 0-1 1v4M15 4h4a1 1 0 0 1 1 1v4M9 20H5a1 1 0 0 1-1-1v-4M15 20h4a1 1 0 0 0 1-1v-4"/></svg>',
   pog:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>',
   filter:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>',
@@ -724,51 +665,6 @@ let unfound;
 })();
 function saveUnfound(){ writeK(UNFOUND_KEY,JSON.stringify(unfound)); }
 
-/* ======= Notes ======= */
-const NOTES_KEY="pdp_notes_v1";
-let notes;
-(function loadNotes(){
-  const raw=readK(NOTES_KEY);
-  if(raw){ try{ notes=JSON.parse(raw); }catch(e){ notes=[]; } }
-  if(!Array.isArray(notes)) notes=[];
-})();
-function saveNotes(){ writeK(NOTES_KEY,JSON.stringify(notes)); }
-
-/* ======= Reminders ======= */
-const REMINDERS_KEY="pdp_reminders_v1";
-let reminders;
-(function loadReminders(){
-  const raw=readK(REMINDERS_KEY);
-  if(raw){ try{ reminders=JSON.parse(raw); }catch(e){ reminders=[]; } }
-  if(!Array.isArray(reminders)) reminders=[];
-})();
-function saveReminders(){ writeK(REMINDERS_KEY,JSON.stringify(reminders)); }
-let reminderTimers={};
-
-function scheduleReminderNotifs(){
-  Object.values(reminderTimers).forEach(t=>clearTimeout(t));
-  reminderTimers={};
-  const now=Date.now();
-  reminders.forEach(r=>{
-    const dt=new Date(r.datetime).getTime();
-    const diff=dt-now;
-    if(diff>0&&diff<864e5*7){
-      reminderTimers[r.id]=setTimeout(()=>{
-        if("Notification" in window && Notification.permission==="granted"){
-          new Notification("PDP Reminder",{body:r.title,icon:"icon192.png"});
-        }
-      },diff);
-    }
-  });
-}
-function requestNotifPermission(){
-  if(!("Notification" in window)) return;
-  if(Notification.permission==="default") Notification.requestPermission();
-}
-
-let toolView="hub"; /* hub | notes | noteEdit | calendar */
-let editingNoteId=null;
-
 /* ======= Helpers ======= */
 function esc(s){ return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 const toastEl=document.getElementById("toast"); let toastTimer;
@@ -878,7 +774,6 @@ const tabbar=document.getElementById("tabbar");
 
 function setTab(t){ tab=t;
   if(t==="loadlist"&&ll.screen==="section"&&!sectionById(ll.sectionId)) ll.screen="sections";
-  if(t!=="tools") toolView="hub";
   render(); window.scrollTo(0,0);
 }
 function render(){ renderTopbar(); renderTabbar();
@@ -901,13 +796,7 @@ function renderTopbar(){
     right=`<button class="tb-act" id="schScanAct" style="gap:4px;display:inline-flex;align-items:center"><span style="width:14px;height:14px;display:inline-flex">${I.scan}</span>Scan</button><button class="tb-act" id="schEditAct">${schEdit?"Done":"Edit"}</button>`;
   } else if(tab==="gev"){ title="GEV List";
     right=`<button class="tb-act" id="gevScanAct" style="gap:4px;display:inline-flex;align-items:center"><span style="width:14px;height:14px;display:inline-flex">${I.scan}</span>Scan</button><button class="tb-act" id="gevEditAct">${gevEdit?"Done":"Edit"}</button>`;
-  } else if(tab==="tools"){
-    if(toolView==="hub") title="Tools";
-    else if(toolView==="notes") title="Notes";
-    else if(toolView==="noteEdit") title=editingNoteId?"Edit Note":"New Note";
-    else if(toolView==="calendar") title="Reminders";
-    if(toolView!=="hub") right=`<button class="tb-act" id="toolBack">${I.back} Back</button>`;
-  }
+  } else if(tab==="tools") title="Tools";
   topbar.innerHTML=`<div class="brand"><img src="${LOGO_SM}" alt="PDP"></div><div class="tb-tt"><h1>${title}</h1></div>${right}`;
   const ea=document.getElementById("editAct"); if(ea) ea.onclick=()=>{ ll.edit=!ll.edit; render(); };
   const stea=document.getElementById("stencilEditAct"); if(stea) stea.onclick=()=>{ stencilEdit=!stencilEdit; render(); };
@@ -915,7 +804,6 @@ function renderTopbar(){
   const ssa=document.getElementById("schScanAct"); if(ssa) ssa.onclick=()=>openScanOverlay("schedule");
   const gsa=document.getElementById("gevScanAct"); if(gsa) gsa.onclick=()=>openScanOverlay("gev");
   const gea=document.getElementById("gevEditAct"); if(gea) gea.onclick=()=>{ gevEdit=!gevEdit; render(); };
-  const tba=document.getElementById("toolBack"); if(tba) tba.onclick=()=>{ toolView="hub"; render(); };
 }
 
 /* ---- Tab bar ---- */
@@ -934,7 +822,7 @@ function renderHome(){
     {tab:"loadlist",ic:I.clip,cls:"",t:"Holes",s:"Build & track your daily pull"},
     {tab:"gev",ic:I.gev,cls:"",t:"GEV List",s:""},
     {tab:"schedule",ic:I.cal,cls:"",t:"Schedule",s:"Scan or build the weekly schedule"},
-    {tab:"tools",ic:I.tools,cls:"",t:"Tools",s:"Notes, Claims & Reminders"}
+    {tab:"tools",ic:I.calc,cls:"amber",t:"Claims",s:"Quick Claims Calculator"}
   ];
   view.innerHTML=
     `<div class="hero">
@@ -964,7 +852,7 @@ function renderHome(){
          <div class="go" style="color:var(--ink-3);font-size:10px;font-weight:700;letter-spacing:.06em">SOON</div>
        </div>
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v3.6.0</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v3.5.0</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
 }
 
@@ -1627,48 +1515,16 @@ function renderGEV(){
 
 /* ================= TOOLS ================= */
 function renderTools(){
-  if(toolView==="notes") return renderNotes();
-  if(toolView==="noteEdit") return renderNoteEdit();
-  if(toolView==="calendar") return renderCalendar();
-  renderToolsHub();
-}
-
-function renderToolsHub(){
-  const noteCount=notes.length;
-  const remCount=reminders.filter(r=>new Date(r.datetime)>=new Date()).length;
-  view.innerHTML=`
-    <div class="lbl" style="margin-top:6px">Tools</div>
-    <button class="tool-card" id="goNotes">
-      <div class="chip" style="background:var(--brand-tint);color:var(--brand)">${I.note}</div>
-      <div class="tx"><div class="tt">Notes</div><div class="sub">${noteCount?noteCount+" note"+(noteCount!==1?"s":""):"Create & save notes"}</div></div>
-      <div class="go">${I.chev}</div>
-    </button>
-    <button class="tool-card" id="goCalendar">
-      <div class="chip" style="background:var(--amber-tint);color:var(--amber)">${I.bell}</div>
-      <div class="tx"><div class="tt">Reminders</div><div class="sub">${remCount?remCount+" upcoming":"Set date & time alerts"}</div></div>
-      <div class="go">${I.chev}</div>
-    </button>
-    <button class="tool-card" id="goClaims">
-      <div class="chip amber" style="background:var(--amber-tint);color:var(--amber)">${I.calc}</div>
-      <div class="tx"><div class="tt">Claims Calculator</div><div class="sub">Quick 3% calculation</div></div>
-      <div class="go">${I.chev}</div>
-    </button>
-    <div class="lbl">Quick Calc</div>
-    <div class="panel">
-      <div class="panel-h"><div class="chip amber">${I.calc}</div><div><h3>Claims Calculator</h3><p>Quick Claims Calculator</p></div></div>
-      <div class="field"><label>Invoice / total amount</label>
-        <div class="money"><span class="cur">$</span><input id="claimAmt" type="number" inputmode="decimal" placeholder="0.00"></div></div>
-      <div class="result"><div><div class="rl">3% Claim</div><div class="rv tnum" id="claimOut">$0.00</div></div>
-        <button class="copy" id="claimCopy">${I.copy}<span id="copyLbl">Copy</span></button></div>
-      <div class="hintline">Calculates 3% of the entered amount.</div>
-    </div>`;
-  document.getElementById("goNotes").onclick=()=>{ toolView="notes"; render(); window.scrollTo(0,0); };
-  document.getElementById("goCalendar").onclick=()=>{ toolView="calendar"; render(); window.scrollTo(0,0); };
-  document.getElementById("goClaims").onclick=()=>{
-    const el=document.getElementById("claimAmt");
-    if(el) el.scrollIntoView({behavior:"smooth",block:"center"});
-    el.focus();
-  };
+  view.innerHTML=
+    `<div class="panel">
+       <div class="panel-h"><div class="chip amber">${I.calc}</div><div><h3>Claims Calculator</h3><p>Quick Claims Calculator</p></div></div>
+       <div class="field"><label>Invoice / total amount</label>
+         <div class="money"><span class="cur">$</span><input id="claimAmt" type="number" inputmode="decimal" placeholder="0.00"></div></div>
+       <div class="result"><div><div class="rl">3% Claim</div><div class="rv tnum" id="claimOut">$0.00</div></div>
+         <button class="copy" id="claimCopy">${I.copy}<span id="copyLbl">Copy</span></button></div>
+       <div class="hintline">Calculates 3% of the entered amount. Tap copy to grab the figure for your claim sheet.</div>
+     </div>
+     <div class="hintline" style="text-align:center;padding:20px 0;margin-top:8px;">More features coming soon.</div>`;
   const amt=document.getElementById("claimAmt"), out=document.getElementById("claimOut");
   const fmt=n=>"$"+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
   const calc=()=>{ const v=parseFloat(amt.value)||0; out.textContent=fmt(v*0.03); };
@@ -1677,149 +1533,6 @@ function renderToolsHub(){
     const v=(parseFloat(amt.value)||0)*0.03; const txt=v.toFixed(2); const lbl=document.getElementById("copyLbl");
     try{ await navigator.clipboard.writeText(txt); }catch(e){ const t=document.createElement("textarea"); t.value=txt; document.body.appendChild(t); t.select(); try{document.execCommand("copy");}catch(_){} t.remove(); }
     toast("Copied $"+txt); lbl.textContent="Copied"; setTimeout(()=>lbl.textContent="Copy",1400);
-  };
-}
-
-/* ---- Notes ---- */
-function renderNotes(){
-  let html=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-    <div style="font-size:13px;color:var(--ink-3);font-weight:500;">${notes.length} note${notes.length!==1?"s":""}</div>
-    <button class="btn" id="newNote" style="padding:8px 14px;font-size:12px">${I.plus} New Note</button>
-  </div>`;
-  if(!notes.length){
-    html+=`<div class="empty"><div class="ei">${I.note}</div><b>No notes yet</b><br>Tap <b>New Note</b> to get started.</div>`;
-  } else {
-    const sorted=[...notes].sort((a,b)=>b.updated-a.updated);
-    sorted.forEach(n=>{
-      const d=new Date(n.updated);
-      const ds=d.toLocaleDateString(undefined,{month:"short",day:"numeric"})+" · "+d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
-      html+=`<div class="note-card" data-nid="${n.id}">
-        <div class="note-title">${esc(n.title||"Untitled")}</div>
-        <div class="note-preview">${esc(n.body||"").substring(0,120)}</div>
-        <div class="note-date">${ds}</div>
-      </div>`;
-    });
-  }
-  view.innerHTML=html;
-  document.getElementById("newNote").onclick=()=>{ editingNoteId=null; toolView="noteEdit"; render(); window.scrollTo(0,0); };
-  view.querySelectorAll("[data-nid]").forEach(el=>el.onclick=()=>{
-    editingNoteId=el.dataset.nid;
-    toolView="noteEdit";
-    render(); window.scrollTo(0,0);
-  });
-}
-
-function renderNoteEdit(){
-  const note=editingNoteId?notes.find(n=>n.id===editingNoteId):null;
-  view.innerHTML=`<div class="note-editor">
-    <input id="noteTitle" placeholder="Note title…" value="${esc(note?note.title:"")}">
-    <textarea id="noteBody" placeholder="Write your note here…">${esc(note?note.body:"")}</textarea>
-    <div style="display:flex;gap:8px;margin-top:12px;">
-      <button class="btn block" id="noteSave">${I.check} Save</button>
-    </div>
-    ${note?`<button class="btn-danger" id="noteDelete" style="margin-top:10px">${I.trash} Delete Note</button>`:""}
-  </div>`;
-  document.getElementById("noteSave").onclick=()=>{
-    const title=document.getElementById("noteTitle").value.trim();
-    const body=document.getElementById("noteBody").value.trim();
-    if(!title&&!body){ toast("Note is empty"); return; }
-    if(note){
-      note.title=title; note.body=body; note.updated=Date.now();
-    } else {
-      notes.push({id:uid(),title,body,created:Date.now(),updated:Date.now()});
-    }
-    saveNotes();
-    toolView="notes"; render(); toast(note?"Note updated":"Note saved");
-  };
-  const del=document.getElementById("noteDelete");
-  if(del) del.onclick=()=>{
-    if(!confirm("Delete this note?")) return;
-    notes=notes.filter(n=>n.id!==editingNoteId);
-    saveNotes();
-    toolView="notes"; render(); toast("Note deleted");
-  };
-}
-
-/* ---- Calendar / Reminders ---- */
-function renderCalendar(){
-  requestNotifPermission();
-  const now=new Date();
-  const upcoming=reminders.filter(r=>new Date(r.datetime)>=now).sort((a,b)=>new Date(a.datetime)-new Date(b.datetime));
-  const past=reminders.filter(r=>new Date(r.datetime)<now).sort((a,b)=>new Date(b.datetime)-new Date(a.datetime));
-  const notifStatus="Notification" in window?Notification.permission:"unsupported";
-
-  let html=`<div class="rem-form">
-    <label>Reminder title</label>
-    <input id="remTitle" placeholder="e.g. Check banana load…">
-    <label>Date & time</label>
-    <input id="remDatetime" type="datetime-local">
-    <button class="btn block" id="remAdd">${I.bell} Set Reminder</button>
-  </div>`;
-
-  if(notifStatus==="denied"){
-    html+=`<div class="hintline" style="text-align:center;color:var(--danger);margin-bottom:12px;">Notifications are blocked. Enable them in your browser settings for alerts.</div>`;
-  } else if(notifStatus==="default"){
-    html+=`<div class="hintline" style="text-align:center;margin-bottom:12px;">Tap "Set Reminder" to enable push notifications.</div>`;
-  } else if(notifStatus==="granted"){
-    html+=`<div class="hintline" style="text-align:center;color:var(--brand-ink);margin-bottom:12px;">✓ Notifications enabled</div>`;
-  }
-
-  if(upcoming.length){
-    html+=`<div class="lbl" style="margin-top:8px">Upcoming</div>`;
-    upcoming.forEach(r=>{
-      const d=new Date(r.datetime);
-      const ds=d.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"})+" at "+d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
-      html+=`<div class="rem-card"><div class="rem-icon">${I.bell}</div>
-        <div class="rem-bd"><div class="rem-title">${esc(r.title)}</div><div class="rem-time">${ds}</div></div>
-        <button class="rem-del" data-rid="${r.id}">${I.x}</button></div>`;
-    });
-  }
-  if(past.length){
-    html+=`<div class="lbl" style="margin-top:8px">Past</div>`;
-    past.slice(0,10).forEach(r=>{
-      const d=new Date(r.datetime);
-      const ds=d.toLocaleDateString(undefined,{month:"short",day:"numeric"})+" at "+d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
-      html+=`<div class="rem-card"><div class="rem-icon past">${I.bell}</div>
-        <div class="rem-bd"><div class="rem-title" style="color:var(--ink-3)">${esc(r.title)}</div><div class="rem-time">${ds}</div></div>
-        <button class="rem-del" data-rid="${r.id}">${I.x}</button></div>`;
-    });
-  }
-  if(!upcoming.length&&!past.length){
-    html+=`<div class="empty"><div class="ei">${I.bell}</div><b>No reminders</b><br>Set a reminder above to get notified.</div>`;
-  }
-  if(reminders.length) html+=`<button class="btn-danger" id="remClearPast" style="margin-top:16px">Clear Past Reminders</button>`;
-
-  view.innerHTML=html;
-
-  /* Set default datetime to now + 1 hour */
-  const def=new Date(now.getTime()+3600000);
-  const pad=n=>(n<10?"0":"")+n;
-  document.getElementById("remDatetime").value=
-    `${def.getFullYear()}-${pad(def.getMonth()+1)}-${pad(def.getDate())}T${pad(def.getHours())}:${pad(def.getMinutes())}`;
-
-  document.getElementById("remAdd").onclick=()=>{
-    const title=document.getElementById("remTitle").value.trim();
-    const dt=document.getElementById("remDatetime").value;
-    if(!title){ toast("Enter a title"); return; }
-    if(!dt){ toast("Pick a date & time"); return; }
-    reminders.push({id:uid(),title,datetime:dt,created:Date.now()});
-    saveReminders();
-    scheduleReminderNotifs();
-    render(); toast("Reminder set");
-  };
-
-  view.querySelectorAll("[data-rid]").forEach(btn=>btn.onclick=()=>{
-    reminders=reminders.filter(r=>r.id!==btn.dataset.rid);
-    saveReminders();
-    scheduleReminderNotifs();
-    render(); toast("Reminder removed");
-  });
-
-  const cp=document.getElementById("remClearPast");
-  if(cp) cp.onclick=()=>{
-    reminders=reminders.filter(r=>new Date(r.datetime)>=now);
-    saveReminders();
-    render(); toast("Past reminders cleared");
   };
 }
 
@@ -2138,7 +1851,6 @@ function applyGevScan(){
 
 /* ================= Boot ================= */
 render();
-scheduleReminderNotifs();
 if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>

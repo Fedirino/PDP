@@ -4,6 +4,33 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [3.6.0] — 2026-06-10
+
+### Added
+- **Notes**: Full notes system in the Tools tab — create, edit, and delete notes. Notes persist in localStorage (`pdp_notes_v1`). Sorted by last updated, with title, preview, and timestamp display.
+- **Reminders / Calendar**: Set date & time reminders with push notification support. Upcoming and past reminders displayed in organized lists. Browser Notification API integration with permission prompting. Auto-schedules alerts for reminders within the next 7 days.
+- **Tools Hub**: Tools tab redesigned as a navigation hub with card-style links to Notes, Reminders, and Claims Calculator. Sub-view navigation with back button in topbar.
+- **New icons**: Note (document), Bell (notifications), Trash (delete) icons added to the icon set
+
+### Changed
+- **Home tile**: Tools tile updated from "Claims / Quick Claims Calculator" to "Tools / Notes, Claims & Reminders"
+- **Tools topbar**: Dynamic title changes based on active sub-view (Notes, Edit Note, Reminders)
+- Version bumped to v3.6.0
+
+### Storage
+- New localStorage key: `pdp_notes_v1` (notes data)
+- New localStorage key: `pdp_reminders_v1` (reminders data)
+
+### Files
+- `index.html` — Main app (v3.6.0)
+- `pdp-old-v3_5_0.html` — Archived v3.5.0
+- `sw.js` — Service worker (cache v3.6.0)
+- `manifest.json` — PWA manifest
+- `icon192.png` / `icon512.png` — PWA icons
+- `CHANGELOG.md` — This file
+
+---
+
 ## [2.9.0] — 2026-06-09
 
 ### Added
