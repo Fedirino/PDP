@@ -4,6 +4,62 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [4.1.0] — 2026-06-11
+
+### Changed
+- **Condensed Home screen**: Tool tiles are now a compact 2-column grid — icon + name only, no descriptions. Coming Soon items shrunk to slim rows. Everything fits one screen.
+- **Time on Home**: Current time now shows next to the date in the hero and ticks live while the Home tab is open.
+- **"In today" stat** no longer counts Request Off / Unavailable entries as working.
+
+### Fixed
+- **Notifications now actually fire on phones**: Reminders were using `new Notification()`, which Android (and iOS) PWAs silently block — notifications must go through the service worker. All reminder alerts now use `registration.showNotification()` with vibration, falling back to in-app toast if blocked. Added a **Send test notification** button in Reminders so you can verify instantly.
+- **Missed-reminder catch-up**: Browsers throttle timers while the app is backgrounded. When you return to the app, any reminders that came due while you were away now fire immediately (within 24h) instead of being lost.
+- **Sideways scan photos**: Camera photos carry EXIF rotation data that the scanner was ignoring, sending Claude rotated images — a major source of failed/garbled scans. Images are now orientation-normalized via `createImageBitmap` before upload. JPEG quality bumped 0.85 → 0.92 for crisper text.
+
+### Scan accuracy
+- **Loaned-shift labels**: Shifts with a role other than CLERK / HEADCLERK / MANAGER (e.g. "(GROCERY) CLERK", "(DAIRY) CLERK") now keep the label — extracted as "4:00P-9:00P (Grocery)" so you can see who's loaned out. Standard produce roles stay clean time-only.
+- **Rotation-aware prompt**: Claude is now told the photo may be rotated/tilted and to orient it before reading.
+- **Structure tuned to the real Wall Schedule report**: prompt now describes the Total/Weekly/Sun-Hol hours columns (ignored), employee numbers under names (ignored), per-day hours figures (ignored), and rows that are entirely Request Off (still extracted).
+- **Automatic retry**: A failed API call or malformed JSON now retries once automatically with a stricter instruction before showing the failure screen. Auth errors don't retry. JSON embedded in prose is salvaged.
+- `max_tokens` raised 2000 → 4096 — large schedules were getting truncated mid-JSON, a hidden failure cause.
+
+### Files
+- `index.html` — Main app (v4.1.0)
+- `pdp-old-v4_0_0.html` — Archived v4.0.0
+- `sw.js` — Service worker (cache v4.1.0)
+- `manifest.json` — PWA manifest
+- `icon192.png` / `icon512.png` — PWA icons
+- `CHANGELOG.md` — This file
+- `README.md` — Project readme
+
+---
+
+## [4.0.0] — 2026-06-11
+
+### Changed — Complete Visual Overhaul ("Dawn Market")
+- **New design system**: Entire color palette rebuilt — deep pine-black canvas (`#0b110d`), richer elevated surfaces, and a brighter fresh-leaf green accent (`#34c45f`) replacing the old muddy olive. Softer larger corner radii and deeper shadows throughout.
+- **New Home dashboard hero**: Time-aware greeting (Good morning / afternoon / evening), date, and three **live stat chips** — Holes left, GEV % done, and employees In Today — each tappable to jump straight to that tab. Subtle ambient sheen animation sweeps the hero (disabled when reduced-motion is on).
+- **Produce-hued tiles**: Each Home tile icon now carries its own produce-inspired color — leaf green (Stencil), citrus (Holes), berry (GEV), sky (Schedule), amber (Tools).
+- **Tab bar redesign**: Active tab gets a glowing green pill indicator; bar is taller with stronger blur.
+- **Result cards & accents**: Claims/result cards now use the new hero gradient with a soft green glow; focus rings, danger tones, and toasts all retuned to the new palette.
+- **PWA chrome**: `theme-color` and manifest background/theme colors updated to match the new canvas.
+
+### Added
+- **Daily Notes** placeholder tile on Home (Coming Soon) — planned shift handoff & day log.
+- **Sales Plan** placeholder tile on Home (Coming Soon) — planned weekly ads, pushes & targets.
+- New color tokens: citrus, berry, sky, brand gradient, and glow shadow for future features.
+
+### Files
+- `index.html` — Main app (v4.0.0)
+- `pdp-old-v3_8_0.html` — Archived v3.8.0
+- `sw.js` — Service worker (cache v4.0.0)
+- `manifest.json` — PWA manifest (new theme colors)
+- `icon192.png` / `icon512.png` — PWA icons
+- `CHANGELOG.md` — This file
+- `README.md` — Project readme
+
+---
+
 ## [3.8.0] — 2026-06-11
 
 ### Added

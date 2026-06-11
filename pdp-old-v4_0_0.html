@@ -120,17 +120,6 @@
     margin:26px 4px 12px;}
 
   .tiles{display:flex;flex-direction:column;gap:11px;}
-  .tilegrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
-  .tile.compact{flex-direction:column;align-items:flex-start;gap:10px;padding:13px 14px;}
-  .tile.compact .chip{width:38px;height:38px;border-radius:12px;}
-  .tile.compact .chip svg{width:19px;height:19px;}
-  .tile.compact .tt{font-size:14.5px;}
-  .tile.compact .go{display:none;}
-  .tile.soon{flex-direction:row;align-items:center;gap:10px;padding:10px 12px;opacity:.6;cursor:default;}
-  .tile.soon .chip{width:32px;height:32px;border-radius:10px;}
-  .tile.soon .chip svg{width:16px;height:16px;}
-  .tile.soon .tt{font-size:13px;}
-  .tile.soon .badge{margin-left:auto;color:var(--ink-3);font-size:9px;font-weight:700;letter-spacing:.07em;flex:none;}
   .tile{text-align:left;appearance:none;border:1px solid var(--line);background:var(--surface);
     border-radius:var(--r);padding:16px 17px;cursor:pointer;font:inherit;color:inherit;box-shadow:var(--sh-sm);
     display:flex;align-items:center;gap:15px;
@@ -866,24 +855,6 @@ let checklist;
 })();
 function saveChecklist(){ writeK(CHECKLIST_KEY,JSON.stringify(checklist)); }
 
-async function fireNotification(title,body,tag){
-  /* Android/iOS PWAs block `new Notification()` in page context — must go
-     through the service worker registration. Falls back gracefully. */
-  try{
-    if(!("Notification" in window)||Notification.permission!=="granted") return false;
-    if(navigator.serviceWorker){
-      const reg=await navigator.serviceWorker.getRegistration();
-      if(reg&&reg.showNotification){
-        await reg.showNotification(title,{body,icon:"icon192.png",badge:"icon192.png",tag,vibrate:[200,100,200],renotify:true});
-        return true;
-      }
-    }
-    new Notification(title,{body,icon:"icon192.png",tag});
-    return true;
-  }catch(e){
-    try{ new Notification(title,{body}); return true; }catch(e2){ return false; }
-  }
-}
 function scheduleReminderNotifs(){
   Object.values(reminderTimers).forEach(t=>clearTimeout(t));
   reminderTimers={};
@@ -892,31 +863,16 @@ function scheduleReminderNotifs(){
     const dt=new Date(r.datetime).getTime();
     const diff=dt-now;
     if(diff>0&&diff<864e5*7){
-      reminderTimers[r.id]=setTimeout(async()=>{
-        r.fired=true; saveReminders();
-        const ok=await fireNotification("PDP Reminder",r.title,"pdp-"+r.id);
-        if(!ok) toast("⏰ "+r.title,5000);
+      reminderTimers[r.id]=setTimeout(()=>{
+        try{
+          if("Notification" in window && Notification.permission==="granted"){
+            new Notification("PDP Reminder",{body:r.title,icon:"icon192.png",tag:"pdp-"+r.id});
+          }
+        }catch(e){ /* notification not available in this context */ }
       },diff);
     }
   });
 }
-function catchUpReminders(){
-  /* Browsers throttle timers while the app is backgrounded. When we come
-     back, fire anything that came due while we were away. */
-  const now=Date.now();
-  let changed=false;
-  reminders.forEach(r=>{
-    const dt=new Date(r.datetime).getTime();
-    if(dt<=now&&!r.fired&&now-dt<864e5){
-      r.fired=true; changed=true;
-      fireNotification("PDP Reminder",r.title,"pdp-"+r.id).then(ok=>{ if(!ok) toast("⏰ "+r.title,5000); });
-    }
-  });
-  if(changed) saveReminders();
-  scheduleReminderNotifs();
-}
-document.addEventListener("visibilitychange",()=>{ if(!document.hidden) catchUpReminders(); });
-window.addEventListener("focus",catchUpReminders);
 function requestNotifPermission(){
   /* Must be called from a user gesture (tap). Returns a promise. */
   return new Promise(resolve=>{
@@ -1109,7 +1065,7 @@ function homeStats(){
     const todayKey=SCH_KEYS[new Date().getDay()];
     if(w&&Array.isArray(w.employees)) for(const emp of w.employees){
       const v=((emp.shifts&&emp.shifts[todayKey])||"").trim().toLowerCase();
-      if(v&&v!=="off"&&v!=="-"&&v!=="\u2014"&&v!=="x"&&!v.startsWith("req")&&!v.startsWith("unavail")) working++;
+      if(v&&v!=="off"&&v!=="-"&&v!=="\u2014"&&v!=="x") working++;
     }
   }catch(e){}
   return { holes, gevDone, gevTotal, working };
@@ -1117,22 +1073,21 @@ function homeStats(){
 function renderHome(){
   const now=new Date();
   const date=now.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
-  const time=now.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
   const h=now.getHours();
   const greet=h<4?"Closing it out":h<12?"Good morning":h<17?"Good afternoon":"Good evening";
   const st=homeStats();
   const gevPct=st.gevTotal?Math.round((st.gevDone/st.gevTotal)*100):0;
   const tiles=[
-    {tab:"stencil",ic:I.search,cls:"",t:"Stencil"},
-    {tab:"loadlist",ic:I.clip,cls:"citrus",t:"Holes"},
-    {tab:"gev",ic:I.gev,cls:"berry",t:"GEV List"},
-    {tab:"schedule",ic:I.cal,cls:"sky",t:"Schedule"},
-    {tab:"tools",ic:I.tools,cls:"amber",t:"Tools"}
+    {tab:"stencil",ic:I.search,cls:"",t:"Stencil",s:`Browse & filter ${STENCIL.length} items`},
+    {tab:"loadlist",ic:I.clip,cls:"citrus",t:"Holes",s:"Build & track your daily pull"},
+    {tab:"gev",ic:I.gev,cls:"berry",t:"GEV List",s:"Everyday variety checklists"},
+    {tab:"schedule",ic:I.cal,cls:"sky",t:"Schedule",s:"Scan or build the weekly schedule"},
+    {tab:"tools",ic:I.tools,cls:"amber",t:"Tools",s:"Checklist, Notes, Calculator & more"}
   ];
   const soon=[
-    {ic:I.pog,t:"Plan-O-Grams"},
-    {ic:I.note,t:"Daily Notes"},
-    {ic:I.calc,t:"Sales Plan"}
+    {ic:I.pog,t:"Plan-O-Grams",s:"Section layouts & resets"},
+    {ic:I.note,t:"Daily Notes",s:"Shift handoff & day log"},
+    {ic:I.calc,t:"Sales Plan",s:"Weekly ads, pushes & targets"}
   ];
   view.innerHTML=
     `<div class="hero">
@@ -1143,7 +1098,7 @@ function renderHome(){
            <h2 style="margin-top:4px">${greet}</h2>
          </div>
        </div>
-       <div class="date" style="position:relative">${date} · <span id="heroClock" class="tnum">${time}</span></div>
+       <div class="date" style="position:relative">${date}</div>
        <div class="hero-stats">
          <button class="hstat${st.holes?"":" zero"}" data-go="loadlist">
            <div class="hv tnum">${st.holes}</div><div class="hl">Holes left</div>
@@ -1157,34 +1112,25 @@ function renderHome(){
        </div>
      </div>
      <div class="lbl">Open</div>
-     <div class="tilegrid">
+     <div class="tiles">
        ${tiles.map((x,i)=>`
-         <button class="tile compact" data-go="${x.tab}" style="animation-delay:${0.05+i*0.05}s">
+         <button class="tile" data-go="${x.tab}" style="animation-delay:${0.06+i*0.06}s">
            <div class="chip ${x.cls}">${x.ic}</div>
-           <div class="tx"><div class="tt">${x.t}</div></div>
+           <div class="tx"><div class="tt">${x.t}</div><div class="sub">${x.s}</div></div>
+           <div class="go">${I.chev}</div>
          </button>`).join("")}
      </div>
      <div class="lbl">Coming Soon</div>
-     <div class="tiles" style="gap:7px">
+     <div class="tiles">
        ${soon.map((x,i)=>`
-       <div class="tile soon" style="animation-delay:${0.3+i*0.05}s">
+       <div class="tile" style="opacity:.6;cursor:default;animation-delay:${0.36+i*0.06}s">
          <div class="chip mute">${x.ic}</div>
-         <div class="tx"><div class="tt">${x.t}</div></div>
-         <div class="badge">SOON</div>
+         <div class="tx"><div class="tt">${x.t}</div><div class="sub">${x.s}</div></div>
+         <div class="go" style="color:var(--ink-3);font-size:10px;font-weight:700;letter-spacing:.06em">SOON</div>
        </div>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v4.1.0</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v4.0.0</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
-  startHomeClock();
-}
-let homeClockTimer=null;
-function startHomeClock(){
-  clearInterval(homeClockTimer);
-  homeClockTimer=setInterval(()=>{
-    const el=document.getElementById("heroClock");
-    if(!el){ clearInterval(homeClockTimer); return; }
-    el.textContent=new Date().toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
-  },15000);
 }
 
 /* ================= STENCIL ================= */
@@ -2061,8 +2007,7 @@ function renderCalendar(){
   } else if(notifStatus==="default"){
     html+=`<div class="hintline" style="text-align:center;margin-bottom:12px;">Tap "Set Reminder" to enable notifications. You'll be asked to allow them.</div>`;
   } else if(notifStatus==="granted"){
-    html+=`<div class="hintline" style="text-align:center;color:var(--brand-ink);margin-bottom:4px;">✓ Notifications enabled</div>
-    <div style="text-align:center;margin-bottom:12px;"><button class="sch-sm-btn" id="remTest">Send test notification</button></div>`;
+    html+=`<div class="hintline" style="text-align:center;color:var(--brand-ink);margin-bottom:12px;">✓ Notifications enabled — app must stay open/backgrounded for alerts to fire</div>`;
   } else {
     html+=`<div class="hintline" style="text-align:center;margin-bottom:12px;">Notifications may not be supported on this device. Reminders will still be saved.</div>`;
   }
@@ -2117,13 +2062,6 @@ function renderCalendar(){
     else if(perm==="denied") toast("Reminder saved — enable notifications in settings");
     else if(perm==="unsupported") toast("Reminder saved — notifications not supported here");
     else toast("Reminder set");
-  });
-
-  const testBtn=document.getElementById("remTest");
-  if(testBtn) testBtn.addEventListener("click",async function(e){
-    e.preventDefault(); e.stopPropagation();
-    const ok=await fireNotification("PDP Test","Notifications are working! \ud83d\udfe2","pdp-test");
-    toast(ok?"Test sent \u2014 check your notification shade":"Couldn't send \u2014 check site notification settings",3200);
   });
 
   view.querySelectorAll("[data-rid]").forEach(btn=>btn.addEventListener("click",function(e){
@@ -2361,26 +2299,15 @@ function handleScanFile(file){
   reader.onload=async()=>{
     const imgSrc=reader.result;
 
-    /* Normalize orientation + compress for API.
-       Camera photos carry EXIF rotation that plain canvas drawing ignores,
-       which used to send Claude sideways images. createImageBitmap with
-       imageOrientation:"from-image" bakes the rotation in. */
-    let src=null;
-    try{
-      if(window.createImageBitmap) src=await createImageBitmap(file,{imageOrientation:"from-image"});
-    }catch(e){ src=null; }
-    if(!src){
-      const img=new Image();
-      await new Promise((ok,fail)=>{ img.onload=ok; img.onerror=fail; img.src=imgSrc; });
-      src=img;
-    }
-    const MAX=1800; let w=src.width, h=src.height;
+    /* Compress image for API (keep quality, reduce size) */
+    const img=new Image();
+    await new Promise((ok,fail)=>{ img.onload=ok; img.onerror=fail; img.src=imgSrc; });
+    const MAX=1800; let w=img.width, h=img.height;
     const scale=Math.min(1, MAX/Math.max(w,h));
     w=Math.round(w*scale); h=Math.round(h*scale);
     const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
-    cv.getContext("2d").drawImage(src,0,0,w,h);
-    if(src.close) try{ src.close(); }catch(e){}
-    const compressed=cv.toDataURL("image/jpeg",0.92);
+    cv.getContext("2d").drawImage(img,0,0,w,h);
+    const compressed=cv.toDataURL("image/jpeg",0.85);
     const b64=compressed.split(",")[1];
 
     scanBody.innerHTML=`
@@ -2396,38 +2323,32 @@ function handleScanFile(file){
     try{
       status.textContent=scanMode==="gev"?"Analyzing GEV list…":"Analyzing schedule…";
 
-      const schedulePrompt=`You are reading a grocery store "Wall Schedule" for a produce department. It's a printed grid/table, photographed with a phone.
-
-ORIENTATION & QUALITY:
-- The photo may be ROTATED (90/180/270 degrees), tilted, or skewed. First determine the correct orientation (the title "Wall Schedule" and employee names read left-to-right), mentally rotate the image, THEN read the grid.
-- The photo may be dim, blurry, or low-contrast. Read carefully; use row/column alignment to stay on track.
+      const schedulePrompt=`You are reading a grocery store "Wall Schedule" for a produce department. It's a printed grid/table.
 
 STRUCTURE:
-- Title "Wall Schedule"; header shows store/department like "Store 2606 - PRODUCE"
-- Left columns: Employee name (ALL CAPS "LASTNAME, FIRSTNAME M" — sometimes a small employee number appears under the name; ignore that number), then Total Hours, Weekly Hours, Sun/Hol Hours — IGNORE these hour columns
-- Day columns each show the day name and a date like "Sun 6/14/2026". There may be TWO Saturday columns — ALWAYS IGNORE THE FIRST/LEFTMOST SATURDAY (usually crosshatched). Only extract: Sun, Mon, Tue, Wed, Thu, Fri, Sat (the rightmost Saturday).
-- Each day cell, top to bottom: shift time like "7:00A - 3:30P"; a role label; sometimes "Meal 30 min" or "Meal 60 min"; a daily-hours number like "8.00" (ignore that number)
-
-ROLE LABELS — IMPORTANT:
-- Standard produce roles are exactly: CLERK, HEADCLERK, MANAGER. When the role is one of these three, do NOT include it in the shift — output the time only.
-- If the role is ANYTHING ELSE — e.g. "(GROCERY) CLERK", "(DAIRY) CLERK", or any other department/label — APPEND it to the shift in parentheses, title case: "4:00P-9:00P (Grocery)". This tells the team the shift is loaned to another department.
+- Header shows a date range like "6/21/2026 - 6/27/2026"
+- Employee names in the leftmost column (ALL CAPS: "LASTNAME, FIRSTNAME M")
+- Day columns: there may be TWO Saturday columns — ALWAYS IGNORE THE FIRST/LEFTMOST SATURDAY. Only extract: Sun, Mon, Tue, Wed, Thu, Fri, Sat (the rightmost Saturday).
+- Each cell has a shift time like "7:00A - 3:30P", OR is empty/hatched (diagonal lines = no shift), OR says "UNAVAILABLE" or "Request Off"
+- Below shift times: role (MANAGER, CLERK) — IGNORE
+- Below role: meal info like "Meal 30 min" — EXTRACT the meal minutes
 
 CRITICAL — BLANK/EMPTY CELLS:
 Many cells will be BLANK, EMPTY, or show diagonal hatching lines. These mean the employee does NOT work that day. You MUST use "" (empty string) for these. Do NOT fill in shifts for days that are blank. If a cell has no time written in it, it is EMPTY — use "".
 
 Return ONLY valid JSON. No markdown, no backticks, no explanation.
 
-{"weekStart":"2026-06-14","employees":[{"name":"Firstname Lastname","shifts":{"sun":"7:00A-3:30P","mon":"","tue":"4:00P-9:00P (Grocery)","wed":"","thu":"","fri":"8:00A-4:30P","sat":""},"meals":{"sun":30,"mon":0,"tue":0,"wed":0,"thu":0,"fri":30,"sat":0}}]}
+{"weekStart":"2026-06-21","employees":[{"name":"Firstname Lastname","shifts":{"sun":"7:00A-3:30P","mon":"","tue":"","wed":"","thu":"","fri":"8:00A-4:30P","sat":""},"meals":{"sun":30,"mon":0,"tue":0,"wed":0,"thu":0,"fri":30,"sat":0}}]}
 
 RULES:
-- weekStart: the SUNDAY date from the Sun column header, format "YYYY-MM-DD"
-- Convert names: "DUTKIEWICZ, GAVIN S" \u2192 "Gavin Dutkiewicz"
+- weekStart: the SUNDAY date from the header date range, format "YYYY-MM-DD"
+- Convert names: "DUTKIEWICZ, GAVIN S" → "Gavin Dutkiewicz"
 - Shift format: "7:00A-3:30P" (no spaces around dash)
 - "" (empty string) for ANY cell that is blank, hatched, has no time, or has diagonal lines
 - "REQ OFF" for "Request Off"
 - "UNAVAIL" for "UNAVAILABLE"
 - meals: integer minutes (30 or 60). Use 0 if no meal or no shift that day.
-- Read EVERY employee row — do not skip anyone, even rows with no shifts at all (like all Request Off)
+- Read EVERY employee row — do not skip anyone
 - IGNORE the first/leftmost Saturday column
 - Double-check: if a cell has NO time written in it, use "" — do NOT guess or copy from adjacent cells`;
 
@@ -2447,51 +2368,38 @@ RULES:
 
       const promptText=scanMode==="gev"?gevPrompt:schedulePrompt;
 
-      /* Up to 2 attempts: transient API errors and malformed JSON get one
-         automatic retry (with a stricter instruction) before failing. */
-      async function scanAttempt(extraInstruction){
-        const resp=await fetch("https://api.anthropic.com/v1/messages",{
-          method:"POST",
-          headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-          body:JSON.stringify({
-            model:"claude-sonnet-4-6",
-            max_tokens:4096,
-            messages:[{role:"user",content:[
-              {type:"image",source:{type:"base64",media_type:"image/jpeg",data:b64}},
-              {type:"text",text:promptText+(extraInstruction||"")}
-            ]}]
-          })
-        });
-        if(!resp.ok){
-          const err=await resp.json().catch(()=>({}));
-          const msg=err.error?.message||"Unknown error";
-          const type=err.error?.type||"";
-          const e=new Error(`API ${resp.status}: ${type?type+" — ":""}${msg}`);
-          e.status=resp.status;
-          throw e;
-        }
-        const data=await resp.json();
-        let jsonText=data.content.map(b=>b.text||"").join("");
-        jsonText=jsonText.replace(/```json\s*/g,"").replace(/```\s*/g,"").trim();
-        /* Salvage JSON embedded in prose */
-        if(jsonText&&jsonText[0]!=="{"){
-          const i=jsonText.indexOf("{"), j=jsonText.lastIndexOf("}");
-          if(i>-1&&j>i) jsonText=jsonText.slice(i,j+1);
-        }
-        return JSON.parse(jsonText);
+      const resp=await fetch("https://api.anthropic.com/v1/messages",{
+        method:"POST",
+        headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+        body:JSON.stringify({
+          model:"claude-sonnet-4-6",
+          max_tokens:2000,
+          messages:[{role:"user",content:[
+            {type:"image",source:{type:"base64",media_type:"image/jpeg",data:b64}},
+            {type:"text",text:promptText}
+          ]}]
+        })
+      });
+
+      if(!resp.ok){
+        const err=await resp.json().catch(()=>({}));
+        const msg=err.error?.message||"Unknown error";
+        const type=err.error?.type||"";
+        throw new Error(`API ${resp.status}: ${type?type+" — ":""}${msg}`);
       }
 
-      let parsed;
-      try{
-        parsed=await scanAttempt();
-      }catch(e1){
-        /* Don't retry auth/key problems */
-        if(e1.status===401||e1.status===403) throw e1;
-        status.textContent="First pass failed — retrying…";
-        await new Promise(r=>setTimeout(r,1200));
-        parsed=await scanAttempt("\n\nIMPORTANT: Your previous attempt failed. Look very carefully, correct the image orientation in your head first, and return ONLY the valid JSON object — nothing else.");
-      }
+      const data=await resp.json();
       status.textContent="Parsing results…";
+
+      /* Extract JSON from response */
+      let jsonText=data.content.map(b=>b.text||"").join("");
+      /* Strip markdown fences if present */
+      jsonText=jsonText.replace(/```json\s*/g,"").replace(/```\s*/g,"").trim();
+
+      let parsed;
+      try{ parsed=JSON.parse(jsonText); }catch(e){
+        throw new Error("Could not parse AI response as JSON. Raw: "+jsonText.substring(0,200));
+      }
 
       if(scanMode==="gev"){
         /* GEV mode: expect {categories:[...]} */
