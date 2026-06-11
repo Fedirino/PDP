@@ -4,6 +4,36 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [3.8.0] — 2026-06-11
+
+### Added
+- **Daily Checklist**: New tool in the Tools hub — create an editable list of daily tasks that auto-resets each day. Edit mode lets you rename, delete, and reorder items. Persists in `pdp_checklist_v1`.
+- **General Calculator**: Full calculator in the Tools hub — basic arithmetic (+, −, ×, ÷), percentage, sign flip, and copy result. Accessible from its own card tile.
+- **Item reordering in Holes edit mode**: Up/down arrow buttons on each product let you change the display order while editing a section or subsection.
+- **Subsections in any section**: When editing a flat section (like Veg Wall), a new "Add Subsection" button appears. Adding one converts the section into a grouped section (existing items move into a "General" group). Works just like Endcaps.
+
+### Fixed
+- **Notes not saving on mobile**: Save and Delete buttons in the note editor now use `addEventListener` with `preventDefault`/`stopPropagation` instead of bare `.onclick`, fixing tap reliability on Android and iOS.
+- **Notifications permission flow**: Permission is now requested as an `async/await` flow inside the Set Reminder tap handler (proper user gesture). Status feedback tells you whether notifications are enabled, blocked, or unsupported. Added note that app must stay open/backgrounded for timer-based alerts.
+
+### Changed
+- Tools hub now shows Daily Checklist and Calculator as top-level card tiles
+- Claims Calculator copy button rebound with `addEventListener`
+- Notification status message is more descriptive and honest about limitations
+- Home Tools tile description updated to "Checklist, Notes, Calculator & more"
+- Version bumped to v3.8.0
+
+### Files
+- `index.html` — Main app (v3.8.0)
+- `pdp-old-v3_7_0.html` — Archived v3.7.0
+- `sw.js` — Service worker (cache v3.8.0)
+- `manifest.json` — PWA manifest
+- `icon192.png` / `icon512.png` — PWA icons
+- `CHANGELOG.md` — This file
+- `README.md` — Project readme
+
+---
+
 ## [3.7.0] — 2026-06-10
 
 ### Fixed

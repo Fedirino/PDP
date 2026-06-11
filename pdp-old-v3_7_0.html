@@ -506,49 +506,6 @@
   .grp .grp-act svg{width:13px;height:13px;}
   .grp .grp-act:active{color:var(--brand);border-color:var(--brand);}
   .grp .grp-act.danger:active{color:var(--danger);border-color:var(--danger);}
-
-  /* ======= Reorder Buttons ======= */
-  .reorder-btns{display:flex;flex-direction:column;gap:2px;flex:none;}
-  .reorder-btn{appearance:none;border:1px solid var(--line);background:var(--surface-2);color:var(--ink-3);
-    width:28px;height:22px;border-radius:6px;cursor:pointer;display:grid;place-items:center;padding:0;
-    transition:color .12s ease,border-color .12s ease;}
-  .reorder-btn:active{color:var(--brand);border-color:var(--brand);background:var(--brand-tint);}
-  .reorder-btn svg{width:12px;height:12px;}
-  .reorder-btn:disabled{opacity:.25;pointer-events:none;}
-
-  /* ======= General Calculator ======= */
-  .calc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px;}
-  .calc-grid button{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);
-    font:inherit;font-size:18px;font-weight:600;padding:14px 0;border-radius:var(--r-sm);cursor:pointer;
-    transition:background .1s ease;}
-  .calc-grid button:active{background:var(--surface-2);}
-  .calc-grid button.op{background:var(--brand-tint);color:var(--brand-ink);border-color:var(--brand-tint);}
-  .calc-grid button.op:active{background:var(--brand);color:#fff;}
-  .calc-grid button.eq{background:var(--brand);color:#fff;border-color:var(--brand);}
-  .calc-grid button.eq:active{background:var(--brand-d);}
-  .calc-grid button.clear{color:var(--danger);}
-  .calc-display{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
-    padding:14px 16px;font-size:28px;font-weight:700;text-align:right;color:var(--ink);
-    font-variant-numeric:tabular-nums;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-    margin-bottom:8px;min-height:60px;display:flex;align-items:center;justify-content:flex-end;}
-
-  /* ======= Daily Checklist ======= */
-  .cl-item{display:flex;align-items:center;gap:10px;padding:10px 13px;background:var(--surface);
-    border:1px solid var(--line);border-radius:var(--r-sm);margin-bottom:5px;
-    cursor:pointer;transition:opacity .15s ease;}
-  .cl-item:active{opacity:.8;}
-  .cl-item .cl-tick{width:22px;height:22px;border-radius:50%;border:2px solid var(--line-2);flex:none;display:grid;
-    place-items:center;color:#fff;transition:background .14s ease,border-color .14s ease;}
-  .cl-item .cl-tick svg{width:13px;height:13px;opacity:0;transition:opacity .12s ease;}
-  .cl-item.done{opacity:.45;}
-  .cl-item.done .cl-name{text-decoration:line-through;color:var(--ink-3);font-weight:500;}
-  .cl-item.done .cl-tick{background:var(--brand);border-color:var(--brand);}
-  .cl-item.done .cl-tick svg{opacity:1;}
-  .cl-item .cl-name{flex:1;font-size:13.5px;font-weight:600;}
-  .cl-item .cl-edit-btns{display:flex;gap:4px;flex:none;}
-  .cl-item .cl-edit-btns button{appearance:none;border:none;background:none;cursor:pointer;padding:4px;
-    color:var(--ink-3);border-radius:6px;}
-  .cl-item .cl-edit-btns button:active{color:var(--ink);background:var(--surface-2);}
   .scan-status{color:var(--ink-3);font-size:12px;font-weight:500;text-align:center;}
   .scan-result{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;
     max-height:340px;overflow-y:auto;}
@@ -609,10 +566,7 @@ const I = {
   filter:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>',
   gev:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12l2 2 4-4"/></svg>',
   scan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5a2 2 0 0 1 2-2h3"/><path d="M15 3h3a2 2 0 0 1 2 2v2"/><path d="M20 17v2a2 2 0 0 1-2 2h-3"/><path d="M9 21H6a2 2 0 0 1-2-2v-2"/><path d="M4 12h16"/></svg>',
-  pen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>',
-  up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>',
-  down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>',
-  checklist:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l3 3 5-5"/><path d="M4 17l3 3 5-5"/><path d="M15 6h5M15 12h5M15 18h5"/></svg>'
+  pen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>'
 };
 
 /* ======= Master Stencil ======= */
@@ -816,19 +770,6 @@ let reminders;
 function saveReminders(){ writeK(REMINDERS_KEY,JSON.stringify(reminders)); }
 let reminderTimers={};
 
-/* ======= Daily Checklist ======= */
-const CHECKLIST_KEY="pdp_checklist_v1";
-let checklist;
-(function loadChecklist(){
-  const raw=readK(CHECKLIST_KEY);
-  if(raw){ try{ checklist=JSON.parse(raw); }catch(e){ checklist={items:[],checked:{}}; } }
-  if(!checklist||!Array.isArray(checklist.items)) checklist={items:[],checked:{}};
-  /* Auto-reset checked items daily */
-  const today=new Date().toDateString();
-  if(checklist.lastReset!==today){ checklist.checked={}; checklist.lastReset=today; saveChecklist(); }
-})();
-function saveChecklist(){ writeK(CHECKLIST_KEY,JSON.stringify(checklist)); }
-
 function scheduleReminderNotifs(){
   Object.values(reminderTimers).forEach(t=>clearTimeout(t));
   reminderTimers={};
@@ -838,28 +779,22 @@ function scheduleReminderNotifs(){
     const diff=dt-now;
     if(diff>0&&diff<864e5*7){
       reminderTimers[r.id]=setTimeout(()=>{
-        try{
-          if("Notification" in window && Notification.permission==="granted"){
-            new Notification("PDP Reminder",{body:r.title,icon:"icon192.png",tag:"pdp-"+r.id});
-          }
-        }catch(e){ /* notification not available in this context */ }
+        if("Notification" in window && Notification.permission==="granted"){
+          new Notification("PDP Reminder",{body:r.title,icon:"icon192.png"});
+        }
       },diff);
     }
   });
 }
 function requestNotifPermission(){
-  /* Must be called from a user gesture (tap). Returns a promise. */
-  return new Promise(resolve=>{
-    try{
-      if(!("Notification" in window)){ resolve("unsupported"); return; }
-      if(Notification.permission==="granted"){ resolve("granted"); return; }
-      if(Notification.permission==="denied"){ resolve("denied"); return; }
-      Notification.requestPermission().then(p=>resolve(p)).catch(()=>resolve("error"));
-    }catch(e){ resolve("error"); }
-  });
+  /* Must be called from a user gesture (tap) — iOS throws otherwise. Always guarded. */
+  try{
+    if(!("Notification" in window)) return;
+    if(Notification.permission==="default") Notification.requestPermission().catch(()=>{});
+  }catch(e){ /* unsupported context — reminders still save fine */ }
 }
 
-let toolView="hub"; /* hub | notes | noteEdit | calendar | calculator | checklist */
+let toolView="hub"; /* hub | notes | noteEdit | calendar */
 let editingNoteId=null;
 
 /* ======= Helpers ======= */
@@ -999,8 +934,6 @@ function renderTopbar(){
     else if(toolView==="notes") title="Notes";
     else if(toolView==="noteEdit") title=editingNoteId?"Edit Note":"New Note";
     else if(toolView==="calendar") title="Reminders";
-    else if(toolView==="calculator") title="Calculator";
-    else if(toolView==="checklist") title="Daily Checklist";
     if(toolView!=="hub") right=`<button class="tb-act" id="toolBack">${I.back} Back</button>`;
   }
   topbar.innerHTML=`<div class="brand"><img src="${LOGO_SM}" alt="PDP"></div><div class="tb-tt"><h1>${title}</h1></div>${right}`;
@@ -1029,7 +962,7 @@ function renderHome(){
     {tab:"loadlist",ic:I.clip,cls:"",t:"Holes",s:"Build & track your daily pull"},
     {tab:"gev",ic:I.gev,cls:"",t:"GEV List",s:""},
     {tab:"schedule",ic:I.cal,cls:"",t:"Schedule",s:"Scan or build the weekly schedule"},
-    {tab:"tools",ic:I.tools,cls:"",t:"Tools",s:"Checklist, Notes, Calculator & more"}
+    {tab:"tools",ic:I.tools,cls:"",t:"Tools",s:"Notes, Claims & Reminders"}
   ];
   view.innerHTML=
     `<div class="hero">
@@ -1059,7 +992,7 @@ function renderHome(){
          <div class="go" style="color:var(--ink-3);font-size:10px;font-weight:700;letter-spacing:.06em">SOON</div>
        </div>
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v3.8.0</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v3.7.0</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
 }
 
@@ -1258,13 +1191,8 @@ function groupedHTML(sec){
         <div class="chev">${I.chev}</div></button>`;
     }
     if(open){ let b="";
-      sub.products.forEach((p,pi)=>{ if(ll.edit){
-          b+=`<div class="item" style="cursor:default">
-            <div class="reorder-btns">
-              <button class="reorder-btn" data-gmoveup="${sub.id}_${p.id}"${pi===0?" disabled":""}>${I.up}</button>
-              <button class="reorder-btn" data-gmovedown="${sub.id}_${p.id}"${pi===sub.products.length-1?" disabled":""}>${I.down}</button>
-            </div>
-            <div class="pn">${esc(p.name)}</div><button class="del" data-delprod="${p.id}" data-psub="${sub.id}">${I.x}</button></div>`;
+      sub.products.forEach(p=>{ if(ll.edit){
+          b+=`<div class="item" style="cursor:default"><div class="pn">${esc(p.name)}</div><button class="del" data-delprod="${p.id}" data-psub="${sub.id}">${I.x}</button></div>`;
         } else { const on=isOnList(p.id);
           b+=`<button class="item${on?" on":""}" data-prod="${p.id}" data-psub="${sub.id}"><div class="tick">${I.check}</div><div class="pn">${esc(p.name)}</div></button>`; }});
       if(ll.edit) b+=`<div class="addrow-wrap"><div class="addrow"><input id="np_${sub.id}" placeholder="Add to ${esc(sub.name)}…" autocomplete="off"><button data-addprod="${sub.id}">Add</button></div><div class="sg" id="sg_np_${sub.id}"></div></div>`;
@@ -1283,17 +1211,6 @@ function wireGrouped(sec){
     view.querySelectorAll("[data-delsub]").forEach(b=>b.onclick=()=>{ const sub=subById(sec,b.dataset.delsub);
       if(confirm(`Delete "${sub.name}"?`)){ state.pull=state.pull.filter(p=>p.subId!==sub.id); sec.subsections=sec.subsections.filter(x=>x.id!==sub.id); save(); render(); } });
     view.querySelectorAll("[data-delprod]").forEach(b=>b.onclick=()=>{ const sub=subById(sec,b.dataset.psub),pid=b.dataset.delprod; sub.products=sub.products.filter(x=>x.id!==pid); state.pull=state.pull.filter(p=>p.productId!==pid); save(); render(); });
-    /* Reorder within subsections */
-    view.querySelectorAll("[data-gmoveup]").forEach(b=>b.addEventListener("click",function(e){
-      e.preventDefault(); const [sid,pid]=b.dataset.gmoveup.split("_"); const sub=subById(sec,sid); if(!sub) return;
-      const i=sub.products.findIndex(x=>x.id===pid);
-      if(i>0){ [sub.products[i-1],sub.products[i]]=[sub.products[i],sub.products[i-1]]; save(); render(); }
-    }));
-    view.querySelectorAll("[data-gmovedown]").forEach(b=>b.addEventListener("click",function(e){
-      e.preventDefault(); const [sid,pid]=b.dataset.gmovedown.split("_"); const sub=subById(sec,sid); if(!sub) return;
-      const i=sub.products.findIndex(x=>x.id===pid);
-      if(i<sub.products.length-1){ [sub.products[i],sub.products[i+1]]=[sub.products[i+1],sub.products[i]]; save(); render(); }
-    }));
     view.querySelectorAll("[data-addprod]").forEach(b=>{ const run=()=>{ const sub=subById(sec,b.dataset.addprod),inp=document.getElementById("np_"+b.dataset.addprod); const v=inp.value.trim(); if(!v) return; sub.products.push({id:uid(),name:v}); save(); render(); const f=document.getElementById("np_"+b.dataset.addprod); if(f) f.focus(); };
       b.onclick=run; const inp=document.getElementById("np_"+b.dataset.addprod); if(inp) inp.onkeydown=e=>{ if(e.key==="Enter") run(); };
       wireStencilSuggest("np_"+b.dataset.addprod,run); });
@@ -1305,50 +1222,17 @@ function wireGrouped(sec){
 
 function productsHTML(sec,cont,subId){
   let h="";
-  cont.products.forEach((p,i)=>{ if(ll.edit){
-      h+=`<div class="item" style="cursor:default">
-        <div class="reorder-btns">
-          <button class="reorder-btn" data-moveup="${p.id}"${i===0?" disabled":""}>${I.up}</button>
-          <button class="reorder-btn" data-movedown="${p.id}"${i===cont.products.length-1?" disabled":""}>${I.down}</button>
-        </div>
-        <div class="pn">${esc(p.name)}</div><button class="del" data-delprod="${p.id}">${I.x}</button></div>`;
+  cont.products.forEach(p=>{ if(ll.edit){
+      h+=`<div class="item" style="cursor:default"><div class="pn">${esc(p.name)}</div><button class="del" data-delprod="${p.id}">${I.x}</button></div>`;
     } else { const on=isOnList(p.id);
       h+=`<button class="item${on?" on":""}" data-prod="${p.id}"><div class="tick">${I.check}</div><div class="pn">${esc(p.name)}</div></button>`; }});
-  if(ll.edit){
-    h+=`<div class="addrow-wrap"><div class="addrow"><input id="newProd" placeholder="Add product to ${esc(cont.name)}…" autocomplete="off"><button id="addProd">Add</button></div><div class="sg" id="sg_newProd"></div></div>`;
-    if(!subId) h+=`<div style="margin-top:10px"><button class="btn ghost block" id="addSubsec" style="font-size:11px;padding:8px">${I.plus} Add Subsection</button></div>`;
-  }
+  if(ll.edit) h+=`<div class="addrow-wrap"><div class="addrow"><input id="newProd" placeholder="Add product to ${esc(cont.name)}…" autocomplete="off"><button id="addProd">Add</button></div><div class="sg" id="sg_newProd"></div></div>`;
   if(!cont.products.length&&!ll.edit) h=`<div class="empty"><div class="ei">${I.clip}</div>No products here yet.<br>Tap <b>Edit</b> to add some.</div>`+h;
   return h;
 }
 function wireProducts(sec,cont,subId){
   if(ll.edit){
     view.querySelectorAll("[data-delprod]").forEach(b=>b.onclick=()=>{ const pid=b.dataset.delprod; cont.products=cont.products.filter(x=>x.id!==pid); state.pull=state.pull.filter(p=>p.productId!==pid); save(); render(); });
-    /* Reorder */
-    view.querySelectorAll("[data-moveup]").forEach(b=>b.addEventListener("click",function(e){
-      e.preventDefault(); const pid=b.dataset.moveup; const i=cont.products.findIndex(x=>x.id===pid);
-      if(i>0){ [cont.products[i-1],cont.products[i]]=[cont.products[i],cont.products[i-1]]; save(); render(); }
-    }));
-    view.querySelectorAll("[data-movedown]").forEach(b=>b.addEventListener("click",function(e){
-      e.preventDefault(); const pid=b.dataset.movedown; const i=cont.products.findIndex(x=>x.id===pid);
-      if(i<cont.products.length-1){ [cont.products[i],cont.products[i+1]]=[cont.products[i+1],cont.products[i]]; save(); render(); }
-    }));
-    /* Add subsection to flat section */
-    const addSub=document.getElementById("addSubsec");
-    if(addSub) addSub.addEventListener("click",function(e){
-      e.preventDefault();
-      const name=prompt("Subsection name:");
-      if(!name||!name.trim()) return;
-      /* Convert flat section to grouped section */
-      if(!sec.subsections) sec.subsections=[];
-      sec.subsections.push({id:uid(),name:name.trim(),products:[]});
-      /* Move existing products into a "General" subsection if there are any */
-      if(sec.products&&sec.products.length){
-        sec.subsections.unshift({id:uid(),name:"General",products:sec.products});
-        sec.products=undefined;
-      }
-      save(); render();
-    });
     const np=document.getElementById("newProd"),ap=document.getElementById("addProd");
     const add=()=>{ const v=np.value.trim(); if(!v) return; cont.products.push({id:uid(),name:v}); save(); render(); const f=document.getElementById("newProd"); if(f) f.focus(); };
     ap.onclick=add; np.onkeydown=e=>{ if(e.key==="Enter") add(); };
@@ -1798,23 +1682,14 @@ function renderTools(){
   if(toolView==="notes") return renderNotes();
   if(toolView==="noteEdit") return renderNoteEdit();
   if(toolView==="calendar") return renderCalendar();
-  if(toolView==="calculator") return renderCalculator();
-  if(toolView==="checklist") return renderChecklist();
   renderToolsHub();
 }
 
 function renderToolsHub(){
   const noteCount=notes.length;
   const remCount=reminders.filter(r=>new Date(r.datetime)>=new Date()).length;
-  const clDone=Object.keys(checklist.checked).filter(k=>checklist.checked[k]).length;
-  const clTotal=checklist.items.length;
   view.innerHTML=`
     <div class="lbl" style="margin-top:6px">Tools</div>
-    <button class="tool-card" id="goChecklist">
-      <div class="chip" style="background:var(--brand-tint);color:var(--brand)">${I.checklist}</div>
-      <div class="tx"><div class="tt">Daily Checklist</div><div class="sub">${clTotal?clDone+"/"+clTotal+" done today":"Create your daily tasks"}</div></div>
-      <div class="go">${I.chev}</div>
-    </button>
     <button class="tool-card" id="goNotes">
       <div class="chip" style="background:var(--brand-tint);color:var(--brand)">${I.note}</div>
       <div class="tx"><div class="tt">Notes</div><div class="sub">${noteCount?noteCount+" note"+(noteCount!==1?"s":""):"Create & save notes"}</div></div>
@@ -1825,9 +1700,9 @@ function renderToolsHub(){
       <div class="tx"><div class="tt">Reminders</div><div class="sub">${remCount?remCount+" upcoming":"Set date & time alerts"}</div></div>
       <div class="go">${I.chev}</div>
     </button>
-    <button class="tool-card" id="goCalcSimple">
-      <div class="chip" style="background:var(--amber-tint);color:var(--amber)">${I.calc}</div>
-      <div class="tx"><div class="tt">Calculator</div><div class="sub">General-purpose calculator</div></div>
+    <button class="tool-card" id="goClaims">
+      <div class="chip amber" style="background:var(--amber-tint);color:var(--amber)">${I.calc}</div>
+      <div class="tx"><div class="tt">Claims Calculator</div><div class="sub">Quick 3% calculation</div></div>
       <div class="go">${I.chev}</div>
     </button>
     <div class="lbl">Quick Calc</div>
@@ -1839,20 +1714,22 @@ function renderToolsHub(){
         <button class="copy" id="claimCopy">${I.copy}<span id="copyLbl">Copy</span></button></div>
       <div class="hintline">Calculates 3% of the entered amount.</div>
     </div>`;
-  document.getElementById("goChecklist").addEventListener("click",function(e){ e.preventDefault(); toolView="checklist"; render(); window.scrollTo(0,0); });
   document.getElementById("goNotes").addEventListener("click",function(e){ e.preventDefault(); toolView="notes"; render(); window.scrollTo(0,0); });
   document.getElementById("goCalendar").addEventListener("click",function(e){ e.preventDefault(); toolView="calendar"; render(); window.scrollTo(0,0); });
-  document.getElementById("goCalcSimple").addEventListener("click",function(e){ e.preventDefault(); toolView="calculator"; render(); window.scrollTo(0,0); });
+  document.getElementById("goClaims").addEventListener("click",function(e){
+    e.preventDefault();
+    const el=document.getElementById("claimAmt");
+    if(el){ el.scrollIntoView({behavior:"smooth",block:"center"}); el.focus(); }
+  });
   const amt=document.getElementById("claimAmt"), out=document.getElementById("claimOut");
   const fmt=n=>"$"+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
   const calc=()=>{ const v=parseFloat(amt.value)||0; out.textContent=fmt(v*0.03); };
   amt.oninput=calc; calc();
-  document.getElementById("claimCopy").addEventListener("click",async function(e){
-    e.preventDefault();
+  document.getElementById("claimCopy").onclick=async()=>{
     const v=(parseFloat(amt.value)||0)*0.03; const txt=v.toFixed(2); const lbl=document.getElementById("copyLbl");
-    try{ await navigator.clipboard.writeText(txt); }catch(er){ const t=document.createElement("textarea"); t.value=txt; document.body.appendChild(t); t.select(); try{document.execCommand("copy");}catch(_){} t.remove(); }
+    try{ await navigator.clipboard.writeText(txt); }catch(e){ const t=document.createElement("textarea"); t.value=txt; document.body.appendChild(t); t.select(); try{document.execCommand("copy");}catch(_){} t.remove(); }
     toast("Copied $"+txt); lbl.textContent="Copied"; setTimeout(()=>lbl.textContent="Copy",1400);
-  });
+  };
 }
 
 /* ---- Notes ---- */
@@ -1894,8 +1771,7 @@ function renderNoteEdit(){
     </div>
     ${note?`<button class="btn-danger" id="noteDelete" style="margin-top:10px">${I.trash} Delete Note</button>`:""}
   </div>`;
-  document.getElementById("noteSave").addEventListener("click",function(e){
-    e.preventDefault(); e.stopPropagation();
+  document.getElementById("noteSave").onclick=()=>{
     const title=document.getElementById("noteTitle").value.trim();
     const body=document.getElementById("noteBody").value.trim();
     if(!title&&!body){ toast("Note is empty"); return; }
@@ -1906,15 +1782,14 @@ function renderNoteEdit(){
     }
     saveNotes();
     toolView="notes"; render(); toast(note?"Note updated":"Note saved");
-  });
+  };
   const del=document.getElementById("noteDelete");
-  if(del) del.addEventListener("click",function(e){
-    e.preventDefault(); e.stopPropagation();
+  if(del) del.onclick=()=>{
     if(!confirm("Delete this note?")) return;
     notes=notes.filter(n=>n.id!==editingNoteId);
     saveNotes();
     toolView="notes"; render(); toast("Note deleted");
-  });
+  };
 }
 
 /* ---- Calendar / Reminders ---- */
@@ -1933,13 +1808,11 @@ function renderCalendar(){
   </div>`;
 
   if(notifStatus==="denied"){
-    html+=`<div class="hintline" style="text-align:center;color:var(--danger);margin-bottom:12px;">Notifications are blocked. Go to your browser/phone settings to enable them for this site.</div>`;
+    html+=`<div class="hintline" style="text-align:center;color:var(--danger);margin-bottom:12px;">Notifications are blocked. Enable them in your browser settings for alerts.</div>`;
   } else if(notifStatus==="default"){
-    html+=`<div class="hintline" style="text-align:center;margin-bottom:12px;">Tap "Set Reminder" to enable notifications. You'll be asked to allow them.</div>`;
+    html+=`<div class="hintline" style="text-align:center;margin-bottom:12px;">Tap "Set Reminder" to enable push notifications.</div>`;
   } else if(notifStatus==="granted"){
-    html+=`<div class="hintline" style="text-align:center;color:var(--brand-ink);margin-bottom:12px;">✓ Notifications enabled — app must stay open/backgrounded for alerts to fire</div>`;
-  } else {
-    html+=`<div class="hintline" style="text-align:center;margin-bottom:12px;">Notifications may not be supported on this device. Reminders will still be saved.</div>`;
+    html+=`<div class="hintline" style="text-align:center;color:var(--brand-ink);margin-bottom:12px;">✓ Notifications enabled</div>`;
   }
 
   if(upcoming.length){
@@ -1976,22 +1849,17 @@ function renderCalendar(){
     `${def.getFullYear()}-${pad(def.getMonth()+1)}-${pad(def.getDate())}T${pad(def.getHours())}:${pad(def.getMinutes())}`;
 
   const addBtn=document.getElementById("remAdd");
-  if(addBtn) addBtn.addEventListener("click",async function(e){
+  if(addBtn) addBtn.addEventListener("click",function(e){
     e.preventDefault(); e.stopPropagation();
+    requestNotifPermission(); /* user gesture — safe place to ask */
     const title=document.getElementById("remTitle").value.trim();
     const dt=document.getElementById("remDatetime").value;
     if(!title){ toast("Enter a title"); return; }
     if(!dt){ toast("Pick a date & time"); return; }
-    /* Request permission on this tap (user gesture) */
-    const perm=await requestNotifPermission();
     reminders.push({id:uid(),title,datetime:dt,created:Date.now()});
     saveReminders();
     scheduleReminderNotifs();
-    render();
-    if(perm==="granted") toast("Reminder set — notifications on");
-    else if(perm==="denied") toast("Reminder saved — enable notifications in settings");
-    else if(perm==="unsupported") toast("Reminder saved — notifications not supported here");
-    else toast("Reminder set");
+    render(); toast("Reminder set");
   });
 
   view.querySelectorAll("[data-rid]").forEach(btn=>btn.addEventListener("click",function(e){
@@ -2009,150 +1877,6 @@ function renderCalendar(){
     saveReminders();
     render(); toast("Past reminders cleared");
   });
-}
-
-/* ---- General Calculator ---- */
-function renderCalculator(){
-  view.innerHTML=`
-    <div class="calc-display" id="calcDisplay">0</div>
-    <div class="calc-grid">
-      <button class="clear" data-ca="C">C</button>
-      <button class="op" data-ca="±">±</button>
-      <button class="op" data-ca="%">%</button>
-      <button class="op" data-ca="÷">÷</button>
-      <button data-ca="7">7</button><button data-ca="8">8</button><button data-ca="9">9</button>
-      <button class="op" data-ca="×">×</button>
-      <button data-ca="4">4</button><button data-ca="5">5</button><button data-ca="6">6</button>
-      <button class="op" data-ca="-">−</button>
-      <button data-ca="1">1</button><button data-ca="2">2</button><button data-ca="3">3</button>
-      <button class="op" data-ca="+">+</button>
-      <button data-ca="0" style="grid-column:span 2">0</button><button data-ca=".">.</button>
-      <button class="eq" data-ca="=">=</button>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:14px;">
-      <button class="btn ghost block" id="calcCopy">${I.copy} Copy Result</button>
-    </div>`;
-  let cur="0",prev=null,op=null,fresh=true;
-  const disp=document.getElementById("calcDisplay");
-  const update=()=>{ disp.textContent=cur; };
-  view.querySelectorAll("[data-ca]").forEach(b=>b.addEventListener("click",function(e){
-    e.preventDefault();
-    const a=b.dataset.ca;
-    if(a>="0"&&a<="9"){
-      if(fresh){ cur=a; fresh=false; } else cur+=a;
-      if(cur.length>1&&cur[0]==="0"&&cur[1]!==".") cur=cur.substring(1);
-    } else if(a==="."){
-      if(fresh){ cur="0."; fresh=false; } else if(!cur.includes(".")) cur+=".";
-    } else if(a==="C"){ cur="0"; prev=null; op=null; fresh=true; }
-    else if(a==="±"){ cur=String(-parseFloat(cur)||0); }
-    else if(a==="%"){ cur=String(parseFloat(cur)/100); }
-    else if(a==="+"||a==="-"||a==="×"||a==="÷"){
-      if(prev!==null&&!fresh) cur=String(doCalc(parseFloat(prev),parseFloat(cur),op));
-      prev=cur; op=a; fresh=true;
-    } else if(a==="="){
-      if(prev!==null){ cur=String(doCalc(parseFloat(prev),parseFloat(cur),op)); prev=null; op=null; fresh=true; }
-    }
-    update();
-  }));
-  document.getElementById("calcCopy").addEventListener("click",async function(e){
-    e.preventDefault();
-    const txt=cur;
-    try{ await navigator.clipboard.writeText(txt); }catch(er){ const t=document.createElement("textarea"); t.value=txt; document.body.appendChild(t); t.select(); try{document.execCommand("copy");}catch(_){} t.remove(); }
-    toast("Copied "+txt);
-  });
-}
-function doCalc(a,b,op){
-  if(op==="+") return Math.round((a+b)*1e10)/1e10;
-  if(op==="-") return Math.round((a-b)*1e10)/1e10;
-  if(op==="×") return Math.round((a*b)*1e10)/1e10;
-  if(op==="÷") return b!==0?Math.round((a/b)*1e10)/1e10:0;
-  return b;
-}
-
-/* ---- Daily Checklist ---- */
-let clEdit=false;
-function renderChecklist(){
-  const today=new Date().toDateString();
-  if(checklist.lastReset!==today){ checklist.checked={}; checklist.lastReset=today; saveChecklist(); }
-
-  const done=Object.keys(checklist.checked).filter(k=>checklist.checked[k]).length;
-  const total=checklist.items.length;
-  let html=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-    <div style="font-size:13px;color:var(--ink-3);font-weight:500;">${total?done+"/"+total+" done today":"No tasks yet"}</div>
-    <div style="display:flex;gap:6px;">
-      <button class="btn ghost" id="clEditToggle" style="padding:6px 12px;font-size:11px">${clEdit?"Done":"Edit"}</button>
-      ${!clEdit?`<button class="btn" id="clResetChecks" style="padding:6px 12px;font-size:11px">Reset</button>`:""}
-    </div>
-  </div>`;
-  if(!total&&!clEdit){
-    html+=`<div class="empty"><div class="ei">${I.checklist}</div><b>No checklist items</b><br>Tap <b>Edit</b> to create your daily tasks.</div>`;
-  } else {
-    checklist.items.forEach((item,i)=>{
-      const checked=!!checklist.checked[item];
-      if(clEdit){
-        html+=`<div class="cl-item" style="cursor:default;">
-          <div class="reorder-btns">
-            <button class="reorder-btn" data-clup="${i}"${i===0?" disabled":""}>${I.up}</button>
-            <button class="reorder-btn" data-cldown="${i}"${i===total-1?" disabled":""}>${I.down}</button>
-          </div>
-          <div class="cl-name">${esc(item)}</div>
-          <div class="cl-edit-btns">
-            <button data-cledit="${i}">${I.pen}</button>
-            <button data-cldel="${i}" style="color:var(--danger)">${I.x}</button>
-          </div>
-        </div>`;
-      } else {
-        html+=`<div class="cl-item${checked?" done":""}" data-clcheck="${i}">
-          <div class="cl-tick">${I.check}</div>
-          <div class="cl-name">${esc(item)}</div>
-        </div>`;
-      }
-    });
-  }
-  if(clEdit){
-    html+=`<div class="addrow" style="margin-top:10px"><input id="newClItem" placeholder="New task…" autocomplete="off"><button id="addClItem">Add</button></div>`;
-  }
-  view.innerHTML=html;
-
-  document.getElementById("clEditToggle").addEventListener("click",function(e){ e.preventDefault(); clEdit=!clEdit; renderChecklist(); });
-  const resetBtn=document.getElementById("clResetChecks");
-  if(resetBtn) resetBtn.addEventListener("click",function(e){ e.preventDefault(); checklist.checked={}; saveChecklist(); renderChecklist(); toast("Checklist reset"); });
-
-  if(clEdit){
-    view.querySelectorAll("[data-clup]").forEach(b=>b.addEventListener("click",function(e){
-      e.preventDefault(); const i=+b.dataset.clup; if(i<=0) return;
-      [checklist.items[i-1],checklist.items[i]]=[checklist.items[i],checklist.items[i-1]];
-      saveChecklist(); renderChecklist();
-    }));
-    view.querySelectorAll("[data-cldown]").forEach(b=>b.addEventListener("click",function(e){
-      e.preventDefault(); const i=+b.dataset.cldown; if(i>=checklist.items.length-1) return;
-      [checklist.items[i],checklist.items[i+1]]=[checklist.items[i+1],checklist.items[i]];
-      saveChecklist(); renderChecklist();
-    }));
-    view.querySelectorAll("[data-cledit]").forEach(b=>b.addEventListener("click",function(e){
-      e.preventDefault(); const i=+b.dataset.cledit;
-      const v=prompt("Edit task:",checklist.items[i]);
-      if(v!==null&&v.trim()){ checklist.items[i]=v.trim(); saveChecklist(); renderChecklist(); }
-    }));
-    view.querySelectorAll("[data-cldel]").forEach(b=>b.addEventListener("click",function(e){
-      e.preventDefault(); const i=+b.dataset.cldel;
-      checklist.items.splice(i,1); saveChecklist(); renderChecklist();
-    }));
-    const ni=document.getElementById("newClItem"), ai=document.getElementById("addClItem");
-    if(ni&&ai){
-      const add=()=>{ const v=ni.value.trim(); if(!v) return; checklist.items.push(v); saveChecklist(); renderChecklist(); const f=document.getElementById("newClItem"); if(f) f.focus(); };
-      ai.addEventListener("click",function(e){ e.preventDefault(); add(); });
-      ni.addEventListener("keydown",function(e){ if(e.key==="Enter") add(); });
-    }
-  } else {
-    view.querySelectorAll("[data-clcheck]").forEach(el=>el.addEventListener("click",function(e){
-      e.preventDefault(); const i=+el.dataset.clcheck;
-      const item=checklist.items[i];
-      checklist.checked[item]=!checklist.checked[item];
-      saveChecklist();
-      const sc=window.scrollY; renderChecklist(); window.scrollTo(0,sc);
-    }));
-  }
 }
 
 /* ================= AI SCAN PIPELINE ================= */
