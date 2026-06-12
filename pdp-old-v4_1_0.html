@@ -92,8 +92,6 @@
     font:inherit;font-weight:600;font-size:13px;padding:10px;border-radius:var(--r-sm);cursor:pointer;width:100%;
     box-shadow:var(--sh-sm);}
   .btn-danger:active{background:var(--danger-tint);}
-  .btn-danger{display:flex;align-items:center;justify-content:center;gap:6px;}
-  .btn-danger svg{width:15px;height:15px;flex:none;}
 
   .hero{position:relative;overflow:hidden;border-radius:var(--r-lg);padding:24px 22px 20px;color:#ecf7ef;
     background:var(--hero-grad);box-shadow:var(--sh-hero);
@@ -117,15 +115,6 @@
   .hstat .hv small{font-size:12px;font-weight:700;opacity:.66;letter-spacing:0;}
   .hstat .hl{font-size:9.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;opacity:.68;margin-top:5px;}
   .hstat.zero .hv{opacity:.55;}
-  .hstat.wide{flex:1;text-align:left;padding:11px 14px 10px;display:flex;flex-direction:column;gap:5px;}
-  .hstat.wide .hv{font-size:17px;letter-spacing:-.02em;}
-  .hstat.wide .hl{margin-top:0;}
-  .home-rem{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);
-    padding:6px 8px;margin-bottom:14px;box-shadow:var(--sh-sm);}
-  .home-rem textarea{width:100%;font:inherit;font-size:13.5px;line-height:1.5;color:var(--ink);
-    background:none;border:none;resize:none;padding:5px 4px;min-height:54px;display:block;}
-  .home-rem textarea:focus{outline:none;}
-  .home-rem textarea::placeholder{color:var(--ink-3);}
 
   .lbl{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
     margin:26px 4px 12px;}
@@ -597,7 +586,6 @@
   .cl-item .cl-edit-btns button{appearance:none;border:none;background:none;cursor:pointer;padding:4px;
     color:var(--ink-3);border-radius:6px;}
   .cl-item .cl-edit-btns button:active{color:var(--ink);background:var(--surface-2);}
-  .cl-item .cl-edit-btns button svg{width:14px;height:14px;display:block;}
   .scan-status{color:var(--ink-3);font-size:12px;font-weight:500;text-align:center;}
   .scan-result{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;
     max-height:340px;overflow-y:auto;}
@@ -661,8 +649,7 @@ const I = {
   pen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>',
   up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>',
   down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>',
-  checklist:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l3 3 5-5"/><path d="M4 17l3 3 5-5"/><path d="M15 6h5M15 12h5M15 18h5"/></svg>',
-  folder:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>'
+  checklist:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l3 3 5-5"/><path d="M4 17l3 3 5-5"/><path d="M15 6h5M15 12h5M15 18h5"/></svg>'
 };
 
 /* ======= Master Stencil ======= */
@@ -1105,53 +1092,27 @@ function renderTabbar(){
 }
 
 /* ---- Home ---- */
-const HOME_REM_KEY="pdp_home_reminders_v1";
-function homeRemGet(){ try{ return localStorage.getItem(HOME_REM_KEY)||""; }catch(e){ return ""; } }
-function homeRemSave(v){ try{ localStorage.setItem(HOME_REM_KEY,v); }catch(e){} }
-
-function parseShiftStart(s){
-  if(!s) return null;
-  const m=String(s).trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(A|P)/i);
-  if(!m) return null;
-  let h=parseInt(m[1]),min=parseInt(m[2]||0);
-  const ap=m[3].toUpperCase();
-  if(ap==="P"&&h<12) h+=12; if(ap==="A"&&h===12) h=0;
-  return h*60+min;
-}
-function weekForDate(d){
+function homeStats(){
+  const holes=state.pull.filter(p=>!p.done).length;
+  let gevDone=0, gevTotal=0;
   try{
-    for(const w of sched.weeks){
-      if(!w.startDate) continue;
-      const s=new Date(w.startDate+"T00:00:00");
-      const e=new Date(s.getTime()+7*86400000);
-      if(d>=s&&d<e) return w;
+    const g=activeGev();
+    if(g&&Array.isArray(g.categories)) for(const c of g.categories){
+      const items=Array.isArray(c.items)?c.items:[];
+      gevTotal+=items.length;
+      for(const it of items){ if(g.crossed&&g.crossed[it]) gevDone++; }
     }
   }catch(e){}
-  return (sched.weeks&&sched.weeks[0])||null;
-}
-function nextEmployeeIn(){
-  const now=new Date();
-  const nowMin=now.getHours()*60+now.getMinutes();
-  for(let off=0;off<7;off++){
-    const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()+off);
-    const w=weekForDate(d);
-    if(!w||!Array.isArray(w.employees)||!w.employees.length) continue;
-    const key=SCH_KEYS[d.getDay()];
-    let best=null;
-    for(const emp of w.employees){
-      const sh=((emp.shifts&&emp.shifts[key])||"").trim();
-      const st=parseShiftStart(sh);
-      if(st===null) continue;
-      if(off===0&&st<=nowMin) continue;
-      if(!best||st<best.start) best={start:st,name:emp.name,shift:sh};
+  let working=0;
+  try{
+    const w=sched.weeks&&sched.weeks[0];
+    const todayKey=SCH_KEYS[new Date().getDay()];
+    if(w&&Array.isArray(w.employees)) for(const emp of w.employees){
+      const v=((emp.shifts&&emp.shifts[todayKey])||"").trim().toLowerCase();
+      if(v&&v!=="off"&&v!=="-"&&v!=="\u2014"&&v!=="x"&&!v.startsWith("req")&&!v.startsWith("unavail")) working++;
     }
-    if(best){
-      return { name:(best.name||"").split(" ")[0]||best.name,
-        time:best.shift.split("-")[0].trim(),
-        label:off===0?"":off===1?"Tomorrow":SCH_DAYS[d.getDay()] };
-    }
-  }
-  return null;
+  }catch(e){}
+  return { holes, gevDone, gevTotal, working };
 }
 function renderHome(){
   const now=new Date();
@@ -1159,13 +1120,19 @@ function renderHome(){
   const time=now.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
   const h=now.getHours();
   const greet=h<4?"Closing it out":h<12?"Good morning":h<17?"Good afternoon":"Good evening";
-  let ni=null; try{ ni=nextEmployeeIn(); }catch(e){}
+  const st=homeStats();
+  const gevPct=st.gevTotal?Math.round((st.gevDone/st.gevTotal)*100):0;
   const tiles=[
     {tab:"stencil",ic:I.search,cls:"",t:"Stencil"},
     {tab:"loadlist",ic:I.clip,cls:"citrus",t:"Holes"},
     {tab:"gev",ic:I.gev,cls:"berry",t:"GEV List"},
     {tab:"schedule",ic:I.cal,cls:"sky",t:"Schedule"},
     {tab:"tools",ic:I.tools,cls:"amber",t:"Tools"}
+  ];
+  const soon=[
+    {ic:I.pog,t:"Plan-O-Grams"},
+    {ic:I.note,t:"Daily Notes"},
+    {ic:I.calc,t:"Sales Plan"}
   ];
   view.innerHTML=
     `<div class="hero">
@@ -1178,14 +1145,17 @@ function renderHome(){
        </div>
        <div class="date" style="position:relative">${date} · <span id="heroClock" class="tnum">${time}</span></div>
        <div class="hero-stats">
-         <button class="hstat wide${ni?"":" zero"}" data-go="schedule">
-           <div class="hl">Next in${ni&&ni.label?" · "+ni.label:""}</div>
-           <div class="hv">${ni?`${esc(ni.name)} · <span class="tnum">${esc(ni.time)}</span>`:"\u2014"}</div>
+         <button class="hstat${st.holes?"":" zero"}" data-go="loadlist">
+           <div class="hv tnum">${st.holes}</div><div class="hl">Holes left</div>
+         </button>
+         <button class="hstat${st.gevTotal?"":" zero"}" data-go="gev">
+           <div class="hv tnum">${st.gevTotal?gevPct+"<small>%</small>":"\u2014"}</div><div class="hl">GEV done</div>
+         </button>
+         <button class="hstat${st.working?"":" zero"}" data-go="schedule">
+           <div class="hv tnum">${st.working||"\u2014"}</div><div class="hl">In today</div>
          </button>
        </div>
      </div>
-     <div class="lbl">Reminders</div>
-     <div class="home-rem"><textarea id="homeRem" placeholder="Anything to remember today\u2026" autocomplete="off">${esc(homeRemGet())}</textarea></div>
      <div class="lbl">Open</div>
      <div class="tilegrid">
        ${tiles.map((x,i)=>`
@@ -1194,21 +1164,17 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div class="tiles" style="gap:7px;margin-top:10px">
-       <div class="tile soon">
-         <div class="chip mute">${I.folder}</div>
-         <div class="tx"><div class="tt">Documents</div></div>
+     <div class="lbl">Coming Soon</div>
+     <div class="tiles" style="gap:7px">
+       ${soon.map((x,i)=>`
+       <div class="tile soon" style="animation-delay:${0.3+i*0.05}s">
+         <div class="chip mute">${x.ic}</div>
+         <div class="tx"><div class="tt">${x.t}</div></div>
          <div class="badge">SOON</div>
-       </div>
+       </div>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v4.2.0</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v4.1.0</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
-  const hr=document.getElementById("homeRem");
-  if(hr){
-    const fit=()=>{ hr.style.height="auto"; hr.style.height=Math.max(54,hr.scrollHeight)+"px"; };
-    fit();
-    hr.addEventListener("input",()=>{ homeRemSave(hr.value); fit(); });
-  }
   startHomeClock();
 }
 let homeClockTimer=null;
@@ -2432,42 +2398,38 @@ function handleScanFile(file){
 
       const schedulePrompt=`You are reading a grocery store "Wall Schedule" for a produce department. It's a printed grid/table, photographed with a phone.
 
-READ PROCEDURE — follow in order:
-1. ORIENT: The photo may be rotated (90/180/270 degrees), tilted, or skewed, and may be dim or low-contrast. Mentally rotate it so the title "Wall Schedule" reads left-to-right at the top, THEN read.
-2. Read the day-column headers and their dates (like "Sun 6/14/2026"). Note the Sunday date.
-3. Count the employee rows. Then process ONE ROW at a time, left to right, using the printed gridlines to stay inside the correct row — row heights vary.
-4. For each day cell read top to bottom: shift time ("7:00A - 3:30P"), role label, sometimes "Meal 30 min"/"Meal 60 min", and a daily-hours number like "8.00".
+ORIENTATION & QUALITY:
+- The photo may be ROTATED (90/180/270 degrees), tilted, or skewed. First determine the correct orientation (the title "Wall Schedule" and employee names read left-to-right), mentally rotate the image, THEN read the grid.
+- The photo may be dim, blurry, or low-contrast. Read carefully; use row/column alignment to stay on track.
 
 STRUCTURE:
-- Left columns: Employee name (ALL CAPS "LASTNAME, FIRSTNAME M" — sometimes a small employee number appears under the name; ignore it), then Total Hours, Weekly Hours, Sun/Hol Hours.
-- There may be TWO Saturday columns — ALWAYS IGNORE THE FIRST/LEFTMOST SATURDAY (usually crosshatched). Only extract: Sun, Mon, Tue, Wed, Thu, Fri, Sat (the rightmost Saturday).
+- Title "Wall Schedule"; header shows store/department like "Store 2606 - PRODUCE"
+- Left columns: Employee name (ALL CAPS "LASTNAME, FIRSTNAME M" — sometimes a small employee number appears under the name; ignore that number), then Total Hours, Weekly Hours, Sun/Hol Hours — IGNORE these hour columns
+- Day columns each show the day name and a date like "Sun 6/14/2026". There may be TWO Saturday columns — ALWAYS IGNORE THE FIRST/LEFTMOST SATURDAY (usually crosshatched). Only extract: Sun, Mon, Tue, Wed, Thu, Fri, Sat (the rightmost Saturday).
+- Each day cell, top to bottom: shift time like "7:00A - 3:30P"; a role label; sometimes "Meal 30 min" or "Meal 60 min"; a daily-hours number like "8.00" (ignore that number)
 
-ROLE FILTER — CRITICAL:
-- Only these three roles are produce shifts: CLERK, HEADCLERK, MANAGER.
-- If the role label is ANYTHING ELSE — e.g. "(GROCERY) CLERK", "(DAIRY) CLERK", "GROCERY CLERK", "DAIRY CLERK", or any other department's role — that employee is loaned out and does NOT count. Treat that cell as EMPTY: output "" for the shift and 0 for the meal that day.
-- Never include role text in the output. Shifts are time-only: "7:00A-3:30P".
+ROLE LABELS — IMPORTANT:
+- Standard produce roles are exactly: CLERK, HEADCLERK, MANAGER. When the role is one of these three, do NOT include it in the shift — output the time only.
+- If the role is ANYTHING ELSE — e.g. "(GROCERY) CLERK", "(DAIRY) CLERK", or any other department/label — APPEND it to the shift in parentheses, title case: "4:00P-9:00P (Grocery)". This tells the team the shift is loaned to another department.
 
-BLANK/EMPTY CELLS — CRITICAL:
-Many cells are blank or show diagonal hatching. These mean the employee does NOT work that day. Use "" (empty string). If a cell has no time written in it, it is EMPTY — never guess or copy from an adjacent cell or row.
+CRITICAL — BLANK/EMPTY CELLS:
+Many cells will be BLANK, EMPTY, or show diagonal hatching lines. These mean the employee does NOT work that day. You MUST use "" (empty string) for these. Do NOT fill in shifts for days that are blank. If a cell has no time written in it, it is EMPTY — use "".
 
-SELF-CHECK — the schedule prints the math for you:
-- Each worked cell shows a daily-hours number (e.g. "8.00"). Verify: end time minus start time minus meal minutes = that number of hours. If it doesn't match, you misread a digit or the A/P — re-read that cell.
-- The Total Hours column equals the sum of that row's daily-hours numbers. Use it to confirm you didn't miss a shift or invent one.
+Return ONLY valid JSON. No markdown, no backticks, no explanation.
 
-OUTPUT:
-First output exactly one short line: the orientation you determined and the Sunday date (e.g. "Upright, week of 6/14/2026"). Then on a new line output ONLY the JSON object — no markdown, no backticks, nothing after it.
-
-{"weekStart":"2026-06-14","employees":[{"name":"Firstname Lastname","shifts":{"sun":"7:00A-3:30P","mon":"","tue":"","wed":"","thu":"","fri":"8:00A-4:30P","sat":""},"meals":{"sun":30,"mon":0,"tue":0,"wed":0,"thu":0,"fri":30,"sat":0}}]}
+{"weekStart":"2026-06-14","employees":[{"name":"Firstname Lastname","shifts":{"sun":"7:00A-3:30P","mon":"","tue":"4:00P-9:00P (Grocery)","wed":"","thu":"","fri":"8:00A-4:30P","sat":""},"meals":{"sun":30,"mon":0,"tue":0,"wed":0,"thu":0,"fri":30,"sat":0}}]}
 
 RULES:
 - weekStart: the SUNDAY date from the Sun column header, format "YYYY-MM-DD"
 - Convert names: "DUTKIEWICZ, GAVIN S" \u2192 "Gavin Dutkiewicz"
 - Shift format: "7:00A-3:30P" (no spaces around dash)
-- "" (empty string) for ANY cell that is blank, hatched, or worked in another department (role filter above)
+- "" (empty string) for ANY cell that is blank, hatched, has no time, or has diagonal lines
 - "REQ OFF" for "Request Off"
 - "UNAVAIL" for "UNAVAILABLE"
-- meals: integer minutes (30 or 60). Use 0 if no meal, no shift, or the shift was filtered out.
-- Read EVERY employee row — do not skip anyone, even rows that are all Request Off`;
+- meals: integer minutes (30 or 60). Use 0 if no meal or no shift that day.
+- Read EVERY employee row — do not skip anyone, even rows with no shifts at all (like all Request Off)
+- IGNORE the first/leftmost Saturday column
+- Double-check: if a cell has NO time written in it, use "" — do NOT guess or copy from adjacent cells`;
 
       const gevPrompt=`You are reading a grocery store GEV (Guaranteed Everyday Variety) checklist. It lists categories of produce items that must always be stocked.
 
@@ -2565,27 +2527,20 @@ RULES:
         throw new Error("No employees found in the response.");
       }
 
-      /* Normalize the parsed data.
-         Safety net: even if the AI includes a loaned-out shift (other
-         department role like "(Grocery)" or "(Dairy)"), strip it here —
-         only CLERK/HEADCLERK/MANAGER produce shifts belong on the board. */
-      const OTHER_DEPT=/\(|GROCERY|DAIRY|DELI|MEAT|BAKERY|SEAFOOD|FRONT\s?END|FLORAL|GM\b/i;
-      function cleanShift(s){
-        s=(s==null?"":String(s)).trim();
-        if(!s) return "";
-        const u=s.toUpperCase();
-        if(u==="REQ OFF"||u==="UNAVAIL") return u;
-        if(OTHER_DEPT.test(s)) return "";
-        return s;
-      }
-      scanParsed=empArr.map(emp=>{
-        const sh={},ml={};
-        SCH_KEYS.forEach(k=>{
-          sh[k]=cleanShift(emp.shifts?.[k]);
-          ml[k]=sh[k]?(parseInt(emp.meals?.[k])||0):0;
-        });
-        return { name:emp.name||"Unknown", shifts:sh, meals:ml };
-      });
+      /* Normalize the parsed data */
+      scanParsed=empArr.map(emp=>({
+        name:emp.name||"Unknown",
+        shifts:{
+          sun:emp.shifts?.sun||"",mon:emp.shifts?.mon||"",tue:emp.shifts?.tue||"",
+          wed:emp.shifts?.wed||"",thu:emp.shifts?.thu||"",fri:emp.shifts?.fri||"",
+          sat:emp.shifts?.sat||""
+        },
+        meals:{
+          sun:parseInt(emp.meals?.sun)||0,mon:parseInt(emp.meals?.mon)||0,tue:parseInt(emp.meals?.tue)||0,
+          wed:parseInt(emp.meals?.wed)||0,thu:parseInt(emp.meals?.thu)||0,fri:parseInt(emp.meals?.fri)||0,
+          sat:parseInt(emp.meals?.sat)||0
+        }
+      }));
       scanWeekStart=weekStart;
 
       /* Show results */

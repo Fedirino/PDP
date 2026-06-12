@@ -4,6 +4,29 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [4.2.0] — 2026-06-11
+
+### Changed
+- **Home screen rework**: The Holes / GEV done / In today stat tiles are gone. In their place: a **Next in** card showing who comes in next and at what time (today, tomorrow, or the next scheduled day — pulled live from the Schedule tab, tap to open), and a **Reminders** field — a free-text scratchpad on the Home screen that auto-saves as you type (stored locally, survives restarts).
+- **Coming Soon condensed**: Plan-O-Grams / Daily Notes / Sales Plan tiles collapsed into a single **Documents** tile (still marked Soon).
+
+### Fixed
+- **Giant trash icon on Notes**: The Delete Note button's trash icon had no size rule and rendered enormous. Now 15px and properly aligned.
+- **Daily Checklist delete**: Same root cause — the edit/delete (pen/X) icons in checklist Edit mode had no size rule, rendering huge and breaking the row. Icons now sized correctly, so deleting checklist items works as intended (tap **Edit**, then the X next to an item).
+
+### Scan accuracy
+- **Other-department shifts are now excluded**: "(GROCERY) CLERK", "(DAIRY) CLERK", and any other non-produce role no longer appear on the schedule at all. Only CLERK, HEADCLERK, and MANAGER shifts count. This is enforced twice: in the AI prompt (treat loaned-out cells as empty) and in a code-level safety net that strips any shift containing a department label even if the AI slips one through.
+- **Self-checking prompt**: The Wall Schedule prints its own math — each worked cell shows a daily-hours figure (e.g. 8.00) and each row a Total Hours figure. The AI is now instructed to verify every extracted shift against them (end − start − meal must equal the printed hours; row total must match Total Hours), catching misread digits and A/P mixups before they reach you.
+- **Structured read procedure**: Prompt rewritten as an ordered procedure — orient first, read header dates, then process one row at a time following the gridlines (row heights vary). The model also states its determined orientation and week date on one line before the JSON, which forces it to commit to orientation before reading (the JSON parser already strips this preamble).
+
+### Files
+- `index.html` — Main app (v4.2.0)
+- `pdp-old-v4_1_0.html` — Archived v4.1.0
+- `sw.js` — Service worker (cache v4.2.0)
+- `manifest.json` — PWA manifest (unchanged)
+
+---
+
 ## [4.1.0] — 2026-06-11
 
 ### Changed
