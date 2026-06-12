@@ -4,6 +4,13 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [4.3.0] — 2026-06-11
+
+### Changed
+- **Holes default items**: All sections now pre-loaded with actual Store 2606 items instead of generic placeholders. Endcaps (Apple end, Berry end, Grapes, Melons, Pears), Veg Wall, Stone fruit, Apples, Berries, Seasonal, Ethnic, Tomatoes, Citrus, Peppers, and Potatoes all reflect real department SKUs and variety names.
+
+---
+
 ## [4.2.0] — 2026-06-11
 
 ### Changed
