@@ -4,6 +4,62 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [4.6.0] — 2026-06-11
+
+### Changed
+- **Sales Plan now renders as a true digital copy of the plan** — not generic cards. Each block draws like the printed fixture: a titled header bar, position slots down the left (Power Wing, Shelf, Well, 1–4, Back Wing…), and the items stacked beside them. Cells holding several items are split onto their own lines, and **DEAL LOCK** / **SPOT BUY** print as small amber tags. Empty slots show a dash so the fixture shape is preserved. The plan's italic notes sit under each block header. Photos remain attached as backup, but the digital version is now the main read.
+- Daily Notes keep their existing card/table layout — only the Sales Plan section gets the plan-style rendering. Edit mode, copy text/photo, delete, the dropdown, and the two-week retention all work exactly as before.
+
+### Files
+- `index.html` — Main app (v4.6.0)
+- `sw.js` — cache bumped to `pdp-v4.6.0`
+- `pdp-old-v4_5_0.html` — archived previous version
+- `manifest.json`, icons — unchanged
+
+---
+
+## [4.5.0] — 2026-06-11
+
+### Changed
+- **Documents is now organized into sections.** Opening the Documents tab shows a chooser:
+  - **Daily Notes** — the daily bulletin scanner from v4.4.0, now its own section.
+  - **Sales Plan** — new. Scan the weekly produce display plan (the multi-page sheet of promo tables, end caps, hero pods, value bins, authorized displays, etc.). Claude rebuilds every titled block as a digital card with its grid reproduced as a table. Same multi-page scan flow as Daily Notes.
+  - **Plan-O-Gram** — placeholder, still marked **Coming Soon**.
+
+### Added
+- **Two-week retention** (same idea as the Schedule's two-week window): each section automatically keeps only the last 14 days of documents, newest first, so storage stays bounded. Older entries drop off on their own.
+- **Edit mode** for any scanned document (tap **Edit**, top right): rename the date label, edit each section's title / subject / contact, edit bullets (one per line; start a line with `>>` for a sub-bullet), and edit table cells. Add or delete sections, add tables, and add or delete table rows. Tap **Done** to save.
+- **Delete** any individual document from its section (unchanged behavior, now per section).
+- **Seeded example Sales Plan**: this build ships with the 6/12–7/16 display plan (pages 8 & 10) already transcribed into the Sales Plan section, original photos attached. It's a normal saved document — edit it or delete it like any other. (Double-check the dense recap/allocation-style grids against the printout; transcription was done from the photos and a couple of tight cells may need a tweak in Edit.)
+
+### Files
+- `index.html` — Main app (v4.5.0); includes the embedded example Sales Plan photos
+- `sw.js` — cache bumped to `pdp-v4.5.0`
+- `pdp-old-v4_4_0.html` — archived previous version
+- `manifest.json`, icons — unchanged
+
+---
+
+## [4.4.0] — 2026-06-11
+
+### Added
+- **Documents tab (new)**: A dedicated section for department paperwork, with **Daily Notes** as the first document type. Lives in the bottom tab bar (folder icon) and as a tile on the Home screen.
+- **Scan Daily Notes (multi-page)**: Tap **Scan** in the Documents tab, then add every page of the printed Daily Notes (camera or upload — a sheet usually runs 2+ pages). Claude reads all pages together and rebuilds the bulletin digitally: each Category / Contact / Subject block, every bullet (including indented sub-bullets), and **every table reproduced cell-for-cell** (Division Recap, Allocations, Organic End plans, etc.). Tables scroll horizontally so wide grids stay exact.
+- **Stored by date with a dropdown**: Every scan is saved as its own dated document. A dropdown at the top of the tab cycles between days; newest first. Re-scanning a date you already have offers to replace or keep both.
+- **Original photo kept**: The source photo(s) are stored with each document as thumbnails. Tap to open full-screen; **Copy photo** puts the image on the clipboard. **Copy text** copies the whole bulletin as clean plain text. **Delete** removes the current document.
+
+### Notes
+- Uses the same on-device Anthropic API key as the Schedule and GEV scanners — no extra setup if you've already entered one.
+- Photos are compressed before storage to conserve space; if local storage fills up, the app warns that the oldest notes may not persist.
+
+### Files
+- `index.html` — Main app (v4.4.0)
+- `sw.js` — cache bumped to `pdp-v4.4.0`
+- `pdp-old-v4_3_0.html` — archived previous version
+- `manifest.json`, icons — unchanged
+
+---
+
 ## [4.3.0] — 2026-06-11
 
 ### Changed

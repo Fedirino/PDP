@@ -10,6 +10,7 @@ This is that app.
 - **Stencil** — An 816-item master log (item codes, pack sizes, units) built by photographing every price stencil in the back room. Searchable in two keystrokes, editable when the warehouse changes things on us.
 - **Schedule** — Point the camera at the printed wall schedule and AI reads the whole grid: every employee, every shift, with net hours calculated after meal breaks. The thing reads a schedule better than I do at 6 AM.
 - **GEV Lists** — Scannable, checkable variety lists. Tap to cross off, keep multiple named lists.
+- **Documents** — A section for department paperwork, split into **Daily Notes** and **Sales Plan** (Plan-O-Gram coming soon). Scan the printed sheets front-to-back and AI rebuilds them digitally — every block, bullet, and table reproduced cell-for-cell. Each section keeps the last two weeks, with a dropdown to flip between dates, the original photo kept alongside, full edit mode, and one-tap copy of the text or the picture.
 - **Tools** — Notes, date/time reminders, and a claims calculator, because pockets only hold so many sticky notes.
 
 ## How a produce guy ended up here
@@ -30,7 +31,7 @@ The fanciest part is the scanner: photos go to Claude's vision API (you bring yo
 
 It's hosted on GitHub Pages — open it, tap "Add to Home Screen," done. To deploy a new version: replace the files, bump the service worker cache name, and re-add the PWA. Old versions are archived in the repo as `pdp-old-v{version}.html` because trust takes years to build and one bad deploy to lose.
 
-Every change is logged in [CHANGELOG.md](CHANGELOG.md). Currently at **v3.7.0**.
+Every change is logged in [CHANGELOG.md](CHANGELOG.md). Currently at **v4.6.0**.
 
 ---
 
