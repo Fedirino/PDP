@@ -2490,14 +2490,11 @@ function renderChecklist(){
 const scanOverlay=document.getElementById("scanOverlay");
 const scanBody=document.getElementById("scanBody");
 const scanFileInput=document.getElementById("scanFileInput");
-const APIKEY_KEY="pdp_api_key";
+/* API calls go through Netlify Function /api/scan — key lives on server */
+const SCAN_ENDPOINT="/api/scan";
 let scanParsed=null;
 let scanMode="schedule"; /* "schedule" or "gev" */
 let scanWeekStart="";
-
-const EMBEDDED_KEY="YOUR_API_KEY_HERE"; /* embedded fallback — coworkers can use without setup */
-function getApiKey(){ try{ return localStorage.getItem(APIKEY_KEY)||EMBEDDED_KEY; }catch(e){ return EMBEDDED_KEY; } }
-function saveApiKey(k){ try{ localStorage.setItem(APIKEY_KEY,k); }catch(e){} }
 
 document.getElementById("scanClose").onclick=closeScanOverlay;
 
@@ -2512,24 +2509,14 @@ function openScanOverlay(mode){
     return;
   }
   const title=scanMode==="gev"?"Scan GEV List":"Scan Schedule";
-  const hasKey=!!getApiKey();
   document.querySelector("#scanOverlay .scan-bar .t").textContent=title;
   scanBody.innerHTML=`
-    ${!hasKey?`
-    <div class="scan-step"><div class="num">!</div>API key needed (one-time setup)</div>
-    <div style="padding:0 4px;font-size:12px;color:var(--ink-3);line-height:1.6;margin-bottom:10px;">
-      The scanner sends your photo to Claude AI for accurate reading. You need an Anthropic API key — get one free at <b>console.anthropic.com</b>. It stays on your device only.</div>
-    <div style="display:flex;gap:8px;margin-bottom:16px;">
-      <input id="apiKeyInput" type="password" placeholder="sk-ant-..." style="flex:1;font:inherit;font-size:13px;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:10px 12px;color:var(--ink);">
-      <button class="btn" id="apiKeySave" style="flex:none">Save</button>
-    </div>`:""}
     <div class="scan-step"><div class="num">1</div>Take a photo or upload an image</div>
-    <div style="display:flex;gap:8px;padding:8px 0 16px;${!hasKey?"opacity:.4;pointer-events:none":""}">
+    <div style="display:flex;gap:8px;padding:8px 0 16px;">
       <button class="btn block" id="scanCapture" style="flex:1">${I.scan} Camera</button>
       <button class="btn ghost block" id="scanUpload" style="flex:1">${I.upload||I.plus} Upload</button>
     </div>
-    <div class="hintline" style="text-align:center">${scanMode==="gev"?"Point your camera at the GEV list or upload a photo. Claude will read every item.":"Point your camera at the schedule or upload a photo. Claude will read the grid and extract every employee and shift."}</div>
-    ${hasKey?`<div style="margin-top:12px;text-align:center"><button class="sch-sm-btn" id="changeKey">Change API key</button></div>`:""}`;
+    <div class="hintline" style="text-align:center">${scanMode==="gev"?"Point your camera at the GEV list or upload a photo. Claude will read every item.":"Point your camera at the schedule or upload a photo. Claude will read the grid and extract every employee and shift."}</div>`;
 
   scanOverlay.classList.add("open");
   document.body.style.overflow="hidden";
@@ -2538,21 +2525,6 @@ function openScanOverlay(mode){
   const uploadBtn=document.getElementById("scanUpload");
   if(captureBtn) captureBtn.onclick=()=>{ scanFileInput.setAttribute("capture","environment"); scanFileInput.click(); };
   if(uploadBtn) uploadBtn.onclick=()=>{ scanFileInput.removeAttribute("capture"); scanFileInput.click(); };
-
-  const saveBtn=document.getElementById("apiKeySave");
-  if(saveBtn) saveBtn.onclick=()=>{
-    const inp=document.getElementById("apiKeyInput");
-    const k=(inp?inp.value:"").trim();
-    if(!k||!k.startsWith("sk-")){ alert("Enter a valid API key starting with sk-"); return; }
-    saveApiKey(k);
-    openScanOverlay(scanMode);
-  };
-
-  const changeBtn=document.getElementById("changeKey");
-  if(changeBtn) changeBtn.onclick=()=>{
-    saveApiKey("");
-    openScanOverlay(scanMode);
-  };
 }
 function closeScanOverlay(){
   scanOverlay.classList.remove("open");
@@ -2561,8 +2533,6 @@ function closeScanOverlay(){
 
 function handleScanFile(file){
   if(!file) return;
-  const apiKey=getApiKey();
-  if(!apiKey){ alert("No API key saved."); return; }
 
   const reader=new FileReader();
   reader.onload=async()=>{
@@ -2661,9 +2631,9 @@ RULES:
       /* Up to 2 attempts: transient API errors and malformed JSON get one
          automatic retry (with a stricter instruction) before failing. */
       async function scanAttempt(extraInstruction){
-        const resp=await fetch("https://api.anthropic.com/v1/messages",{
+        const resp=await fetch(SCAN_ENDPOINT,{
           method:"POST",
-          headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+          headers:{"Content-Type":"application/json"},
           body:JSON.stringify({
             model:"claude-sonnet-4-6",
             max_tokens:4096,
@@ -2867,7 +2837,6 @@ async function compressImageFile(file){
 }
 
 async function addDocPage(file){
-  if(!getApiKey()){ alert("No API key saved."); return; }
   const strip=document.getElementById("pgStrip");
   if(strip) strip.insertAdjacentHTML("beforeend",`<div class="pg-item" style="display:grid;place-items:center;color:var(--ink-3);font-size:10px">…</div>`);
   try{
@@ -2882,21 +2851,12 @@ function pgItemHTML(p,i){
 }
 
 function openDocScanCollect(){
-  const hasKey=!!getApiKey();
   const lbl=DOC_LABEL[scanMode]||"Daily Notes";
   document.querySelector("#scanOverlay .scan-bar .t").textContent="Scan "+lbl;
   const n=docPages.length;
   scanBody.innerHTML=`
-    ${!hasKey?`
-    <div class="scan-step"><div class="num">!</div>API key needed (one-time setup)</div>
-    <div style="padding:0 4px;font-size:12px;color:var(--ink-3);line-height:1.6;margin-bottom:10px;">
-      The scanner sends your photos to Claude AI for accurate reading. You need an Anthropic API key — get one free at <b>console.anthropic.com</b>. It stays on your device only.</div>
-    <div style="display:flex;gap:8px;margin-bottom:16px;">
-      <input id="apiKeyInput" type="password" placeholder="sk-ant-..." style="flex:1;font:inherit;font-size:13px;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:10px 12px;color:var(--ink);">
-      <button class="btn" id="apiKeySave" style="flex:none">Save</button>
-    </div>`:""}
     <div class="scan-step"><div class="num">1</div>Add each page of the ${lbl.toLowerCase()}</div>
-    <div style="display:flex;gap:8px;padding:8px 0 4px;${!hasKey?"opacity:.4;pointer-events:none":""}">
+    <div style="display:flex;gap:8px;padding:8px 0 4px;">
       <button class="btn block" id="docCapture" style="flex:1">${I.scan} Camera</button>
       <button class="btn ghost block" id="docUpload" style="flex:1">${I.upload||I.plus} Upload</button>
     </div>
@@ -2904,8 +2864,7 @@ function openDocScanCollect(){
     <div class="hintline" style="text-align:center">${scanMode==="salesplan"?"Sales Plans run several pages of small tables. Add every page, then read them together — Claude rebuilds each end / table grid.":"Daily Notes often run more than one page. Add every page, then read them together. Claude transcribes the text and rebuilds any tables."}</div>
     <div class="scan-actions" style="margin-top:14px">
       <button class="btn block" id="docRead" style="${n?"":"opacity:.4;pointer-events:none"}">${I.scan} Read ${n||""} page${n===1?"":"s"}</button>
-    </div>
-    ${hasKey?`<div style="margin-top:12px;text-align:center"><button class="sch-sm-btn" id="changeKey">Change API key</button></div>`:""}`;
+    </div>`;
 
   const cap=document.getElementById("docCapture");
   const up=document.getElementById("docUpload");
@@ -2913,16 +2872,6 @@ function openDocScanCollect(){
   if(up) up.onclick=()=>{ scanFileInput.removeAttribute("capture"); scanFileInput.click(); };
   scanBody.querySelectorAll("[data-pgx]").forEach(b=>b.onclick=()=>{ docPages.splice(+b.dataset.pgx,1); openDocScanCollect(); });
   const rd=document.getElementById("docRead"); if(rd&&n) rd.onclick=readDocPages;
-
-  const saveBtn=document.getElementById("apiKeySave");
-  if(saveBtn) saveBtn.onclick=()=>{
-    const inp=document.getElementById("apiKeyInput");
-    const k=(inp?inp.value:"").trim();
-    if(!k||!k.startsWith("sk-")){ alert("Enter a valid API key starting with sk-"); return; }
-    saveApiKey(k); openDocScanCollect();
-  };
-  const changeBtn=document.getElementById("changeKey");
-  if(changeBtn) changeBtn.onclick=()=>{ saveApiKey(""); openDocScanCollect(); };
 }
 
 const dailyNotesPrompt=`You are transcribing a grocery store "Produce Daily Notes" bulletin (Stop & Shop). It was photographed across ONE OR MORE pages, given to you in order. Transcribe EVERYTHING into structured JSON — do not summarize, do not skip anything.
@@ -2951,8 +2900,6 @@ RULES:
 
 async function readDocPages(){
   if(!docPages.length) return;
-  const apiKey=getApiKey();
-  if(!apiKey){ alert("No API key saved."); return; }
   scanBody.innerHTML=`
     <div class="scan-frame"><img src="${docPages[0].imgSrc}" class="scan-preview" alt="Daily notes"><div class="scan-beam"></div></div>
     <div class="scan-progress"><div class="scan-progress-bar indet"></div></div>
@@ -2984,9 +2931,9 @@ RULES:
       const promptText=scanMode==="salesplan"?salesPlanPrompt:dailyNotesPrompt;
       const content=docPages.map(p=>({type:"image",source:{type:"base64",media_type:"image/jpeg",data:p.b64}}));
       content.push({type:"text",text:promptText+(extra||"")});
-      const resp=await fetch("https://api.anthropic.com/v1/messages",{
+      const resp=await fetch(SCAN_ENDPOINT,{
         method:"POST",
-        headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+        headers:{"Content-Type":"application/json"},
         body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:8192,messages:[{role:"user",content}]})
       });
       if(!resp.ok){ const err=await resp.json().catch(()=>({})); const e=new Error(`API ${resp.status}: ${(err.error&&err.error.type)?err.error.type+" — ":""}${(err.error&&err.error.message)||"Unknown error"}`); e.status=resp.status; throw e; }
