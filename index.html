@@ -729,6 +729,23 @@
     color:#fff;font:inherit;font-weight:600;font-size:13px;border-radius:9px;padding:8px 14px;cursor:pointer;display:flex;align-items:center;gap:6px;}
   .img-overlay .iv-btn svg{width:15px;height:15px;}
 
+  /* code export overlay */
+  .code-overlay{position:fixed;inset:0;z-index:75;background:var(--bg);display:none;
+    flex-direction:column;padding:0;}
+  .code-overlay.open{display:flex;}
+  .code-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:calc(14px + env(safe-area-inset-top)) 16px 12px;border-bottom:1px solid var(--line);}
+  .code-title{font-size:16px;font-weight:700;color:var(--ink);}
+  .code-overlay .iv-btn{appearance:none;border:1px solid var(--line-2);background:var(--surface-2);
+    color:var(--ink);font:inherit;font-weight:600;font-size:13px;border-radius:9px;padding:8px 13px;cursor:pointer;}
+  .code-overlay .iv-btn:active{background:var(--surface);}
+  #codeCopy{background:var(--brand);color:#06210f;border-color:var(--brand);}
+  .code-hint{font-size:12.5px;line-height:1.5;color:var(--ink-2);padding:11px 16px;background:var(--surface);border-bottom:1px solid var(--line);}
+  .code-box{flex:1;width:100%;border:none;outline:none;resize:none;
+    background:var(--bg);color:var(--ink);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:12px;line-height:1.5;padding:14px 16px calc(20px + env(safe-area-inset-bottom));
+    white-space:pre;}
+
 </style>
 </head>
 <body>
@@ -748,6 +765,17 @@
     <button class="iv-btn" id="ivClose">Close</button>
   </div>
   <img id="ivImg" src="" alt="Document page">
+</div>
+<div class="code-overlay" id="codeOverlay">
+  <div class="code-bar">
+    <div class="code-title" id="codeTitle">Export</div>
+    <div style="display:flex;gap:8px;">
+      <button class="iv-btn" id="codeCopy">Copy all</button>
+      <button class="iv-btn" id="codeClose">Close</button>
+    </div>
+  </div>
+  <div class="code-hint" id="codeHint"></div>
+  <textarea class="code-box" id="codeBox" readonly spellcheck="false"></textarea>
 </div>
 <div class="toast" id="toast"></div>
 <div class="sheet-backdrop" id="sheetBackdrop">
@@ -952,6 +980,54 @@ let state;
   else state=seed();
 })();
 function save(){ writeK(KEY,JSON.stringify(state)); }
+
+/* ===== Export current load list as seed() code (to paste into index.html) ===== */
+function escJsStr(s){ return String(s).replace(/\\/g,"\\\\").replace(/"/g,'\\"'); }
+function plist(products){
+  return "P([" + (products||[]).map(function(p){ return '"'+escJsStr(p.name)+'"'; }).join(",") + "])";
+}
+function generateSeedCode(){
+  var lines=[];
+  lines.push("function seed(){");
+  lines.push("  return { version:1, sections:[");
+  state.sections.forEach(function(sec,si){
+    var comma = si<state.sections.length-1 ? "," : "";
+    if(isGrouped(sec)){
+      lines.push('    { id:uid(), name:"'+escJsStr(sec.name)+'", subsections:[');
+      sec.subsections.forEach(function(sub,bi){
+        var bcomma = bi<sec.subsections.length-1 ? "," : " ]";
+        lines.push('      { id:uid(), name:"'+escJsStr(sub.name)+'", products:'+plist(sub.products)+' }'+bcomma);
+      });
+      lines.push('     }'+comma);
+    } else {
+      lines.push('    { id:uid(), name:"'+escJsStr(sec.name)+'", products:'+plist(sec.products)+' }'+comma);
+    }
+  });
+  lines.push("  ], pull:[] };");
+  lines.push("}");
+  return lines.join("\n");
+}
+var _codeOv={ box:document.getElementById("codeOverlay"), ta:document.getElementById("codeBox"),
+  title:document.getElementById("codeTitle"), hint:document.getElementById("codeHint") };
+function openCodeExport(title,hint,code){
+  _codeOv.title.textContent=title||"Export";
+  _codeOv.hint.textContent=hint||"";
+  _codeOv.hint.style.display=hint?"block":"none";
+  _codeOv.ta.value=code;
+  _codeOv.box.classList.add("open");
+  document.body.style.overflow="hidden";
+}
+function closeCodeExport(){ _codeOv.box.classList.remove("open"); document.body.style.overflow=""; }
+document.getElementById("codeClose").onclick=closeCodeExport;
+document.getElementById("codeCopy").onclick=async function(){
+  var text=_codeOv.ta.value;
+  try{ await navigator.clipboard.writeText(text); toast("Copied to clipboard"); }
+  catch(e){
+    _codeOv.ta.focus(); _codeOv.ta.select();
+    try{ document.execCommand("copy"); toast("Copied to clipboard"); }
+    catch(e2){ toast("Press and hold to copy"); }
+  }
+};
 
 const SCHKEY="pdp_schedule_v3";
 const SCH_DAYS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -1533,7 +1609,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.2.0</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.3.0</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -1733,6 +1809,10 @@ function sectionsHTML(){
         <div class="chev">${I.chev}</div></button>`;
     }});
   if(ll.edit) h+=`<div class="addrow"><input id="newSec" placeholder="New section name…" autocomplete="off"><button id="addSec">Add</button></div>`;
+  if(ll.edit&&state.sections.length){
+    h+=`<div style="margin-top:16px"><button class="btn ghost block" id="exportSeed">${I.copy||""} Export as default code</button>`;
+    h+=`<div style="font-size:11.5px;color:var(--ink-3);line-height:1.5;margin-top:7px;padding:0 2px">Copies your current list as seed() code to paste into index.html, making it the built-in default for new installs.</div></div>`;
+  }
   if(!state.sections.length&&!ll.edit) h=`<div class="empty"><div class="ei">${I.list}</div>No sections yet.<br>Tap <b>Edit</b> to add one.</div>`+h;
   return h;
 }
@@ -1744,6 +1824,8 @@ function wireSections(){
     const ns=document.getElementById("newSec"),as=document.getElementById("addSec");
     const add=()=>{ const v=ns.value.trim(); if(!v) return; state.sections.push({id:uid(),name:v,products:[]}); save(); render(); const f=document.getElementById("newSec"); if(f) f.focus(); };
     as.onclick=add; ns.onkeydown=e=>{ if(e.key==="Enter") add(); };
+    const ex=document.getElementById("exportSeed");
+    if(ex) ex.onclick=function(){ openCodeExport("Export Default List","Tap Copy all, then in index.html replace the entire existing seed() function with this. Keep the id:uid() and P() pieces exactly as shown.",generateSeedCode()); };
   } else view.querySelectorAll("[data-sec]").forEach(b=>b.onclick=()=>{ ll.sectionId=b.dataset.sec; ll.screen="section"; render(); window.scrollTo(0,0); });
 }
 

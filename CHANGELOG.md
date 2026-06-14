@@ -4,6 +4,22 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.3.0] — 2026-06-14
+
+### Added
+- **Export load list as default code.** In the Holes tab, tap **Edit** on the Sections screen and a new **"Export as default code"** button appears at the bottom. It opens a full-screen panel containing your current load list rendered as a ready-to-paste `seed()` function. Tap **Copy all**, then replace the existing `seed()` in index.html with it to make your edited list the built-in default for new installs. Handles grouped sections (subsections), plain sections, and safely escapes quotes in item names.
+
+### Why
+- The default load list lives in the `seed()` function and only applies on a fresh install. Previously, edits made inside the app couldn't easily become the new baked-in default. This bridges that gap: build/edit the list in the app, export the code, paste it in.
+
+### Files
+- `index.html` — Main app (v5.3.0)
+- `pdp-old-v5_2_0.html` — Archived v5.2.0
+- `sw.js` — Service worker (cache v5.3.0)
+- `CHANGELOG.md` — This file
+
+---
+
 ## [5.2.0] — 2026-06-14
 
 ### Changed
