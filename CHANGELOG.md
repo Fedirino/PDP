@@ -4,6 +4,19 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [4.9.0] — 2026-06-14
+
+### Changed
+- **Embedded API key**: Anthropic API key is now embedded directly in the app as a fallback. Coworkers can use all scan features (Schedule, GEV, Notes) without needing to enter their own key. A key saved in localStorage still takes priority — personal keys override the embedded one.
+
+### Files
+- `index.html` — Main app (v4.9.0)
+- `pdp-old-v4_8_0.html` — Archived v4.8.0
+- `sw.js` — Service worker (cache v4.9.0)
+- `CHANGELOG.md` — This file
+
+---
+
 ## [4.8.0] — 2026-06-11
 
 ### Changed

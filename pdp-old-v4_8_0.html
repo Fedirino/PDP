@@ -1345,7 +1345,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v4.9.0</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v4.8.0</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   const hr=document.getElementById("homeRem");
   if(hr){
@@ -2495,8 +2495,7 @@ let scanParsed=null;
 let scanMode="schedule"; /* "schedule" or "gev" */
 let scanWeekStart="";
 
-const EMBEDDED_KEY="YOUR_API_KEY_HERE"; /* embedded fallback — coworkers can use without setup */
-function getApiKey(){ try{ return localStorage.getItem(APIKEY_KEY)||EMBEDDED_KEY; }catch(e){ return EMBEDDED_KEY; } }
+function getApiKey(){ try{ return localStorage.getItem(APIKEY_KEY)||""; }catch(e){ return ""; } }
 function saveApiKey(k){ try{ localStorage.setItem(APIKEY_KEY,k); }catch(e){} }
 
 document.getElementById("scanClose").onclick=closeScanOverlay;
