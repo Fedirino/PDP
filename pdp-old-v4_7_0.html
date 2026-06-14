@@ -1345,7 +1345,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v4.8.0</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v4.7.0</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   const hr=document.getElementById("homeRem");
   if(hr){
@@ -1677,42 +1677,33 @@ function compiledListHTML(){
   if(!state.pull.length) return `<div class="empty"><div class="ei">${I.clip}</div>
     Your holes list is empty.<br>Browse <b>Sections</b> or use the <b>Stencil</b> to add items.</div>`;
   let h="";
-  const notDone = state.pull.filter(p=>!p.done);
-  const sectionItems = notDone.filter(p=>p.sectionId);
-  const pluItems = notDone.filter(p=>!p.sectionId);
+  const sectionItems = state.pull.filter(p=>p.sectionId);
+  const pluItems = state.pull.filter(p=>!p.sectionId);
 
   state.sections.forEach(sec=>{ const items=sectionItems.filter(p=>p.sectionId===sec.id); if(!items.length) return;
     h+=`<div class="grp">${esc(sec.name)}<span class="gc tnum">${items.length}</span></div>`;
     if(isGrouped(sec)){
-      sec.subsections.forEach(sub=>{ const its=items.filter(p=>p.subId===sub.id); if(!its.length) return;
+      sec.subsections.forEach(sub=>{ const its=sortDone(items.filter(p=>p.subId===sub.id)); if(!its.length) return;
         h+=`<div class="subgrp">${esc(sub.name)}</div>`; its.forEach(it=>h+=liHTML(it)); });
       const ids=new Set(sec.subsections.map(s=>s.id));
-      items.filter(p=>!p.subId||!ids.has(p.subId)).forEach(it=>h+=liHTML(it));
-    } else items.forEach(it=>h+=liHTML(it));
+      sortDone(items.filter(p=>!p.subId||!ids.has(p.subId))).forEach(it=>h+=liHTML(it));
+    } else sortDone(items).forEach(it=>h+=liHTML(it));
   });
   const knownSec=new Set(state.sections.map(s=>s.id));
-  const orphSec=sectionItems.filter(p=>!knownSec.has(p.sectionId));
+  const orphSec=sortDone(sectionItems.filter(p=>!knownSec.has(p.sectionId)));
   if(orphSec.length){ h+=`<div class="grp">Other<span class="gc tnum">${orphSec.length}</span></div>`; orphSec.forEach(it=>h+=liHTML(it)); }
 
   if(pluItems.length){
     if(sectionItems.length) h+=`<div style="height:6px"></div>`;
     CAT_ORDER.forEach(cat=>{
-      const its=pluItems.filter(p=>(p.cat||catOf(p.name))===cat);
+      const its=sortDone(pluItems.filter(p=>(p.cat||catOf(p.name))===cat));
       if(!its.length) return;
       h+=`<div class="grp">${esc(cat)} (Stencil)<span class="gc tnum">${its.length}</span></div>`;
       its.forEach(it=>h+=liHTML(it));
     });
   }
-
-  const doneItems = state.pull.filter(p=>p.done);
-  if(doneItems.length){
-    if(notDone.length) h+=`<div style="height:6px"></div>`;
-    h+=`<div class="grp">Found<span class="gc tnum">${doneItems.length}</span></div>`;
-    doneItems.forEach(it=>h+=liHTML(it));
-  }
-
-  const uncheckedCount=notDone.length;
-  const checkedCount=doneItems.length;
+  const uncheckedCount=state.pull.filter(p=>!p.done).length;
+  const checkedCount=state.pull.length-uncheckedCount;
   h+=`<div class="ll-actions">
     <div class="ll-summary">${checkedCount} found · ${uncheckedCount} remaining</div>
     ${uncheckedCount?`<button class="btn" id="saveUnfound">${I.download} Save Inv. Check</button>`:""}
@@ -1990,41 +1981,31 @@ function renderGEV(){
       <button class="btn ghost" id="gevReset" style="padding:4px 8px;font-size:10px">Reset</button>
     </div></div>`;
 
-  if(gevEdit){
-    g.categories.forEach((cat,ci)=>{
-      h+=`<div class="gev-cat">${esc(cat.name)}<span class="gc tnum">${cat.items.length}</span>
-        <button class="gev-cat-btn" data-gevrencat="${ci}">${I.pen}</button><button class="gev-cat-btn danger-txt" data-gevdelcat="${ci}">${I.x}</button></div>`;
-      cat.items.forEach((item,ii)=>{
+  g.categories.forEach((cat,ci)=>{
+    h+=`<div class="gev-cat">${esc(cat.name)}<span class="gc tnum">${cat.items.length}</span>
+      ${gevEdit?`<button class="gev-cat-btn" data-gevrencat="${ci}">${I.pen}</button><button class="gev-cat-btn danger-txt" data-gevdelcat="${ci}">${I.x}</button>`:""}</div>`;
+    let gevOrder=cat.items.map((item,ii)=>({item,ii}));
+    if(!gevEdit) gevOrder=gevOrder.filter(x=>!g.crossed[x.item]).concat(gevOrder.filter(x=>g.crossed[x.item]));
+    gevOrder.forEach(({item,ii})=>{
+      if(gevEdit){
         h+=`<div class="gev-item" style="cursor:default;">
           <div class="gev-name" style="flex:1">${esc(item)}</div>
           <button class="gev-ibtn" data-gevedit="${ci}_${ii}">${I.pen}</button>
           <button class="gev-ibtn danger-txt" data-gevdel="${ci}_${ii}">${I.x}</button>
         </div>`;
-      });
+      } else {
+        const crossed=!!g.crossed[item];
+        h+=`<div class="gev-item${crossed?" crossed":""}" data-gev="${esc(item)}">
+          <div class="gev-tick">${I.check}</div>
+          <div class="gev-name">${esc(item)}</div></div>`;
+      }
+    });
+    if(gevEdit){
       h+=`<div style="padding:4px 0"><button class="gev-add-btn" data-gevadditem="${ci}">${I.plus} Add item</button></div>`;
-    });
-    h+=`<div style="margin-top:14px"><button class="btn ghost block" id="gevAddCat">${I.plus} Add Category</button></div>`;
-  } else {
-    g.categories.forEach(cat=>{
-      const open=cat.items.filter(item=>!g.crossed[item]);
-      if(!open.length) return;
-      h+=`<div class="gev-cat">${esc(cat.name)}<span class="gc tnum">${open.length}</span></div>`;
-      open.forEach(item=>{
-        h+=`<div class="gev-item" data-gev="${esc(item)}">
-          <div class="gev-tick">${I.check}</div>
-          <div class="gev-name">${esc(item)}</div></div>`;
-      });
-    });
-    const crossedItems=[];
-    g.categories.forEach(cat=>cat.items.forEach(item=>{ if(g.crossed[item]) crossedItems.push(item); }));
-    if(crossedItems.length){
-      h+=`<div class="gev-cat">Crossed off<span class="gc tnum">${crossedItems.length}</span></div>`;
-      crossedItems.forEach(item=>{
-        h+=`<div class="gev-item crossed" data-gev="${esc(item)}">
-          <div class="gev-tick">${I.check}</div>
-          <div class="gev-name">${esc(item)}</div></div>`;
-      });
     }
+  });
+  if(gevEdit){
+    h+=`<div style="margin-top:14px"><button class="btn ghost block" id="gevAddCat">${I.plus} Add Category</button></div>`;
   }
   view.innerHTML=h;
 
