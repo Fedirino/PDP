@@ -4,6 +4,38 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [4.8.0] — 2026-06-11
+
+### Changed
+- **Crossed-off items now drop to the bottom of the whole list — across categories, not just within them.**
+  - **GEV:** Each category shows only the items still to do (with a live count). Everything you've crossed off collects under a single **Crossed off** group at the very bottom, regardless of which category it came from. Tap a crossed item there to bring it back up to its category.
+  - **Holes (List view):** Items still needed stay grouped by section / stencil category as before; everything marked found drops into one **Found** group at the very bottom. The found/remaining summary is unchanged.
+
+### Files
+- `index.html` — Main app (v4.8.0)
+- `sw.js` — cache bumped to `pdp-v4.8.0`
+- `pdp-old-v4_7_0.html` — archived previous version
+- `manifest.json`, icons — unchanged
+
+---
+
+## [4.7.0] — 2026-06-11
+
+### Changed
+- **GEV lists now sink crossed-off items to the bottom.** Within each category, items you haven't crossed off stay on top; tapping one to cross it off drops it to the bottom of that category, so what's left to do is always front and center. (Edit mode keeps the original order so you can manage the list.)
+- **Document photos are hidden.** Daily Notes and Sales Plan no longer show the scanned picture or the "Copy photo" button — the digital version is all that's shown. New scans no longer store the photo at all, which keeps storage light. (The embedded example photos were removed too, shrinking the app by ~270 KB.)
+
+### Sales Plan order
+- Blocks now display in a fixed priority order: **Refrigerated Promo → Refrigerated Veg Promo → Stone Fruit End 2 (Power Side) → Berry End → Grape End**, with every other block following in its original order. Matching is by block name, so re-scans and the seeded example both follow this order automatically.
+
+### Files
+- `index.html` — Main app (v4.7.0)
+- `sw.js` — cache bumped to `pdp-v4.7.0`
+- `pdp-old-v4_6_0.html` — archived previous version
+- `manifest.json`, icons — unchanged
+
+---
+
 ## [4.6.0] — 2026-06-11
 
 ### Changed

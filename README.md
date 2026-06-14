@@ -31,7 +31,7 @@ The fanciest part is the scanner: photos go to Claude's vision API (you bring yo
 
 It's hosted on GitHub Pages — open it, tap "Add to Home Screen," done. To deploy a new version: replace the files, bump the service worker cache name, and re-add the PWA. Old versions are archived in the repo as `pdp-old-v{version}.html` because trust takes years to build and one bad deploy to lose.
 
-Every change is logged in [CHANGELOG.md](CHANGELOG.md). Currently at **v4.6.0**.
+Every change is logged in [CHANGELOG.md](CHANGELOG.md). Currently at **v4.8.0**.
 
 ---
 
