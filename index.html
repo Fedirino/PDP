@@ -691,6 +691,12 @@
   .img-overlay .iv-btn svg{width:15px;height:15px;}
 
 </style>
+
+<!-- ===== Firebase JS SDK v10 — compat mode (no bundler needed) ===== -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 </head>
 <body>
 <div id="shell">
@@ -3314,5 +3320,507 @@ render();
 scheduleReminderNotifs();
 if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
+
+<!-- ===================================================================
+     PDP FIREBASE INTEGRATION
+     Fill in FIREBASE_CONFIG below, then sign in with Google.
+     The app keeps working from localStorage if Firebase is unavailable.
+=================================================================== -->
+<script>
+(function(){
+'use strict';
+
+// ================================================================
+// FIREBASE CONFIG — paste your values from Firebase Console
+// Project Settings → Your apps → SDK snippet → Config
+// ================================================================
+var FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyC52B8l6oH_8pc5khs078vlTqCZotp7O-Y",
+  authDomain:        "producedepartmentportal.firebaseapp.com",
+  projectId:         "producedepartmentportal",
+  storageBucket:     "producedepartmentportal.firebasestorage.app",
+  messagingSenderId: "636331639868",
+  appId:             "1:636331639868:web:bc37f3a94dd8cbdc63af39"
+};
+
+// Skip entirely until the config is filled in
+if(FIREBASE_CONFIG.apiKey==="YOUR_API_KEY"){
+  console.log("[PDP Firebase] Config not set — localStorage-only mode.");
+  return;
+}
+
+// ================================================================
+// Init
+// ================================================================
+var fbApp, fbAuth, fbDb, fbStorage, fbUser=null;
+try{
+  fbApp     = firebase.initializeApp(FIREBASE_CONFIG);
+  fbAuth    = firebase.auth();
+  fbDb      = firebase.firestore();
+  fbStorage = firebase.storage();
+}catch(e){
+  console.warn("[PDP Firebase] Init failed:",e);
+  return;
+}
+
+// Offline persistence — app still works in the back room with no signal.
+// Firestore queues writes and replays them when connectivity returns.
+fbDb.enablePersistence({synchronizeTabs:false}).catch(function(e){
+  console.warn("[PDP Firebase] Persistence:",e.code);
+});
+
+// ================================================================
+// UI — floating auth chip (bottom of screen, above tab bar)
+// ================================================================
+var _chip=null;
+function _showSignInPrompt(){
+  if(document.getElementById('fb-auth-chip')) return;
+  var el=document.createElement('div');
+  el.id='fb-auth-chip';
+  el.style.cssText='position:fixed;bottom:calc(var(--tabh,64px) + env(safe-area-inset-bottom) + 12px);'+
+    'left:50%;transform:translateX(-50%);z-index:55;'+
+    'background:var(--surface,#141c16);border:1px solid var(--line,#22301f);'+
+    'border-radius:999px;padding:9px 14px 9px 12px;box-shadow:0 4px 18px rgba(0,0,0,.45);'+
+    'display:flex;align-items:center;gap:9px;white-space:nowrap;';
+  el.innerHTML=
+    '<span style="font-size:12px;color:var(--ink-3,#71806f)">☁ Sync to cloud</span>'+
+    '<button id="fb-signin-btn" style="appearance:none;border:none;'+
+    'background:var(--brand,#34c45f);color:#fff;font:inherit;font-size:12px;font-weight:700;'+
+    'padding:6px 13px;border-radius:999px;cursor:pointer;">Sign in with Google</button>';
+  document.body.appendChild(el);
+  document.getElementById('fb-signin-btn').onclick=_signIn;
+  _chip=el;
+}
+function _removePrompt(){
+  var el=document.getElementById('fb-auth-chip'); if(el) el.remove(); _chip=null;
+}
+function _showUserChip(user){
+  _removePrompt();
+  var el=document.createElement('div');
+  el.id='fb-user-chip';
+  el.style.cssText='position:fixed;bottom:calc(var(--tabh,64px) + env(safe-area-inset-bottom) + 12px);'+
+    'left:50%;transform:translateX(-50%);z-index:55;'+
+    'background:var(--surface,#141c16);border:1px solid var(--line,#22301f);'+
+    'border-radius:999px;padding:8px 14px;box-shadow:0 4px 18px rgba(0,0,0,.45);'+
+    'display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2,#aebbab);'+
+    'white-space:nowrap;animation:rise .3s cubic-bezier(.2,.8,.3,1) both;';
+  var name=user.displayName||user.email||'Signed in';
+  el.innerHTML='<span style="color:var(--brand,#34c45f)">☁</span>'+
+    _esc(name)+
+    '<button id="fb-signout-btn" style="appearance:none;border:none;background:none;'+
+    'font:inherit;font-size:10px;color:var(--ink-3,#71806f);cursor:pointer;padding:0 2px;">Sign out</button>';
+  document.body.appendChild(el);
+  document.getElementById('fb-signout-btn').onclick=function(e){
+    e.stopPropagation(); _signOut();
+  };
+  // Auto-hide after 5 seconds
+  setTimeout(function(){
+    if(el&&el.parentNode){
+      el.style.transition='opacity .4s ease';
+      el.style.opacity='0';
+      setTimeout(function(){ if(el&&el.parentNode) el.remove(); },450);
+    }
+  },5000);
+}
+function _esc(s){ return (s||'').replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]);}); }
+
+// ================================================================
+// Auth
+// ================================================================
+function _signIn(){
+  var provider=new firebase.auth.GoogleAuthProvider();
+  fbAuth.signInWithPopup(provider).catch(function(e){
+    console.warn("[PDP Firebase] Sign in failed:",e);
+    if(typeof toast==='function') toast('Sign-in failed: '+(e.message||e.code),3500);
+  });
+}
+function _signOut(){
+  fbAuth.signOut().then(function(){
+    if(typeof toast==='function') toast('Signed out');
+  }).catch(function(e){ console.warn("[PDP Firebase] Sign out:",e); });
+}
+
+// ================================================================
+// Firestore helpers
+// ================================================================
+function _stateDoc(key){
+  return fbDb.collection('users').doc(fbUser.uid).collection('state').doc(key);
+}
+function _docsCol(){
+  return fbDb.collection('users').doc(fbUser.uid).collection('docs');
+}
+
+// ================================================================
+// Storage — upload a data URL, return download URL
+// ================================================================
+async function _uploadDataUrl(dataUrl, path){
+  var ref=fbStorage.ref(path);
+  var snap=await ref.putString(dataUrl,'data_url',{contentType:'image/jpeg'});
+  return await snap.ref.getDownloadURL();
+}
+
+// ================================================================
+// Firestore sync — write helpers (fire-and-forget)
+// ================================================================
+var _fbSync={
+  pullList: function(){
+    if(!fbUser) return;
+    _stateDoc('pull_list').set({v:1,data:state,ts:Date.now()})
+      .catch(function(e){console.warn('[FB] pull_list:',e);});
+  },
+  schedule: function(){
+    if(!fbUser) return;
+    _stateDoc('schedule').set({v:1,data:sched,ts:Date.now()})
+      .catch(function(e){console.warn('[FB] schedule:',e);});
+  },
+  gev: function(){
+    if(!fbUser) return;
+    _stateDoc('gev').set({v:1,lists:gevLists,activeId:gevActiveId,ts:Date.now()})
+      .catch(function(e){console.warn('[FB] gev:',e);});
+  },
+  stencil: function(){
+    if(!fbUser) return;
+    _stateDoc('stencil').set({v:1,custom:loadCustomStencil(),edits:loadStencilEdits(),ts:Date.now()})
+      .catch(function(e){console.warn('[FB] stencil:',e);});
+  },
+  unfound: function(){
+    if(!fbUser) return;
+    _stateDoc('unfound').set({v:1,items:unfound,ts:Date.now()})
+      .catch(function(e){console.warn('[FB] unfound:',e);});
+  },
+  notes: function(){
+    if(!fbUser) return;
+    _stateDoc('notes').set({v:1,items:notes,ts:Date.now()})
+      .catch(function(e){console.warn('[FB] notes:',e);});
+  },
+  reminders: function(){
+    if(!fbUser) return;
+    _stateDoc('reminders').set({v:1,items:reminders,ts:Date.now()})
+      .catch(function(e){console.warn('[FB] reminders:',e);});
+  },
+  checklist: function(){
+    if(!fbUser) return;
+    var data={v:1,items:checklist.items||[],checked:checklist.checked||{},lastReset:checklist.lastReset||'',ts:Date.now()};
+    _stateDoc('checklist').set(data)
+      .catch(function(e){console.warn('[FB] checklist:',e);});
+  },
+  homeRem: function(text){
+    if(!fbUser) return;
+    _stateDoc('home_rem').set({v:1,text:text||'',ts:Date.now()})
+      .catch(function(e){console.warn('[FB] home_rem:',e);});
+  },
+  // Save a single doc entry (with optional image upload)
+  saveDocEntry: async function(docId, type, docData, pageImages){
+    if(!fbUser) return;
+    var imageUrls=docData.imageUrls||[];
+    if(pageImages&&pageImages.length){
+      try{
+        var uploads=pageImages.map(function(dataUrl,i){
+          return _uploadDataUrl(dataUrl,'users/'+fbUser.uid+'/docs/'+docId+'/page_'+i+'.jpg');
+        });
+        imageUrls=await Promise.all(uploads);
+      }catch(e){ console.warn('[FB] image upload:',e); }
+    }
+    var fsDoc={type:type,date:docData.date||'',dateLabel:docData.dateLabel||'',
+      created:docData.created||Date.now(),sections:docData.sections||[],
+      imageUrls:imageUrls,ts:Date.now()};
+    _docsCol().doc(docId).set(fsDoc)
+      .catch(function(e){console.warn('[FB] saveDoc:',e);});
+    // Return urls so caller can update local doc
+    return imageUrls;
+  },
+  deleteDocEntry: function(docId){
+    if(!fbUser) return;
+    _docsCol().doc(docId).delete()
+      .catch(function(e){console.warn('[FB] deleteDoc:',e);});
+  }
+};
+
+// ================================================================
+// Load all data from Firestore on sign-in
+// ================================================================
+async function _loadFromFirestore(){
+  if(!fbUser) return;
+  try{
+    // Parallel fetch of all state docs
+    var [pullSnap,schedSnap,gevSnap,stencilSnap,unfoundSnap,
+         notesSnap,remSnap,clSnap,hrSnap] = await Promise.all([
+      _stateDoc('pull_list').get(),
+      _stateDoc('schedule').get(),
+      _stateDoc('gev').get(),
+      _stateDoc('stencil').get(),
+      _stateDoc('unfound').get(),
+      _stateDoc('notes').get(),
+      _stateDoc('reminders').get(),
+      _stateDoc('checklist').get(),
+      _stateDoc('home_rem').get()
+    ]);
+
+    var changed=false;
+
+    if(pullSnap.exists){
+      var d=pullSnap.data();
+      if(d&&d.data){ state=d.data; writeK(KEY,JSON.stringify(state)); changed=true; }
+    }
+    if(schedSnap.exists){
+      var d=schedSnap.data();
+      if(d&&d.data){ sched=d.data; writeK(SCHKEY,JSON.stringify(sched)); changed=true; }
+    }
+    if(gevSnap.exists){
+      var d=gevSnap.data();
+      if(d&&d.lists){
+        gevLists=d.lists;
+        if(d.activeId) gevActiveId=d.activeId;
+        // Call originals to avoid double-sync loop
+        _origSaveGevLists();
+        _origSaveGevActive();
+        changed=true;
+      }
+    }
+    if(stencilSnap.exists){
+      var d=stencilSnap.data();
+      if(d){
+        if(d.custom) _origSaveCustomStencil(d.custom);
+        if(d.edits) _origSaveStencilEdits(d.edits);
+        stencilEdits=loadStencilEdits();
+        changed=true;
+      }
+    }
+    if(unfoundSnap.exists){
+      var d=unfoundSnap.data();
+      if(d&&d.items){ unfound=d.items; _origSaveUnfound(); changed=true; }
+    }
+    if(notesSnap.exists){
+      var d=notesSnap.data();
+      if(d&&d.items){ notes=d.items; _origSaveNotes(); changed=true; }
+    }
+    if(remSnap.exists){
+      var d=remSnap.data();
+      if(d&&d.items){ reminders=d.items; _origSaveReminders(); scheduleReminderNotifs(); changed=true; }
+    }
+    if(clSnap.exists){
+      var d=clSnap.data();
+      if(d){
+        checklist={items:d.items||[],checked:d.checked||{},lastReset:d.lastReset||''};
+        // Respect daily reset — if lastReset isn't today, wipe checked
+        var today=new Date().toDateString();
+        if(checklist.lastReset!==today){ checklist.checked={}; checklist.lastReset=today; }
+        _origSaveChecklist();
+        changed=true;
+      }
+    }
+    if(hrSnap.exists){
+      var d=hrSnap.data();
+      if(d&&d.text!==undefined){ _origHomeRemSave(d.text); changed=true; }
+    }
+
+    // Fetch docs subcollection
+    var docsSnap=await _docsCol().get();
+    if(!docsSnap.empty){
+      docStore={dailynotes:[],salesplan:[]};
+      docsSnap.forEach(function(doc){
+        var d=doc.data();
+        var type=d.type;
+        if(type==='dailynotes'||type==='salesplan'){
+          docStore[type].push({
+            id:doc.id, date:d.date||'', dateLabel:d.dateLabel||'',
+            created:d.created||0, sections:d.sections||[],
+            imageUrls:d.imageUrls||[], images:[]
+          });
+        }
+      });
+      DOC_TYPES.forEach(function(t){
+        if(!Array.isArray(docStore[t])) docStore[t]=[];
+        docStore[t].sort(function(a,b){ return (b.date||'').localeCompare(a.date||'')||(b.created||0)-(a.created||0); });
+        if(docStore[t].length) docActiveId[t]=docStore[t][0].id;
+      });
+      _origSaveDocs();
+      changed=true;
+    }
+
+    if(changed){
+      if(typeof render==='function') render();
+      if(typeof toast==='function') toast('☁ Synced from cloud',2500);
+    }
+
+  }catch(e){
+    console.warn("[PDP Firebase] loadFromFirestore failed:",e);
+  }
+}
+
+// ================================================================
+// Initial push — send all local data to Firestore for first-time setup
+// ================================================================
+function _pushAllToFirestore(){
+  _fbSync.pullList();
+  _fbSync.schedule();
+  _fbSync.gev();
+  _fbSync.stencil();
+  _fbSync.unfound();
+  _fbSync.notes();
+  _fbSync.reminders();
+  _fbSync.checklist();
+  _fbSync.homeRem(homeRemGet());
+  // Push all existing documents
+  DOC_TYPES.forEach(function(type){
+    (docStore[type]||[]).forEach(function(doc){
+      _fbSync.saveDocEntry(doc.id, type, doc, null);
+    });
+  });
+}
+
+// ================================================================
+// Track doc IDs so we can detect deletions
+// ================================================================
+var _knownDocIds=new Set();
+function _refreshKnownDocIds(){
+  _knownDocIds=new Set();
+  DOC_TYPES.forEach(function(t){ (docStore[t]||[]).forEach(function(d){ _knownDocIds.add(d.id); }); });
+}
+_refreshKnownDocIds();
+
+// ================================================================
+// Wrap existing save functions — preserve originals
+// ================================================================
+
+// Pull List / Holes
+var _origSave=window.save;
+window.save=function(){ _origSave(); _fbSync.pullList(); };
+
+// Schedule
+var _origSaveSched=window.saveSched;
+window.saveSched=function(){ var r=_origSaveSched(); _fbSync.schedule(); return r; };
+
+// GEV
+var _origSaveGevLists=window.saveGevLists;
+window.saveGevLists=function(){ _origSaveGevLists(); _fbSync.gev(); };
+var _origSaveGevActive=window.saveGevActive;
+window.saveGevActive=function(){ _origSaveGevActive(); _fbSync.gev(); };
+
+// Stencil
+var _origSaveCustomStencil=window.saveCustomStencil;
+window.saveCustomStencil=function(arr){ _origSaveCustomStencil(arr); _fbSync.stencil(); };
+var _origSaveStencilEdits=window.saveStencilEdits;
+window.saveStencilEdits=function(obj){ _origSaveStencilEdits(obj); _fbSync.stencil(); };
+
+// Unfound
+var _origSaveUnfound=window.saveUnfound;
+window.saveUnfound=function(){ _origSaveUnfound(); _fbSync.unfound(); };
+
+// Notes
+var _origSaveNotes=window.saveNotes;
+window.saveNotes=function(){ _origSaveNotes(); _fbSync.notes(); };
+
+// Reminders
+var _origSaveReminders=window.saveReminders;
+window.saveReminders=function(){ _origSaveReminders(); _fbSync.reminders(); };
+
+// Checklist
+var _origSaveChecklist=window.saveChecklist;
+window.saveChecklist=function(){ _origSaveChecklist(); _fbSync.checklist(); };
+
+// Home Reminders
+var _origHomeRemSave=window.homeRemSave;
+window.homeRemSave=function(v){ _origHomeRemSave(v); _fbSync.homeRem(v); };
+
+// Documents — detect deletions and sync
+var _origSaveDocs=window.saveDocs;
+window.saveDocs=function(){
+  var r=_origSaveDocs();
+  if(fbUser){
+    // Detect deleted docs
+    var currentIds=new Set();
+    DOC_TYPES.forEach(function(t){ (docStore[t]||[]).forEach(function(d){ currentIds.add(d.id); }); });
+    _knownDocIds.forEach(function(id){ if(!currentIds.has(id)) _fbSync.deleteDocEntry(id); });
+    _knownDocIds=currentIds;
+    // Sync all remaining docs
+    DOC_TYPES.forEach(function(type){
+      (docStore[type]||[]).forEach(function(doc){
+        _fbSync.saveDocEntry(doc.id, type, doc, null);
+      });
+    });
+  }
+  return r;
+};
+
+// Override applyDocScan to upload photos to Storage
+var _origApplyDocScan=window.applyDocScan;
+window.applyDocScan=function(){
+  if(!fbUser||!scanParsed||!scanParsed.sections){
+    _origApplyDocScan();
+    return;
+  }
+  // Run the save logic inline (mirrors _origApplyDocScan logic)
+  var type=(scanMode==="salesplan")?"salesplan":"dailynotes";
+  var today=new Date(), pad=function(n){ return String(n).padStart(2,"0"); };
+  var date=scanParsed.date||(today.getFullYear()+"-"+pad(today.getMonth()+1)+"-"+pad(today.getDate()));
+  var dateLabel=scanParsed.dateLabel||today.toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"2-digit",day:"2-digit"});
+  var arr=docStore[type];
+  var existing=arr.find(function(d){ return d.date===date; });
+  if(existing&&!confirm("A "+DOC_LABEL[type]+" for "+(existing.dateLabel||date)+" already exists.\n\nOK = Replace it\nCancel = Keep both")){
+    /* keep both */
+  } else if(existing){
+    _fbSync.deleteDocEntry(existing.id);
+    docStore[type]=arr.filter(function(d){ return d.id!==existing.id; });
+  }
+  var docId="doc_"+Date.now();
+  var pageImages=scanParsed.images||[];
+  var doc={id:docId,date:date,dateLabel:dateLabel,created:Date.now(),images:[],imageUrls:[],sections:scanParsed.sections};
+  docStore[type].unshift(doc);
+  if(typeof sortDocs==='function') sortDocs(type);
+  if(typeof docPrune==='function') docPrune();
+  docActiveId[type]=doc.id;
+  var ok=_origSaveDocs();
+  if(typeof closeScanOverlay==='function') closeScanOverlay();
+  tab="docs"; docView=type; docEdit=false;
+  if(typeof render==='function') render();
+  window.scrollTo(0,0);
+  if(typeof toast==='function') toast(ok?DOC_LABEL[type]+" saved":"Saved (storage full)",2000);
+  // Upload images asynchronously; update doc URLs when done
+  if(pageImages.length){
+    _fbSync.saveDocEntry(docId, type, doc, pageImages).then(function(urls){
+      if(urls&&urls.length){
+        var saved=docStore[type].find(function(d){ return d.id===docId; });
+        if(saved){ saved.imageUrls=urls; _origSaveDocs(); }
+      }
+    });
+  }
+  _refreshKnownDocIds();
+};
+
+// ================================================================
+// Auth state listener — runs on every page load
+// ================================================================
+var _firstSignIn=true;
+fbAuth.onAuthStateChanged(function(user){
+  fbUser=user;
+  if(user){
+    _removePrompt();
+    _showUserChip(user);
+    console.log("[PDP Firebase] Signed in:",user.email);
+    if(_firstSignIn){
+      _firstSignIn=false;
+      // Check if Firestore has data; if not, push local data up
+      _stateDoc('pull_list').get().then(function(snap){
+        if(!snap.exists){
+          // First-ever sign-in: push all local data to cloud
+          _pushAllToFirestore();
+          if(typeof toast==='function') toast('☁ Data uploaded to cloud',2500);
+        } else {
+          // Already have cloud data: pull it down
+          _loadFromFirestore();
+        }
+      }).catch(function(){ _loadFromFirestore(); });
+    }
+  } else {
+    _firstSignIn=true;
+    _showSignInPrompt();
+    console.log("[PDP Firebase] Signed out.");
+  }
+});
+
+})();
+</script>
+
 </body>
 </html>
