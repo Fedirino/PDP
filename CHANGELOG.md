@@ -1,0 +1,603 @@
+# PDP Changelog
+
+All notable changes to the Produce Department Portal are documented here.
+
+---
+
+## [5.4.0] — 2026-06-15
+
+### Fixed
+- **Scanning (Schedule, GEV, Daily Notes, Sales Plan) was failing for everyone.** The app calls `/api/scan`, but the Netlify serverless function that handles that path didn't exist in the repo — so every scan hit a dead endpoint. Added the missing function and routing:
+  - `netlify/functions/scan.js` — server-side proxy that injects the Anthropic API key (kept private as a Netlify environment variable) and forwards scan requests. The key never ships in the client.
+  - `netlify.toml` — maps `/api/scan` → the function and sets the static publish + functions directories.
+- **Clearer scan errors.** When the scan endpoint is missing or returns a web page instead of data, the app now says so explicitly (e.g. "Scan service not found (/api/scan). The Netlify function may not be deployed.") instead of a generic "Unknown error."
+
+### Deployment — REQUIRED after deploying these files
+1. Make sure `netlify/functions/scan.js` and `netlify.toml` are committed to the repo root.
+2. In Netlify: **Site settings → Environment variables → Add** a variable named `ANTHROPIC_API_KEY` with your Anthropic key as the value. Then **redeploy** (or trigger a new deploy) so the function picks it up.
+3. After deploy, test a scan. If it still fails, the error message will now point at the cause.
+
+### Files
+- `index.html` — Main app (v5.4.0)
+- `netlify/functions/scan.js` — NEW serverless scan proxy
+- `netlify.toml` — NEW Netlify routing/config
+- `pdp-old-v5_3_0.html` — Archived v5.3.0
+- `sw.js` — Service worker (cache v5.4.0)
+- `CHANGELOG.md` — This file
+
+---
+
+## [5.3.0] — 2026-06-14
+
+### Added
+- **Export load list as default code.** In the Holes tab, tap **Edit** on the Sections screen and a new **"Export as default code"** button appears at the bottom. It opens a full-screen panel containing your current load list rendered as a ready-to-paste `seed()` function. Tap **Copy all**, then replace the existing `seed()` in index.html with it to make your edited list the built-in default for new installs. Handles grouped sections (subsections), plain sections, and safely escapes quotes in item names.
+
+### Why
+- The default load list lives in the `seed()` function and only applies on a fresh install. Previously, edits made inside the app couldn't easily become the new baked-in default. This bridges that gap: build/edit the list in the app, export the code, paste it in.
+
+### Files
+- `index.html` — Main app (v5.3.0)
+- `pdp-old-v5_2_0.html` — Archived v5.2.0
+- `sw.js` — Service worker (cache v5.3.0)
+- `CHANGELOG.md` — This file
+
+---
+
+## [5.2.0] — 2026-06-14
+
+### Changed
+- **Daily Checklist simplified to one daily list.** Reverted the brief multi-list/category design back to a single, simple checklist: add bulleted tasks, tap to check them off, edit and delete. Checked tasks drop to a "Done" group at the bottom and the whole list auto-unchecks at the start of each new day. Edit mode (top-right) handles add / rename / delete / reorder.
+- Home and Tools summaries show the single list's progress (e.g. "4 of 9 done today").
+- Any tasks created under the short-lived v5.1.0 multi-list format are migrated automatically into the simple list.
+
+### Kept from 5.1.0
+- The themed in-app dialog sheet (replacing native `prompt()` / `confirm()`) remains in use for the Checklist and GEV List actions.
+
+### Files
+- `index.html` — Main app (v5.2.0)
+- `pdp-old-v5_1_0.html` — Archived v5.1.0
+- `sw.js` — Service worker (cache v5.2.0)
+- `CHANGELOG.md` — This file
+
+---
+
+## [5.1.0] — 2026-06-14
+
+### Changed
+- **Daily Checklist rebuilt to work like the GEV List.** The checklist is now a full category-based, multi-list tool instead of a flat task list:
+  - **Multiple named checklists** (Opening, Closing, Truck Day, etc.) selectable from a dropdown, with New / Rename / Delete.
+  - **Categories** (Backroom, Sales Floor, Cooler…) each holding their own tasks, with add / rename / delete and per-task reorder.
+  - **Tap to check off** — completed tasks drop into a single "Done" group at the bottom, exactly like GEV's crossed-off behavior.
+  - **Daily auto-reset** is preserved and now runs per-list: each checklist's checkmarks clear automatically at the start of a new day, while the task structure stays.
+  - No scan — checklists are built and edited by hand, as requested.
+  - Existing flat checklist items are **migrated automatically** into an "Opening" list under a "Tasks" category, so nothing is lost.
+- **Home & Tools summaries** now reflect all checklists combined (e.g. "2 lists · 7 of 14 done today").
+
+### Added
+- **Themed in-app dialog sheet** replaces native browser `prompt()` / `confirm()` for all GEV List and Daily Checklist actions. Native dialogs are unreliable in installed PWAs (especially on iOS) and broke the dark theme; the new bottom sheet matches the app, animates in, supports Enter-to-confirm, and uses a red confirm button for destructive actions. (GEV and Checklist fully migrated; other tabs to follow.)
+
+### UX audit notes (for follow-up)
+- 7 `prompt()` and ~15 `confirm()` calls remain in Holes, Schedule, Notes, and Documents — these still use native dialogs and should be migrated to the new sheet in a future pass.
+- Tab bar carries 7 destinations, which is tight on small phones; worth considering grouping later.
+
+### Files
+- `index.html` — Main app (v5.1.0)
+- `pdp-old-v5_0_0.html` — Archived v5.0.0
+- `sw.js` — Service worker (cache v5.1.0)
+- `CHANGELOG.md` — This file
+
+---
+
+## [5.0.0] — 2026-06-14
+
+### Added
+- **Multi-photo upload**: Upload button now supports selecting multiple images at once. In schedule/GEV scan mode, selected photos queue and process one at a time — after applying each result the next image loads automatically. In document scan mode (Daily Notes / Sales Plan) all selected pages are added to the page strip at once.
+- **Daily Checklist card on Home**: The home screen now shows a tap-to-open Daily Checklist card with a live task progress summary ("3 of 7 done"). Replaces the freeform Reminders textarea.
+- **Produce Fun Fact of the Day**: A fresh fact rotates every day on the home screen, sourced from a 50-fact library covering nutrition, botany, and produce trivia. Fully offline — no API call needed.
+
+### Changed
+- **Home screen layout**: "Today" section replaces "Reminders" — houses the new Checklist card. Fun Fact panel added below it.
+- Version bumped to v5.0.0.
+
+### Files
+- `index.html` — Main app (v5.0.0)
+- `pdp-old-v4_9_0.html` — Archived v4.9.0
+- `sw.js` — Service worker (cache v5.0.0)
+- `CHANGELOG.md` — This file
+
+---
+
+## [4.9.0] — 2026-06-14
+
+### Changed
+- **Netlify proxy for API calls**: All Claude AI scan requests now route through a Netlify serverless function (`netlify/functions/scan.js`) instead of calling Anthropic directly from the browser. The API key lives in Netlify's environment variables — never in GitHub source code or the browser.
+- **API key UI removed**: No more "Enter API key" prompt or "Change API key" button. Scans just work for all coworkers with no setup required.
+
+### Added
+- `netlify/functions/scan.js` — Serverless proxy function. Reads `ANTHROPIC_API_KEY` from Netlify environment and forwards requests to Anthropic.
+
+### Files
+- `index.html` — Main app (v4.9.0)
+- `pdp-old-v4_8_0.html` — Archived v4.8.0
+- `sw.js` — Service worker (cache v4.9.0)
+- `netlify/functions/scan.js` — NEW: API proxy function
+- `CHANGELOG.md` — This file
+
+---
+
+## [4.8.0] — 2026-06-11
+
+### Changed
+- **Crossed-off items now drop to the bottom of the whole list — across categories, not just within them.**
+  - **GEV:** Each category shows only the items still to do (with a live count). Everything you've crossed off collects under a single **Crossed off** group at the very bottom, regardless of which category it came from. Tap a crossed item there to bring it back up to its category.
+  - **Holes (List view):** Items still needed stay grouped by section / stencil category as before; everything marked found drops into one **Found** group at the very bottom. The found/remaining summary is unchanged.
+
+### Files
+- `index.html` — Main app (v4.8.0)
+- `sw.js` — cache bumped to `pdp-v4.8.0`
+- `pdp-old-v4_7_0.html` — archived previous version
+- `manifest.json`, icons — unchanged
+
+---
+
+## [4.7.0] — 2026-06-11
+
+### Changed
+- **GEV lists now sink crossed-off items to the bottom.** Within each category, items you haven't crossed off stay on top; tapping one to cross it off drops it to the bottom of that category, so what's left to do is always front and center. (Edit mode keeps the original order so you can manage the list.)
+- **Document photos are hidden.** Daily Notes and Sales Plan no longer show the scanned picture or the "Copy photo" button — the digital version is all that's shown. New scans no longer store the photo at all, which keeps storage light. (The embedded example photos were removed too, shrinking the app by ~270 KB.)
+
+### Sales Plan order
+- Blocks now display in a fixed priority order: **Refrigerated Promo → Refrigerated Veg Promo → Stone Fruit End 2 (Power Side) → Berry End → Grape End**, with every other block following in its original order. Matching is by block name, so re-scans and the seeded example both follow this order automatically.
+
+### Files
+- `index.html` — Main app (v4.7.0)
+- `sw.js` — cache bumped to `pdp-v4.7.0`
+- `pdp-old-v4_6_0.html` — archived previous version
+- `manifest.json`, icons — unchanged
+
+---
+
+## [4.6.0] — 2026-06-11
+
+### Changed
+- **Sales Plan now renders as a true digital copy of the plan** — not generic cards. Each block draws like the printed fixture: a titled header bar, position slots down the left (Power Wing, Shelf, Well, 1–4, Back Wing…), and the items stacked beside them. Cells holding several items are split onto their own lines, and **DEAL LOCK** / **SPOT BUY** print as small amber tags. Empty slots show a dash so the fixture shape is preserved. The plan's italic notes sit under each block header. Photos remain attached as backup, but the digital version is now the main read.
+- Daily Notes keep their existing card/table layout — only the Sales Plan section gets the plan-style rendering. Edit mode, copy text/photo, delete, the dropdown, and the two-week retention all work exactly as before.
+
+### Files
+- `index.html` — Main app (v4.6.0)
+- `sw.js` — cache bumped to `pdp-v4.6.0`
+- `pdp-old-v4_5_0.html` — archived previous version
+- `manifest.json`, icons — unchanged
+
+---
+
+## [4.5.0] — 2026-06-11
+
+### Changed
+- **Documents is now organized into sections.** Opening the Documents tab shows a chooser:
+  - **Daily Notes** — the daily bulletin scanner from v4.4.0, now its own section.
+  - **Sales Plan** — new. Scan the weekly produce display plan (the multi-page sheet of promo tables, end caps, hero pods, value bins, authorized displays, etc.). Claude rebuilds every titled block as a digital card with its grid reproduced as a table. Same multi-page scan flow as Daily Notes.
+  - **Plan-O-Gram** — placeholder, still marked **Coming Soon**.
+
+### Added
+- **Two-week retention** (same idea as the Schedule's two-week window): each section automatically keeps only the last 14 days of documents, newest first, so storage stays bounded. Older entries drop off on their own.
+- **Edit mode** for any scanned document (tap **Edit**, top right): rename the date label, edit each section's title / subject / contact, edit bullets (one per line; start a line with `>>` for a sub-bullet), and edit table cells. Add or delete sections, add tables, and add or delete table rows. Tap **Done** to save.
+- **Delete** any individual document from its section (unchanged behavior, now per section).
+- **Seeded example Sales Plan**: this build ships with the 6/12–7/16 display plan (pages 8 & 10) already transcribed into the Sales Plan section, original photos attached. It's a normal saved document — edit it or delete it like any other. (Double-check the dense recap/allocation-style grids against the printout; transcription was done from the photos and a couple of tight cells may need a tweak in Edit.)
+
+### Files
+- `index.html` — Main app (v4.5.0); includes the embedded example Sales Plan photos
+- `sw.js` — cache bumped to `pdp-v4.5.0`
+- `pdp-old-v4_4_0.html` — archived previous version
+- `manifest.json`, icons — unchanged
+
+---
+
+## [4.4.0] — 2026-06-11
+
+### Added
+- **Documents tab (new)**: A dedicated section for department paperwork, with **Daily Notes** as the first document type. Lives in the bottom tab bar (folder icon) and as a tile on the Home screen.
+- **Scan Daily Notes (multi-page)**: Tap **Scan** in the Documents tab, then add every page of the printed Daily Notes (camera or upload — a sheet usually runs 2+ pages). Claude reads all pages together and rebuilds the bulletin digitally: each Category / Contact / Subject block, every bullet (including indented sub-bullets), and **every table reproduced cell-for-cell** (Division Recap, Allocations, Organic End plans, etc.). Tables scroll horizontally so wide grids stay exact.
+- **Stored by date with a dropdown**: Every scan is saved as its own dated document. A dropdown at the top of the tab cycles between days; newest first. Re-scanning a date you already have offers to replace or keep both.
+- **Original photo kept**: The source photo(s) are stored with each document as thumbnails. Tap to open full-screen; **Copy photo** puts the image on the clipboard. **Copy text** copies the whole bulletin as clean plain text. **Delete** removes the current document.
+
+### Notes
+- Uses the same on-device Anthropic API key as the Schedule and GEV scanners — no extra setup if you've already entered one.
+- Photos are compressed before storage to conserve space; if local storage fills up, the app warns that the oldest notes may not persist.
+
+### Files
+- `index.html` — Main app (v4.4.0)
+- `sw.js` — cache bumped to `pdp-v4.4.0`
+- `pdp-old-v4_3_0.html` — archived previous version
+- `manifest.json`, icons — unchanged
+
+---
+
+## [4.3.0] — 2026-06-11
+
+### Changed
+- **Holes default items**: All sections now pre-loaded with actual Store 2606 items instead of generic placeholders. Endcaps (Apple end, Berry end, Grapes, Melons, Pears), Veg Wall, Stone fruit, Apples, Berries, Seasonal, Ethnic, Tomatoes, Citrus, Peppers, and Potatoes all reflect real department SKUs and variety names.
+
+---
+
+## [4.2.0] — 2026-06-11
+
+### Changed
+- **Home screen rework**: The Holes / GEV done / In today stat tiles are gone. In their place: a **Next in** card showing who comes in next and at what time (today, tomorrow, or the next scheduled day — pulled live from the Schedule tab, tap to open), and a **Reminders** field — a free-text scratchpad on the Home screen that auto-saves as you type (stored locally, survives restarts).
+- **Coming Soon condensed**: Plan-O-Grams / Daily Notes / Sales Plan tiles collapsed into a single **Documents** tile (still marked Soon).
+
+### Fixed
+- **Giant trash icon on Notes**: The Delete Note button's trash icon had no size rule and rendered enormous. Now 15px and properly aligned.
+- **Daily Checklist delete**: Same root cause — the edit/delete (pen/X) icons in checklist Edit mode had no size rule, rendering huge and breaking the row. Icons now sized correctly, so deleting checklist items works as intended (tap **Edit**, then the X next to an item).
+
+### Scan accuracy
+- **Other-department shifts are now excluded**: "(GROCERY) CLERK", "(DAIRY) CLERK", and any other non-produce role no longer appear on the schedule at all. Only CLERK, HEADCLERK, and MANAGER shifts count. This is enforced twice: in the AI prompt (treat loaned-out cells as empty) and in a code-level safety net that strips any shift containing a department label even if the AI slips one through.
+- **Self-checking prompt**: The Wall Schedule prints its own math — each worked cell shows a daily-hours figure (e.g. 8.00) and each row a Total Hours figure. The AI is now instructed to verify every extracted shift against them (end − start − meal must equal the printed hours; row total must match Total Hours), catching misread digits and A/P mixups before they reach you.
+- **Structured read procedure**: Prompt rewritten as an ordered procedure — orient first, read header dates, then process one row at a time following the gridlines (row heights vary). The model also states its determined orientation and week date on one line before the JSON, which forces it to commit to orientation before reading (the JSON parser already strips this preamble).
+
+### Files
+- `index.html` — Main app (v4.2.0)
+- `pdp-old-v4_1_0.html` — Archived v4.1.0
+- `sw.js` — Service worker (cache v4.2.0)
+- `manifest.json` — PWA manifest (unchanged)
+
+---
+
+## [4.1.0] — 2026-06-11
+
+### Changed
+- **Condensed Home screen**: Tool tiles are now a compact 2-column grid — icon + name only, no descriptions. Coming Soon items shrunk to slim rows. Everything fits one screen.
+- **Time on Home**: Current time now shows next to the date in the hero and ticks live while the Home tab is open.
+- **"In today" stat** no longer counts Request Off / Unavailable entries as working.
+
+### Fixed
+- **Notifications now actually fire on phones**: Reminders were using `new Notification()`, which Android (and iOS) PWAs silently block — notifications must go through the service worker. All reminder alerts now use `registration.showNotification()` with vibration, falling back to in-app toast if blocked. Added a **Send test notification** button in Reminders so you can verify instantly.
+- **Missed-reminder catch-up**: Browsers throttle timers while the app is backgrounded. When you return to the app, any reminders that came due while you were away now fire immediately (within 24h) instead of being lost.
+- **Sideways scan photos**: Camera photos carry EXIF rotation data that the scanner was ignoring, sending Claude rotated images — a major source of failed/garbled scans. Images are now orientation-normalized via `createImageBitmap` before upload. JPEG quality bumped 0.85 → 0.92 for crisper text.
+
+### Scan accuracy
+- **Loaned-shift labels**: Shifts with a role other than CLERK / HEADCLERK / MANAGER (e.g. "(GROCERY) CLERK", "(DAIRY) CLERK") now keep the label — extracted as "4:00P-9:00P (Grocery)" so you can see who's loaned out. Standard produce roles stay clean time-only.
+- **Rotation-aware prompt**: Claude is now told the photo may be rotated/tilted and to orient it before reading.
+- **Structure tuned to the real Wall Schedule report**: prompt now describes the Total/Weekly/Sun-Hol hours columns (ignored), employee numbers under names (ignored), per-day hours figures (ignored), and rows that are entirely Request Off (still extracted).
+- **Automatic retry**: A failed API call or malformed JSON now retries once automatically with a stricter instruction before showing the failure screen. Auth errors don't retry. JSON embedded in prose is salvaged.
+- `max_tokens` raised 2000 → 4096 — large schedules were getting truncated mid-JSON, a hidden failure cause.
+
+### Files
+- `index.html` — Main app (v4.1.0)
+- `pdp-old-v4_0_0.html` — Archived v4.0.0
+- `sw.js` — Service worker (cache v4.1.0)
+- `manifest.json` — PWA manifest
+- `icon192.png` / `icon512.png` — PWA icons
+- `CHANGELOG.md` — This file
+- `README.md` — Project readme
+
+---
+
+## [4.0.0] — 2026-06-11
+
+### Changed — Complete Visual Overhaul ("Dawn Market")
+- **New design system**: Entire color palette rebuilt — deep pine-black canvas (`#0b110d`), richer elevated surfaces, and a brighter fresh-leaf green accent (`#34c45f`) replacing the old muddy olive. Softer larger corner radii and deeper shadows throughout.
+- **New Home dashboard hero**: Time-aware greeting (Good morning / afternoon / evening), date, and three **live stat chips** — Holes left, GEV % done, and employees In Today — each tappable to jump straight to that tab. Subtle ambient sheen animation sweeps the hero (disabled when reduced-motion is on).
+- **Produce-hued tiles**: Each Home tile icon now carries its own produce-inspired color — leaf green (Stencil), citrus (Holes), berry (GEV), sky (Schedule), amber (Tools).
+- **Tab bar redesign**: Active tab gets a glowing green pill indicator; bar is taller with stronger blur.
+- **Result cards & accents**: Claims/result cards now use the new hero gradient with a soft green glow; focus rings, danger tones, and toasts all retuned to the new palette.
+- **PWA chrome**: `theme-color` and manifest background/theme colors updated to match the new canvas.
+
+### Added
+- **Daily Notes** placeholder tile on Home (Coming Soon) — planned shift handoff & day log.
+- **Sales Plan** placeholder tile on Home (Coming Soon) — planned weekly ads, pushes & targets.
+- New color tokens: citrus, berry, sky, brand gradient, and glow shadow for future features.
+
+### Files
+- `index.html` — Main app (v4.0.0)
+- `pdp-old-v3_8_0.html` — Archived v3.8.0
+- `sw.js` — Service worker (cache v4.0.0)
+- `manifest.json` — PWA manifest (new theme colors)
+- `icon192.png` / `icon512.png` — PWA icons
+- `CHANGELOG.md` — This file
+- `README.md` — Project readme
+
+---
+
+## [3.8.0] — 2026-06-11
+
+### Added
+- **Daily Checklist**: New tool in the Tools hub — create an editable list of daily tasks that auto-resets each day. Edit mode lets you rename, delete, and reorder items. Persists in `pdp_checklist_v1`.
+- **General Calculator**: Full calculator in the Tools hub — basic arithmetic (+, −, ×, ÷), percentage, sign flip, and copy result. Accessible from its own card tile.
+- **Item reordering in Holes edit mode**: Up/down arrow buttons on each product let you change the display order while editing a section or subsection.
+- **Subsections in any section**: When editing a flat section (like Veg Wall), a new "Add Subsection" button appears. Adding one converts the section into a grouped section (existing items move into a "General" group). Works just like Endcaps.
+
+### Fixed
+- **Notes not saving on mobile**: Save and Delete buttons in the note editor now use `addEventListener` with `preventDefault`/`stopPropagation` instead of bare `.onclick`, fixing tap reliability on Android and iOS.
+- **Notifications permission flow**: Permission is now requested as an `async/await` flow inside the Set Reminder tap handler (proper user gesture). Status feedback tells you whether notifications are enabled, blocked, or unsupported. Added note that app must stay open/backgrounded for timer-based alerts.
+
+### Changed
+- Tools hub now shows Daily Checklist and Calculator as top-level card tiles
+- Claims Calculator copy button rebound with `addEventListener`
+- Notification status message is more descriptive and honest about limitations
+- Home Tools tile description updated to "Checklist, Notes, Calculator & more"
+- Version bumped to v3.8.0
+
+### Files
+- `index.html` — Main app (v3.8.0)
+- `pdp-old-v3_7_0.html` — Archived v3.7.0
+- `sw.js` — Service worker (cache v3.8.0)
+- `manifest.json` — PWA manifest
+- `icon192.png` / `icon512.png` — PWA icons
+- `CHANGELOG.md` — This file
+- `README.md` — Project readme
+
+---
+
+## [3.7.0] — 2026-06-10
+
+### Fixed
+- **Reminders tab not opening on mobile**: The notification permission prompt was being requested the moment the Reminders view rendered. iOS only allows that request from a direct tap, so it threw an error and killed the view before anything drew. Permission is now requested when you tap **Set Reminder** (a real tap), and the whole call is guarded so it can never break the page again.
+- **Scan retry mode bug**: After a failed GEV scan, tapping Retry reopened the scanner in Schedule mode. Retry now keeps the original scan mode.
+
+### Added
+- **Per-day Inventory Check actions**: Each saved day in Inv. Check now has its own small **Copy** and **Delete** buttons on the day header — copy or remove a single day without touching the rest.
+
+### Changed
+- **New scanning animation**: A scanner-style light beam sweeps over your photo while Claude reads it, with a smooth indeterminate progress bar (no more frozen pulsing bar). Respects reduced-motion settings.
+- **Cleaner scan failure screen**: Failures now show one tidy card — icon, "Scan failed," the reason, and clear **Try Again** / **Cancel** buttons — instead of an error box appended under the in-progress UI.
+- Inv. Check bottom buttons renamed to **Copy All** / **Clear All** for clarity
+- Tools hub and Reminders buttons rebound with `addEventListener` for Android tap reliability
+- Version bumped to v3.7.0
+
+### Files
+- `index.html` — Main app (v3.7.0)
+- `pdp-old-v3_6_0.html` — Archived v3.6.0
+- `sw.js` — Service worker (cache v3.7.0)
+- `manifest.json` — PWA manifest
+- `icon192.png` / `icon512.png` — PWA icons
+- `CHANGELOG.md` — This file
+- `README.md` — Rewritten
+
+---
+
+## [3.6.0] — 2026-06-10
+
+### Added
+- **Notes**: Full notes system in the Tools tab — create, edit, and delete notes. Persists in localStorage (`pdp_notes_v1`), sorted by last updated.
+- **Reminders / Calendar**: Date & time reminders with push notification support, upcoming and past lists, and auto-scheduled alerts for reminders within 7 days. Persists in `pdp_reminders_v1`.
+- **Tools Hub**: Tools tab redesigned as a navigation hub with card links to Notes, Reminders, and Claims Calculator, with sub-view back navigation.
+- New icons: Note, Bell, Trash
+
+### Changed
+- Home Tools tile updated to "Tools / Notes, Claims & Reminders"
+- Version bumped to v3.6.0
+
+---
+
+
+## [2.9.0] — 2026-06-09
+
+### Added
+- **Editable Stencil**: Tap Edit in the Stencil topbar to enter edit mode. Add custom items (code, description, pack, unit), edit any item (custom or built-in), and delete custom items. Custom items appear under "★ Custom Items" at the top of the list with a CUSTOM badge.
+- **Stencil custom storage**: Custom items saved in `pdp_stencil_custom_v1`, edits to built-in items saved in `pdp_stencil_edits_v1`
+- **Pencil edit icon**: New icon in the icon set
+
+### Changed
+- **GEV tile description removed**: Home tile for GEV List no longer shows a subtitle
+- Stencil item count now includes custom items
+- Version bumped to v2.9.0
+
+### Files
+- `index.html` — Main app (v2.9.0)
+- `pdp-v2_5_0.html` — Archived v2.5.0
+- `icon192.png` / `icon512.png` — PWA icons (circular)
+- `sw.js` — Service worker (cache v2.9.0)
+- `manifest.json` — PWA manifest
+- `CHANGELOG.md` — This file
+
+---
+
+## [2.8.0] — 2026-06-09
+
+### Changed
+- **Scanner rebuilt with Claude Vision API**: Replaced Tesseract.js OCR with Anthropic's Claude API (vision). Photos are sent to Claude Sonnet which reads the grid layout visually and returns structured JSON — dramatically more accurate than client-side OCR on complex grid schedules.
+- **One-time API key setup**: First scan prompts for an Anthropic API key (stored in localStorage as `pdp_api_key`, never leaves the device). "Change API key" option available in the scan overlay.
+- **Removed Tesseract.js**: No longer loaded from CDN — smaller footprint, no external dependency for core app features
+- Image compression: photos resized to max 1800px and JPEG-compressed before sending to API for fast upload
+- Version bumped to v2.8.0
+
+### Files
+- `index.html` — Main app (v2.8.0)
+- `pdp-v2_5_0.html` — Archived v2.5.0
+- `icon192.png` / `icon512.png` — PWA icons (circular)
+- `sw.js` — Service worker (cache v2.8.0)
+- `manifest.json` — PWA manifest
+- `CHANGELOG.md` — This file
+
+---
+
+## [2.7.0] — 2026-06-08
+
+### Added
+- **OCR Schedule Scanner**: Tap "Scan" in the Schedule topbar to photograph a printed schedule. Uses Tesseract.js OCR engine to extract text, then a custom text parser identifies employee names and shift times automatically. Includes image pre-processing (contrast boost, sharpening), progress bar, parsed result preview, and apply/retry flow.
+- **Tesseract.js v5**: Loaded from CDN for in-browser OCR capability
+- **Scan icon**: New viewfinder-style icon in the icon set
+
+### Changed
+- Schedule empty state now mentions "Scan" as the primary action
+- Schedule home tile description updated to "Scan or build the weekly schedule"
+- Version bumped to v2.7.0
+
+### Technical
+- Image pre-processing pipeline: resize to max 2000px, contrast 1.3×, brightness 1.05×
+- Text parser handles common schedule formats: tab/space-delimited rows, name + 7 shift cells
+- Normalizes OCR artifacts (l→1, O→0 in numeric context), dash types, and OFF variants
+- Scan results can replace or append to existing employee data
+
+### Files
+- `index.html` — Main app (v2.7.0)
+- `pdp-v2_5_0.html` — Archived v2.5.0
+- `icon192.png` — PWA icon (192×192, circular)
+- `icon512.png` — PWA icon (512×512, circular)
+- `sw.js` — Service worker (cache v2.7.0)
+- `manifest.json` — PWA manifest
+- `CHANGELOG.md` — This file
+
+---
+
+## [2.6.0] — 2026-06-08
+
+### Added
+- **Digital Schedule**: Replaced photo upload with a full digital schedule entry system. Two-week view ("This Week" / "Next Week") with segment control. Add employees, enter shift times per day (Sun–Sat), tap any cell to edit inline. Auto-calculates weekly hours per employee. Edit mode with add/remove employees and inline shift editing.
+- **Schedule Edit button**: Edit/Done toggle in topbar when on the Schedule tab
+
+### Changed
+- **Claims tile description**: "Quick shrink calculator" → "Quick Claims Calculator"
+- **Claims panel subtitle**: Updated to "Quick Claims Calculator"
+- **PWA icons**: New clean circular design with "PDP / PRODUCE DEPT" text on dark green background — fits properly inside phone circle masks
+- Service worker cache bumped to `pdp-v2.6.0`
+
+### Removed
+- **Image-based schedule**: Removed photo upload, lightbox, pinch-zoom, and all image schedule code
+- **Lightbox**: Removed entirely (HTML, CSS, JS) — no longer needed
+
+### Storage
+- New localStorage key: `pdp_schedule_v3` (digital schedule data)
+- Old key `pdp_schedule_v2` (image data) is no longer used
+
+### Files
+- `index.html` — Main app (v2.6.0)
+- `pdp-v2_5_0.html` — Archived previous version
+- `icon192.png` — PWA icon (192×192, new circular design)
+- `icon512.png` — PWA icon (512×512, new circular design)
+- `sw.js` — Service worker (cache v2.6.0)
+- `CHANGELOG.md` — This file
+
+---
+
+## [2.5.0] — 2026-06-08
+
+### Added
+- **Stencil search in Edit mode**: When adding products to any Holes list section or subsection, typing 2+ characters triggers a live stencil autocomplete dropdown showing up to 6 matching items with highlighted text, item codes, and pack/unit info. Tap a suggestion to add it instantly — or type a custom name and hit Add as before.
+
+### Changed
+- Service worker cache bumped to `pdp-v2.5.0`
+
+### Files
+- `index.html` — Main app (v2.5.0)
+- `pdp-v2_4_0.html` — Archived previous version
+- `sw.js` — Service worker (cache v2.5.0)
+- `CHANGELOG.md` — This file
+
+---
+
+## [2.4.0] — 2026-06-08
+
+### Added
+- **GEV List tab**: Dedicated page for the GEV checklist — all 24 categories and 73 items from the master manifest PDF. Tap any item to cross it out; state persists on device. Reset button clears all. Accessible from its own tab and a Home tile.
+- **PWA app icon**: The in-app PDP logo is now used as the phone home screen icon (192px and 512px PNG), replacing the SVG favicon
+- **Version number**: App version displayed on home screen (v2.4.0)
+
+### Changed
+- **Renamed "Load List" → "Holes"**: Tab, home tile, topbar, and all internal references updated
+- **Renamed "Unfound" → "Inventory Check"**: Segment control and all related labels
+- **Renamed "3% Claims Calculator" → "Claims Calculator"**: Removed "3%" from the tool name (calculation unchanged)
+- **6-tab layout**: Tab bar now includes Home, Stencil, Holes, GEV, Schedule, Tools
+- Service worker cache bumped to `pdp-v2.4.0`
+
+### Removed
+- **Data Specifications section**: Removed from GEV list (was a PDF formatting artifact)
+- **"Produce Department Master Manifest Lookup Matrix"**: Removed subtitle text
+
+### Storage
+- New localStorage key: `pdp_gev_v1` (GEV crossed-out state)
+
+### Files
+- `index.html` — Main app (v2.4.0)
+- `pdp-v2_3_0.html` — Archived previous version
+- `icon-192.png` — PWA icon (192×192)
+- `icon-512.png` — PWA icon (512×512)
+- `manifest.json` — Updated with PNG icons
+- `sw.js` — Service worker (cache v2.4.0)
+- `CHANGELOG.md` — This file
+
+---
+
+## [2.3.0] — 2026-06-08
+
+### Fixed
+- **Unfound clear button**: Rewired with addEventListener for reliable event binding on mobile
+
+### Changed
+- **Smaller buttons**: All `.btn` elements reduced from 15px/15px to 13px/10px padding — cleaner, more professional on mobile
+- **Schedule simplified**: Removed fullscreen, download, and expand overlay buttons — just the two images stacked with "Replace" as a subtle inline link next to the label. Tap image to zoom.
+- **Load list action bar**: Tighter spacing, smaller summary text
+- **Unfound items**: Slightly smaller cards and text for denser scanning
+
+---
+
+## [2.2.0] — 2026-06-08
+
+### Added
+- **Save Unfound Items**: New action at the bottom of the compiled list saves all unchecked items to persistent storage for order adjustment reference, then clears the list
+- **Unfound tab**: Third segment on the Load List ("Unfound") shows saved unfound snapshots grouped by date — stores up to 10 most recent saves
+- **Action bar**: Compiled list now shows a found/unfound summary with "Save Unfound" and "Clear List" buttons at the bottom
+- **Clear Saved Unfound**: Button on the Unfound tab to wipe saved history
+
+### Changed
+- "Clear" button removed from topbar; list actions now consolidated at the bottom of the compiled list for clearer workflow
+- Service worker cache bumped to v2.2.0
+
+### Storage
+- New localStorage key: `pdp_unfound_v1`
+
+---
+
+## [2.1.0] — 2026-06-07
+
+### Changed
+- **Dark theme**: Full app switched to a dark green-tinted background with light text — easier on the eyes in back-of-house lighting
+- **Schedule shows both pages**: Page 1 and Page 2 now display stacked on one screen — no more tab switching to compare weeks
+- **Schedule upload**: Each page has its own independent upload/replace/download/fullscreen controls
+
+### Updated
+- Theme color meta tag and manifest background updated for dark mode
+- Service worker cache bumped to v2.1.0
+- Topbar and tabbar blur layers matched to dark palette
+- Hero gradient, claims calculator, and all tint colors adjusted for dark contrast
+
+---
+
+## [2.0.0] — 2026-06-07
+
+### Changed
+- **PLU Lookup → Stencil**: Renamed across entire app (tab, home tile, tools panel, load list references)
+- **Stencil now shows full item list**: All 816 items display grouped by category on load — no search required to browse
+- **Filter replaces search-only**: Sticky filter bar at top lets you narrow down the full list by name, code, or keyword
+- **Filter icon**: Stencil tab uses a filter icon instead of a magnifying glass to reflect the new browse-first behavior
+
+### Added
+- **Plan-O-Grams (Coming Soon)**: New tile on home screen and tools panel — section layout diagrams coming in a future release
+- **Version number**: "PDP v2.0.0" displayed at the bottom of the home screen
+- **Custom SVG logo**: `favicon.svg` — a branded PDP icon used as the app favicon
+- **PWA manifest**: `manifest.json` for home-screen installation with proper app name, colors, and icon
+- **Service worker**: `sw.js` caches all assets for full offline support
+- **Changelog**: This file (`CHANGELOG.md`) — updated with every release
+
+### Files
+- `index.html` — Main app (v2.0.0)
+- `pdp-v1.0.0.html` — Archived previous version
+- `favicon.svg` — App logo
+- `manifest.json` — PWA manifest
+- `sw.js` — Service worker
+- `CHANGELOG.md` — This file
+
+---
+
+## [1.0.0] — 2026 (initial)
+
+### Features
+- Five-tab layout: Home, PLU, Load List, Schedule, Tools
+- PLU Lookup with 816-item stencil search
+- Load List with sections, subsections, inline editing, pull tracking
+- Schedule image manager with two-page support, compression, lightbox
+- 3% Claims Calculator with clipboard copy
+- Fully offline, single-file architecture
+- localStorage persistence (`produce_pull_list_v5`, `pdp_schedule_v2`)
+- Corporate bottom navigation bar
