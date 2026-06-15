@@ -1609,7 +1609,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.3.0</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.4.0</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -2943,9 +2943,15 @@ RULES:
           })
         });
         if(!resp.ok){
-          const err=await resp.json().catch(()=>({}));
-          const msg=err.error?.message||"Unknown error";
+          const raw=await resp.text().catch(()=>"");
+          let err={}; try{ err=JSON.parse(raw); }catch(_){}
+          let msg=err.error?.message||"";
           const type=err.error?.type||"";
+          if(!msg){
+            if(resp.status===404) msg="Scan service not found (/api/scan). The Netlify function may not be deployed.";
+            else if(/^\s*</.test(raw)) msg="Server returned a web page instead of data — the /api/scan function isn't responding.";
+            else msg=raw.slice(0,140)||"Unknown error";
+          }
           const e=new Error(`API ${resp.status}: ${type?type+" — ":""}${msg}`);
           e.status=resp.status;
           throw e;
@@ -3257,7 +3263,7 @@ RULES:
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:8192,messages:[{role:"user",content}]})
       });
-      if(!resp.ok){ const err=await resp.json().catch(()=>({})); const e=new Error(`API ${resp.status}: ${(err.error&&err.error.type)?err.error.type+" — ":""}${(err.error&&err.error.message)||"Unknown error"}`); e.status=resp.status; throw e; }
+      if(!resp.ok){ const raw=await resp.text().catch(()=>""); let err={}; try{ err=JSON.parse(raw); }catch(_){} let msg=(err.error&&err.error.message)||""; if(!msg){ if(resp.status===404) msg="Scan service not found (/api/scan). The Netlify function may not be deployed."; else if(/^\s*</.test(raw)) msg="Server returned a web page instead of data — the /api/scan function isn't responding."; else msg=raw.slice(0,140)||"Unknown error"; } const e=new Error(`API ${resp.status}: ${(err.error&&err.error.type)?err.error.type+" — ":""}${msg}`); e.status=resp.status; throw e; }
       const data=await resp.json();
       let t=data.content.map(b=>b.text||"").join("");
       t=t.replace(/```json\s*/g,"").replace(/```\s*/g,"").trim();
