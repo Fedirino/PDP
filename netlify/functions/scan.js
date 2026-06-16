@@ -1,7 +1,3 @@
-// Netlify Function: /api/scan
-// Proxies PDP scan requests to Anthropic using Node's built-in https module
-// (avoids fetch() compatibility issues across Node versions).
-
 const https = require("https");
 
 function anthropicRequest(apiKey, body) {
@@ -23,8 +19,8 @@ function anthropicRequest(apiKey, body) {
       res.on("data", (chunk) => { raw += chunk; });
       res.on("end", () => resolve({ status: res.statusCode, body: raw }));
     });
-    req.on("error", reject);
-    req.setTimeout(25000, () => { req.destroy(new Error("Anthropic request timed out")); });
+    req.on("error", (e) => reject(e));
+    req.setTimeout(28000, () => { req.destroy(new Error("Timed out waiting for Anthropic (28s)")); });
     req.write(data);
     req.end();
   });
@@ -38,47 +34,22 @@ exports.handler = async (event) => {
     "Access-Control-Allow-Methods": "POST, OPTIONS",
   };
 
-  if (event.httpMethod === "OPTIONS") {
-    return { statusCode: 204, headers, body: "" };
-  }
+  if (event.httpMethod === "OPTIONS") return { statusCode: 204, headers, body: "" };
   if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      headers,
-      body: JSON.stringify({ error: { type: "method_not_allowed", message: "Use POST." } }),
-    };
+    return { statusCode: 405, headers, body: JSON.stringify({ error: { type: "method_not_allowed", message: "Use POST." } }) };
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({
-        error: {
-          type: "config_error",
-          message: "ANTHROPIC_API_KEY is not set. Add it in Netlify → Site configuration → Environment variables, then redeploy.",
-        },
-      }),
-    };
+    return { statusCode: 500, headers, body: JSON.stringify({ error: { type: "config_error", message: "ANTHROPIC_API_KEY not set in Netlify environment variables." } }) };
   }
 
   let payload;
-  try {
-    payload = JSON.parse(event.body || "{}");
-  } catch (e) {
-    return {
-      statusCode: 400,
-      headers,
-      body: JSON.stringify({ error: { type: "bad_request", message: "Body was not valid JSON." } }),
-    };
-  }
+  try { payload = JSON.parse(event.body || "{}"); }
+  catch (e) { return { statusCode: 400, headers, body: JSON.stringify({ error: { type: "bad_request", message: "Body was not valid JSON." } }) }; }
+
   if (!payload.messages || !Array.isArray(payload.messages)) {
-    return {
-      statusCode: 400,
-      headers,
-      body: JSON.stringify({ error: { type: "bad_request", message: "Missing messages array." } }),
-    };
+    return { statusCode: 400, headers, body: JSON.stringify({ error: { type: "bad_request", message: "Missing messages array." } }) };
   }
 
   const body = {
@@ -89,17 +60,16 @@ exports.handler = async (event) => {
 
   try {
     const result = await anthropicRequest(apiKey, body);
+    // Pass Anthropic's response straight through — status and body unchanged.
+    // This includes 401 (bad key), 429 (rate limit), 500, etc.
     return { statusCode: result.status, headers, body: result.body };
   } catch (e) {
+    // Network-level failure (DNS, timeout, connection refused)
+    const msg = e && e.message ? e.message : "Unknown network error";
     return {
       statusCode: 502,
       headers,
-      body: JSON.stringify({
-        error: {
-          type: "upstream_error",
-          message: "Could not reach Anthropic: " + (e && e.message ? e.message : "unknown"),
-        },
-      }),
+      body: JSON.stringify({ error: { type: "upstream_error", message: msg } }),
     };
   }
 };
