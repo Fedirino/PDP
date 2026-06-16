@@ -1612,7 +1612,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.9.2</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.9.3</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -3288,32 +3288,26 @@ async function readDocPages(){
   const status=document.getElementById("scanStatus");
   try{
     async function attempt(extra){
-const salesPlanPrompt=`You are reading a grocery store produce display plan (one page). The page has a grid of titled BLOCKS. Each block has a title and a two-column table: position labels on the left, item names on the right.
+const salesPlanPrompt=`You are transcribing a grocery store produce "Sales Plan" / merchandising display plan (Stop & Shop), photographed across ONE OR MORE pages, given in order. The page is a grid of titled BLOCKS — promo tables, end caps, hero pods, value bins, authorized displays, etc. Transcribe EVERYTHING into structured JSON. Be exact; do not summarize.
 
-Transcribe EXACTLY what is printed. Do NOT move items between positions. Do NOT reorganize. Read each block's grid cell by cell.
+Each titled block becomes one SECTION:
+- "category" = the block's title exactly (e.g. "Refrigerated Promo Table", "Berry End 1 (Power Side)", "Grape End 1", "Authorized Displays", "Value Bin", "Organic Fruit End", "Potato End 2", "4 Block").
+- "subject" = "" , "contact" = "" (these don't apply here).
+- "bullets" = any free-text notes printed inside or under the block (the italic "Note:" lines, "...LOCATION" banners, instructions). One string each. [] if none.
+- "tables" = the block's grid. Most blocks are a two-column grid: a position/priority column (Power Wing, Shelf, Well, Inside Wing, Front Wing, Left, Center, Right, Back Wing, 1, 2, 3, 4, …) and an item column. Use headers like ["Priority","Item"] or ["Position","Item"] to match what's printed. Put EACH labelled row as its own row: [label, item text]. If a cell holds several items, keep them in the one item cell separated by " / ". Include "DEAL LOCK" / "SPOT BUY" tags in the item cell where they appear. Numbered lists (Authorized Displays 1–15, Value Bin 1–3) become rows [number, item] — include blank-numbered rows with "" item so the count is preserved.
 
-Each block = one section in the JSON:
-- "category": the block title exactly as printed
-- "subject": "", "contact": ""
-- "bullets": any notes or instructions printed inside/under the block. [] if none.
-- "tables": [{"title":"","headers":["Position","Item"],"rows":[[position, item], ...]}]
-  - Read each row of the grid as [position label, item text]
-  - If one position has multiple items side by side, join them with " / "
-  - Include (DEAL LOCK) / (SPOT BUY) tags where printed
-  - Keep empty cells as ""
+Return ONLY valid JSON. No markdown, no backticks, no commentary.
 
-Return ONLY valid JSON. No markdown, no backticks.
-
-{"date":"","dateLabel":"","sections":[
-  {"category":"Block Title","subject":"","contact":"","bullets":[],
-   "tables":[{"title":"","headers":["Position","Item"],"rows":[["Power Wing","Lemons"],["Shelf","Item A / Item B / Item C"],["Well","Item D / Item E"],["Inside Wing","Limes"]]}]}
+{"date":"2026-06-12","dateLabel":"6/12–7/16","sections":[
+  {"category":"Refrigerated Promo Table","subject":"","contact":"","bullets":["Note: ..."],
+   "tables":[{"title":"","headers":["Position","Item"],"rows":[["Power Wing","Lemons"],["Shelf","Northwest Cherries / Northwest Cherries / Sweetest Batch Blueberries / Conventional Blackberries (SPOT BUY)"],["Well","1lb Strawberries/Raspberries 11x14 (DEAL LOCK)"],["Inside Wing","Limes"]]}]}
 ]}
 
 RULES:
-- Read left-to-right, top-to-bottom across the page
-- Transcribe VERBATIM — keep sizes, brand names, counts exactly as printed
-- Do NOT reorder or move items to different positions
-- date: ISO YYYY-MM-DD from any visible date range. dateLabel: short label.`;
+- date: ISO YYYY-MM-DD if any date range is visible (e.g. a "$5 6/12-7/16" tag → use the start, 2026-06-12). If none, use "". dateLabel: a short label like "6/12–7/16" or the page title.
+- Capture EVERY block on EVERY page, IN ORDER (left-to-right, top-to-bottom).
+- Transcribe item text VERBATIM — keep brand names, sizes (11x14, 2lb), and tags exactly.
+- Do NOT invent or reorder. Accuracy matters most.`;
 
       const promptText=scanMode==="salesplan"?salesPlanPrompt:dailyNotesPrompt;
       const content=docPages.map(p=>({type:"image",source:{type:"base64",media_type:"image/jpeg",data:p.b64}}));
