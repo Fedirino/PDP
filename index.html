@@ -1609,7 +1609,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.4.0</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.5.0</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -2850,13 +2850,13 @@ function handleScanFile(file){
       await new Promise((ok,fail)=>{ img.onload=ok; img.onerror=fail; img.src=imgSrc; });
       src=img;
     }
-    const MAX=1800; let w=src.width, h=src.height;
+    const MAX=1200; let w=src.width, h=src.height;
     const scale=Math.min(1, MAX/Math.max(w,h));
     w=Math.round(w*scale); h=Math.round(h*scale);
     const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
     cv.getContext("2d").drawImage(src,0,0,w,h);
     if(src.close) try{ src.close(); }catch(e){}
-    const compressed=cv.toDataURL("image/jpeg",0.92);
+    const compressed=cv.toDataURL("image/jpeg",0.82);
     const b64=compressed.split(",")[1];
 
     scanBody.innerHTML=`
@@ -3157,8 +3157,8 @@ async function compressImageFile(file){
     cv.getContext("2d").drawImage(src,0,0,w,h);
     return cv.toDataURL("image/jpeg",q);
   }
-  const apiURL=draw(1800,0.92);
-  const store=draw(1500,0.72);
+  const apiURL=draw(1200,0.82);
+  const store=draw(900,0.65);
   if(src.close) try{ src.close(); }catch(e){}
   return { imgSrc:store, store, b64:apiURL.split(",")[1] };
 }
