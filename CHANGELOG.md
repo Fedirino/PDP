@@ -4,6 +4,42 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.11.1] — 2026-06-15
+
+### Changed
+- **New default Holes / Load List.** Replaced the built-in `seed()` with the current curated list. Highlights: **Promo Tables → Front & Veg End** now ship pre-filled; **Endcaps** gains Pineapple (Melons) and Asian Pear (Pears); **Veg Wall** is reorganized from one flat list into 10 subsections (Convenience, Mushrooms, Herbs, Lettuce, Greens/Roots, Cooking Greens, Cabbage/Cauliflower, Carrots, Cucumber, Salads); and Stone Fruit, Tomatoes, and Potatoes pick up a few additional SKUs. 12 sections, 228 items total.
+- This is the built-in default for **fresh installs / reset only** — existing devices keep their current Holes list and pull progress untouched.
+
+### Files
+- `index.html` — Main app (v5.11.1)
+- `sw.js` — cache bumped to `pdp-v5.11.1`
+- `pdp-old-v5_11_0.html` — archived previous version
+- `CHANGELOG.md` — this file
+- `manifest.json`, icons — unchanged
+
+---
+
+## [5.11.0] — 2026-06-15
+
+### Changed — Display Plan now reads and draws the fixtures as true grids
+- **Promo tables & hero pods render as the real fixture.** A Refrigerated/Dry Promo Table or Hero Pod now draws as a bordered grid: the **Shelf** deck sits directly above the **Well** deck with the **columns aligned** (Shelf column 1 over Well column 1, etc.), and **Wings** show as bands above/below. This matches the printed sheet instead of a flat list.
+- **Columns can stack.** A single column cell can hold several items stacked vertically plus its tags (e.g. "Strawberries / 11x14 / TPR") — these now stay together in the correct column instead of spilling sideways into the wrong slot.
+- **Reworked the scan prompt to be grid-aware.** It now tells the model that the Shelf and Well are a 2-D grid with the same number of aligned columns, to count columns first, read column-by-column left→right, and keep each column's stacked items/tags together. This is the main fix for "items landing in the wrong spot/order" on denser weeks. Ends/islands still read as ordered Priority/Item lists (Front Wing → 1–N front-to-back → Back Wing).
+- **Fixture vs. list is now detected automatically** by whether a block actually has Shelf/Well rows (ends stay as clean plain tables).
+
+### Improved scan accuracy
+- **Higher-resolution capture.** The image sent to the AI is now ~2048px at higher quality (was 1500px), so small grid text is legible and items map to the right column.
+- **Capture guidance.** The Display Plan scanner now suggests holding the page straight, filling the frame, and splitting a dense plan into 2–3 close-ups (top half / bottom half) — each shot adds to the same week.
+
+### Files
+- `index.html` — Main app (v5.11.0)
+- `sw.js` — cache bumped to `pdp-v5.11.0`
+- `pdp-old-v5_10_0.html` — archived previous version
+- `CHANGELOG.md` — this file
+- `manifest.json`, icons — unchanged
+
+---
+
 ## [5.10.0] — 2026-06-15
 
 ### Changed
