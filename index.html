@@ -696,10 +696,12 @@
   .sp-row:last-child{border-bottom:none;}
   .sp-label{flex:none;width:84px;font-size:9.5px;font-weight:800;letter-spacing:.05em;
     text-transform:uppercase;color:var(--ink-3);padding-top:3px;line-height:1.3;}
-  .sp-item{flex:1;font-size:13px;line-height:1.45;color:var(--ink);min-width:0;}
-  .sp-item .ln{display:block;}
-  .sp-item .ln + .ln{margin-top:3px;}
-  .sp-item.empty{color:var(--ink-3);}
+  .sp-slots{flex:1;font-size:13px;line-height:1.45;color:var(--ink);min-width:0;}
+  .sp-slots.multi{display:flex;gap:5px;flex-wrap:wrap;}
+  .sp-slot{display:block;}
+  .sp-slots.multi .sp-slot{flex:1;min-width:60px;background:var(--surface-2);border:1px solid var(--line);
+    border-radius:6px;padding:5px 7px;font-size:12px;line-height:1.35;text-align:center;}
+  .sp-slot.empty{color:var(--ink-3);}
   .sp-tag{display:inline-block;font-size:8.5px;font-weight:800;letter-spacing:.05em;
     padding:1.5px 6px;border-radius:999px;background:var(--amber-tint);color:var(--amber);
     margin-left:5px;vertical-align:1.5px;white-space:nowrap;}
@@ -1425,6 +1427,7 @@ function renderTopbar(){
     else if(toolView==="calendar") title="Reminders";
     else if(toolView==="calculator") title="Calculator";
     else if(toolView==="checklist") title="Daily Checklist";
+    else if(toolView==="settings") title="Settings";
     if(toolView!=="hub") right=`<button class="tb-act" id="toolBack">${I.back} Back</button>`;
     if(toolView==="checklist") right=`<button class="tb-act" id="clEditAct">${clEdit?"Done":"Edit"}</button>`+right;
   }
@@ -1609,7 +1612,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.7.1</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.9.0</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -2398,12 +2401,53 @@ function renderGEV(){
 }
 
 /* ================= TOOLS ================= */
+function renderSettings(){
+  var hasKey=!!getApiKey();
+  var masked=hasKey?"sk-ant-…"+getApiKey().slice(-4):"Not set";
+  view.innerHTML=`
+    <div class="lbl" style="margin-top:6px">Anthropic API Key</div>
+    <div class="panel" style="margin-bottom:0">
+      <p style="font-size:13px;color:var(--ink-2);line-height:1.55;margin:0 0 14px">
+        Required for scanning (Schedule, GEV, Daily Notes, Sales Plan).
+        The key is stored only on this device. Get one at <b>console.anthropic.com</b>.
+      </p>
+      <div class="field"><label>API Key</label>
+        <input id="apiKeyInput" type="password" autocomplete="off" autocorrect="off" spellcheck="false"
+          placeholder="sk-ant-api03-…" value="${esc(getApiKey())}"
+          style="font-family:monospace;font-size:13px;letter-spacing:.02em">
+      </div>
+      <div style="display:flex;gap:10px;margin-top:12px">
+        <button class="btn" id="saveApiKey" style="flex:1">Save Key</button>
+        ${hasKey?'<button class="btn ghost" id="clearApiKey">Clear</button>':""}
+      </div>
+      <div style="font-size:12px;color:var(--ink-3);margin-top:10px">
+        Current: <span style="font-family:monospace">${esc(masked)}</span>
+      </div>
+    </div>`;
+  document.getElementById("apiKeyInput").addEventListener("input",function(){ this.type="text"; });
+  document.getElementById("saveApiKey").addEventListener("click",async function(){
+    var v=document.getElementById("apiKeyInput").value.trim();
+    if(!v){ toast("Enter a key"); return; }
+    if(!v.startsWith("sk-ant-")){
+      if(!await askConfirm("Key format",{msg:'Anthropic keys usually start with "sk-ant-". Save anyway?',okText:"Save anyway"})){ return; }
+    }
+    setApiKey(v); toast("API key saved");
+    document.getElementById("apiKeyInput").type="password";
+    render();
+  });
+  var clrBtn=document.getElementById("clearApiKey");
+  if(clrBtn) clrBtn.addEventListener("click",async function(){
+    if(!await askConfirm("Clear API key?",{msg:"Scanning will stop working until a new key is entered.",okText:"Clear",danger:true})){ return; }
+    setApiKey(""); toast("Key cleared"); render();
+  });
+}
 function renderTools(){
   if(toolView==="notes") return renderNotes();
   if(toolView==="noteEdit") return renderNoteEdit();
   if(toolView==="calendar") return renderCalendar();
   if(toolView==="calculator") return renderCalculator();
   if(toolView==="checklist") return renderChecklist();
+  if(toolView==="settings") return renderSettings();
   renderToolsHub();
 }
 
@@ -2435,6 +2479,11 @@ function renderToolsHub(){
       <div class="tx"><div class="tt">Calculator</div><div class="sub">General-purpose calculator</div></div>
       <div class="go">${I.chev}</div>
     </button>
+    <button class="tool-card" id="goSettings">
+      <div class="chip" style="background:var(--surface-2);color:var(--ink-2)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+      <div class="tx"><div class="tt">Settings</div><div class="sub">${getApiKey()?"API key set \u2713":"Set your Anthropic API key"}</div></div>
+      <div class="go">${I.chev}</div>
+    </button>
     <div class="lbl">Quick Calc</div>
     <div class="panel">
       <div class="panel-h"><div class="chip amber">${I.calc}</div><div><h3>Claims Calculator</h3><p>Quick Claims Calculator</p></div></div>
@@ -2448,6 +2497,7 @@ function renderToolsHub(){
   document.getElementById("goNotes").addEventListener("click",function(e){ e.preventDefault(); toolView="notes"; render(); window.scrollTo(0,0); });
   document.getElementById("goCalendar").addEventListener("click",function(e){ e.preventDefault(); toolView="calendar"; render(); window.scrollTo(0,0); });
   document.getElementById("goCalcSimple").addEventListener("click",function(e){ e.preventDefault(); toolView="calculator"; render(); window.scrollTo(0,0); });
+  document.getElementById("goSettings").addEventListener("click",function(e){ e.preventDefault(); toolView="settings"; render(); window.scrollTo(0,0); });
   const amt=document.getElementById("claimAmt"), out=document.getElementById("claimOut");
   const fmt=n=>"$"+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
   const calc=()=>{ const v=parseFloat(amt.value)||0; out.textContent=fmt(v*0.03); };
@@ -2789,20 +2839,28 @@ function renderChecklist(){
 const scanOverlay=document.getElementById("scanOverlay");
 const scanBody=document.getElementById("scanBody");
 const scanFileInput=document.getElementById("scanFileInput");
-/* Scan requests go through Vercel serverless function /api/scan (60s timeout).
-   Key lives in Vercel environment variables, never in the client. */
-const SCAN_ENDPOINT="/api/scan";
+/* Direct browser → Anthropic. Key in localStorage (pdp_api_key). No server proxy = no timeout. */
+function getApiKey(){ try{ return localStorage.getItem("pdp_api_key")||""; }catch(e){ return ""; } }
+function setApiKey(k){ try{ localStorage.setItem("pdp_api_key",k); }catch(e){} }
 async function anthropicFetch(body){
-  const resp=await fetch(SCAN_ENDPOINT,{
+  const key=getApiKey();
+  if(!key) throw Object.assign(new Error("No API key set. Go to Tools → Settings and enter your Anthropic API key."),{status:401});
+  const resp=await fetch("https://api.anthropic.com/v1/messages",{
     method:"POST",
-    headers:{"Content-Type":"application/json"},
+    headers:{
+      "Content-Type":"application/json",
+      "x-api-key":key,
+      "anthropic-version":"2023-06-01",
+      "anthropic-dangerous-direct-browser-access":"true"
+    },
     body:JSON.stringify(body)
   });
   if(!resp.ok){
     const err=await resp.json().catch(()=>({}));
     const msg=(err.error&&err.error.message)||"Unknown error";
     const type=(err.error&&err.error.type)||"";
-    throw Object.assign(new Error(`API ${resp.status}: ${type?type+" — ":""}${msg}`),{status:resp.status});
+    if(resp.status===401) throw Object.assign(new Error("Invalid API key. Update it in Tools → Settings."),{status:401});
+    throw Object.assign(new Error("API "+resp.status+": "+(type?type+" — ":"")+msg),{status:resp.status});
   }
   return resp.json();
 }
@@ -2865,13 +2923,13 @@ function handleScanFile(file){
       await new Promise((ok,fail)=>{ img.onload=ok; img.onerror=fail; img.src=imgSrc; });
       src=img;
     }
-    const MAX=1200; let w=src.width, h=src.height;
+    const MAX=1600; let w=src.width, h=src.height;
     const scale=Math.min(1, MAX/Math.max(w,h));
     w=Math.round(w*scale); h=Math.round(h*scale);
     const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
     cv.getContext("2d").drawImage(src,0,0,w,h);
     if(src.close) try{ src.close(); }catch(e){}
-    const compressed=cv.toDataURL("image/jpeg",0.82);
+    const compressed=cv.toDataURL("image/jpeg",0.88);
     const b64=compressed.split(",")[1];
 
     scanBody.innerHTML=`
@@ -3153,7 +3211,7 @@ async function compressImageFile(file){
     cv.getContext("2d").drawImage(src,0,0,w,h);
     return cv.toDataURL("image/jpeg",q);
   }
-  const apiURL=draw(1200,0.82);
+  const apiURL=draw(1500,0.88);
   const store=draw(900,0.65);
   if(src.close) try{ src.close(); }catch(e){}
   return { imgSrc:store, store, b64:apiURL.split(",")[1] };
@@ -3178,15 +3236,15 @@ function openDocScanCollect(){
   document.querySelector("#scanOverlay .scan-bar .t").textContent="Scan "+lbl;
   const n=docPages.length;
   scanBody.innerHTML=`
-    <div class="scan-step"><div class="num">1</div>Add each page of the ${lbl.toLowerCase()}</div>
+    <div class="scan-step"><div class="num">1</div>Take a photo of one page</div>
     <div style="display:flex;gap:8px;padding:8px 0 4px;">
       <button class="btn block" id="docCapture" style="flex:1">${I.scan} Camera</button>
       <button class="btn ghost block" id="docUpload" style="flex:1">${I.upload||I.plus} Upload</button>
     </div>
     <div class="pg-strip" id="pgStrip">${docPages.map((p,i)=>pgItemHTML(p,i)).join("")}</div>
-    <div class="hintline" style="text-align:center">${scanMode==="salesplan"?"Sales Plans run several pages of small tables. Add every page, then read them together — Claude rebuilds each end / table grid.":"Daily Notes often run more than one page. Add every page, then read them together. Claude transcribes the text and rebuilds any tables."}</div>
+    <div class="hintline" style="text-align:center">Scan one page at a time. Each scan adds to the current ${lbl.toLowerCase()}.</div>
     <div class="scan-actions" style="margin-top:14px">
-      <button class="btn block" id="docRead" style="${n?"":"opacity:.4;pointer-events:none"}">${I.scan} Read ${n||""} page${n===1?"":"s"}</button>
+      <button class="btn block" id="docRead" style="${n?"":"opacity:.4;pointer-events:none"}">${I.scan} Read page</button>
     </div>`;
 
   const cap=document.getElementById("docCapture");
@@ -3230,26 +3288,62 @@ async function readDocPages(){
   const status=document.getElementById("scanStatus");
   try{
     async function attempt(extra){
-const salesPlanPrompt=`You are transcribing a grocery store produce "Sales Plan" / merchandising display plan (Stop & Shop), photographed across ONE OR MORE pages, given in order. The page is a grid of titled BLOCKS — promo tables, end caps, hero pods, value bins, authorized displays, etc. Transcribe EVERYTHING into structured JSON. Be exact; do not summarize.
+const salesPlanPrompt=`You are transcribing a grocery store produce "Sales Plan" display sheet (Stop & Shop). The photo shows one page of a multi-page merchandising plan. Each page has a grid of BLOCKS — each block represents a physical display fixture (end cap, promo table, hero pod, 4-block bin, island display, value bin, etc.).
 
-Each titled block becomes one SECTION:
-- "category" = the block's title exactly (e.g. "Refrigerated Promo Table", "Berry End 1 (Power Side)", "Grape End 1", "Authorized Displays", "Value Bin", "Organic Fruit End", "Potato End 2", "4 Block").
-- "subject" = "" , "contact" = "" (these don't apply here).
-- "bullets" = any free-text notes printed inside or under the block (the italic "Note:" lines, "...LOCATION" banners, instructions). One string each. [] if none.
-- "tables" = the block's grid. Most blocks are a two-column grid: a position/priority column (Power Wing, Shelf, Well, Inside Wing, Front Wing, Left, Center, Right, Back Wing, 1, 2, 3, 4, …) and an item column. Use headers like ["Priority","Item"] or ["Position","Item"] to match what's printed. Put EACH labelled row as its own row: [label, item text]. If a cell holds several items, keep them in the one item cell separated by " / ". Include "DEAL LOCK" / "SPOT BUY" tags in the item cell where they appear. Numbered lists (Authorized Displays 1–15, Value Bin 1–3) become rows [number, item] — include blank-numbered rows with "" item so the count is preserved.
+Transcribe this page into structured JSON. Be exact — do not summarize, paraphrase, or skip anything.
+
+FIXTURE TYPES — each block maps to one of these physical layouts:
+
+1. PROMO TABLE / HERO POD (has wings + shelves + wells):
+   Positions: Power Wing, Shelf (multiple slots L-to-R), Well (multiple slots L-to-R), Inside Wing, TPR
+   When a row (Shelf or Well) has MULTIPLE items side by side, output EACH slot as its own row:
+     ["Shelf", "Item A"], ["Shelf", "Item B"], ["Shelf", "Item C"]
+   NOT: ["Shelf", "Item A / Item B / Item C"]
+
+2. END CAP (has wings + numbered priority shelves):
+   Positions: Front Wing, 1, 2, 3, 4, Back Wing
+   Each numbered priority = one shelf level on the end cap.
+
+3. 4-BLOCK (2x2 bin display):
+   Positions should be: ["Top Left", item], ["Top Right", item], ["Bottom Left", item], ["Bottom Right", item]
+
+4. ISLAND / BERRY ISLAND / BACK OF TABLE:
+   Numbered positions or named positions (Shelf 1, Well 1, etc.)
+
+5. AUTHORIZED DISPLAYS / VALUE BIN / PALLET DROPS / ADDITIONAL PROGRAMS:
+   Numbered list: ["1", item], ["2", item], etc. Keep blank rows.
+
+Each block becomes one SECTION in the JSON:
+- "category" = block title exactly as printed (e.g. "Refrigerated Promo Table", "Berry End 1 (Power Side)")
+- "subject" = "", "contact" = ""
+- "bullets" = any notes/instructions inside or below the block. One string per note. [] if none.
+  Include directional notes like "AVOCADO END LOCATION", "DEAL LOCK", location instructions, etc.
+- "tables" = one table per block with headers ["Position","Item"]. One row per physical slot.
+
+CRITICAL RULES:
+- Output SEPARATE ROWS for each physical slot — if "Shelf" has 3 items side by side, that's 3 rows all labeled "Shelf", not one row with items joined by "/".
+- Transcribe item text VERBATIM including sizes (11x14, 2lb, 6oz), brand names, counts.
+- Append (DEAL LOCK) or (SPOT BUY) to the item text where those tags appear.
+- Capture EVERY block on the page, reading left-to-right, top-to-bottom.
+- date: ISO YYYY-MM-DD from any visible date (e.g. "$5 6/12-7/16" → "2026-06-12"). dateLabel: short label like "6/12–7/16".
+- Do NOT invent data. If a cell is empty, use "" for the item.
 
 Return ONLY valid JSON. No markdown, no backticks, no commentary.
 
 {"date":"2026-06-12","dateLabel":"6/12–7/16","sections":[
-  {"category":"Refrigerated Promo Table","subject":"","contact":"","bullets":["Note: ..."],
-   "tables":[{"title":"","headers":["Position","Item"],"rows":[["Power Wing","Lemons"],["Shelf","Northwest Cherries / Northwest Cherries / Sweetest Batch Blueberries / Conventional Blackberries (SPOT BUY)"],["Well","1lb Strawberries/Raspberries 11x14 (DEAL LOCK)"],["Inside Wing","Limes"]]}]}
-]}
-
-RULES:
-- date: ISO YYYY-MM-DD if any date range is visible (e.g. a "$5 6/12-7/16" tag → use the start, 2026-06-12). If none, use "". dateLabel: a short label like "6/12–7/16" or the page title.
-- Capture EVERY block on EVERY page, IN ORDER (left-to-right, top-to-bottom).
-- Transcribe item text VERBATIM — keep brand names, sizes (11x14, 2lb), and tags exactly.
-- Do NOT invent or reorder. Accuracy matters most.`;
+  {"category":"Refrigerated Promo Table","subject":"","contact":"",
+   "bullets":["Note for all end caps/wings: End/Wing 1 should always be the power side"],
+   "tables":[{"title":"","headers":["Position","Item"],"rows":[
+     ["Power Wing","Lemons"],
+     ["Shelf","Strawberries 6oz 11x14"],
+     ["Shelf","Northwest Cherries"],
+     ["Shelf","Pint Blueberries 11x14"],
+     ["Well","Family Pack Mixed Berries"],
+     ["Well","Family Pack Cut Watermelon (DEAL LOCK)"],
+     ["Inside Wing","Limes"],
+     ["TPR",""]
+   ]}]}
+]}`;
 
       const promptText=scanMode==="salesplan"?salesPlanPrompt:dailyNotesPrompt;
       const content=docPages.map(p=>({type:"image",source:{type:"base64",media_type:"image/jpeg",data:p.b64}}));
@@ -3282,11 +3376,11 @@ RULES:
       <div class="doc-thumbs">${scanParsed.images.map(s=>`<img src="${s}" class="doc-thumb">`).join("")}</div>
       <div class="scan-step"><div class="num">2</div>Done — ${sections.length} section${sections.length===1?"":"s"}${scanParsed.dateLabel?" · "+esc(scanParsed.dateLabel):""}</div>
       <div style="max-height:46vh;overflow:auto;margin:4px 0 2px">${docSectionsHTML(scanParsed,scanMode==="salesplan"?"salesplan":"dailynotes")}</div>
-      <div class="scan-step"><div class="num">3</div>Save to Documents</div>
-      <div style="font-size:11px;color:var(--ink-3);text-align:center;line-height:1.5;padding:0 8px;">⚠️ AI models can make mistakes. Check the tables and figures against the printout before relying on them.</div>
+      <div class="scan-step"><div class="num">3</div>Save this page</div>
+      <div style="font-size:11px;color:var(--ink-3);text-align:center;line-height:1.5;padding:0 8px;">If a document for this date already exists, you can add these sections to it. ⚠️ Check against the printout — AI can make mistakes.</div>
       <div class="scan-actions">
         <button class="btn ghost" id="scanRetry">Retry</button>
-        <button class="btn" id="scanApply">${I.check} Save</button>
+        <button class="btn" id="scanApply">${I.check} Save Page</button>
       </div>`;
     document.getElementById("scanRetry").onclick=()=>openScanOverlay(scanMode);
     document.getElementById("scanApply").onclick=applyDocScan;
@@ -3303,28 +3397,65 @@ RULES:
   }
 }
 
-function applyDocScan(){
+async function applyDocScan(){
   if(!scanParsed||!scanParsed.sections) return;
   const type=(scanMode==="salesplan")?"salesplan":"dailynotes";
-  const today=new Date(), pad=n=>String(n).padStart(2,"0");
-  const date=scanParsed.date||`${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+  const today=new Date(), pad=function(n){ return String(n).padStart(2,"0"); };
+  const date=scanParsed.date||today.getFullYear()+"-"+pad(today.getMonth()+1)+"-"+pad(today.getDate());
   const dateLabel=scanParsed.dateLabel||today.toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"2-digit",day:"2-digit"});
   const arr=docStore[type];
-  const existing=arr.find(d=>d.date===date);
-  if(existing && !confirm(`A ${DOC_LABEL[type]} for ${existing.dateLabel||date} already exists.\n\nOK = Replace it\nCancel = Keep both`)){
-    /* keep both */
-  } else if(existing){
-    docStore[type]=arr.filter(d=>d.id!==existing.id);
+  const existing=arr.find(function(d){ return d.date===date; });
+
+  if(existing){
+    /* Show sheet: Add (primary) vs Replace (ghost/danger) */
+    const result=await new Promise(function(resolve){
+      const bd=document.getElementById("sheetBackdrop");
+      const sh=document.getElementById("sheet");
+      document.getElementById("sheetTitle").textContent="Page already exists for "+date;
+      const msg=document.getElementById("sheetMsg");
+      msg.textContent="Add these sections to the existing "+DOC_LABEL[type]+", or replace it entirely?";
+      msg.style.display="block";
+      sh.classList.remove("has-input");
+      /* Repurpose OK as "Add" and Cancel as "Replace" */
+      const ok=document.getElementById("sheetOk");
+      const cancel=document.getElementById("sheetCancel");
+      ok.textContent="Add to existing";
+      ok.className="sheet-btn primary";
+      cancel.textContent="Replace all";
+      cancel.className="sheet-btn ghost";
+      bd.classList.add("open");
+      document.body.style.overflow="hidden";
+      function close(val){ bd.classList.remove("open"); document.body.style.overflow=""; ok.onclick=null; cancel.onclick=null; bd.onclick=null; resolve(val); }
+      ok.onclick=function(){ close("add"); };
+      cancel.onclick=function(){ close("replace"); };
+      bd.onclick=function(e){ if(e.target===bd) close("cancel"); };
+    });
+
+    if(result==="cancel"){ return; }
+    if(result==="add"){
+      /* Merge new sections into existing doc */
+      existing.sections=existing.sections.concat(scanParsed.sections);
+      docActiveId[type]=existing.id;
+      sortDocs(type); docPrune();
+      var ok1=saveDocs();
+      closeScanOverlay();
+      tab="docs"; docView=type; docEdit=false; render(); window.scrollTo(0,0);
+      toast(ok1?scanParsed.sections.length+" section"+(scanParsed.sections.length>1?"s":"")+" added":"Saved (storage may be full)");
+      return;
+    }
+    /* result === "replace" — remove existing, fall through to create new */
+    docStore[type]=arr.filter(function(d){ return d.id!==existing.id; });
   }
-  const doc={ id:"doc_"+Date.now(), date, dateLabel, created:Date.now(), images:[], sections:scanParsed.sections };
+
+  var doc={ id:"doc_"+Date.now(), date:date, dateLabel:dateLabel, created:Date.now(), images:[], sections:scanParsed.sections };
   docStore[type].unshift(doc);
   sortDocs(type);
   docPrune();
   docActiveId[type]=doc.id;
-  const ok=saveDocs();
+  var ok2=saveDocs();
   closeScanOverlay();
   tab="docs"; docView=type; docEdit=false; render(); window.scrollTo(0,0);
-  toast(ok?DOC_LABEL[type]+" saved":"Saved (storage is full — older items may not persist)");
+  toast(ok2?DOC_LABEL[type]+" saved":"Saved (storage is full — older items may not persist)");
 }
 
 /* ---- Render document sections (shared by preview + tab) ---- */
@@ -3368,31 +3499,41 @@ function spOrder(sections){
 }
 function spTagHTML(t){ return t.replace(/\((DEAL LOCK|SPOT BUY)\)/g,'<span class="sp-tag">$1</span>'); }
 function spSectionsHTML(doc){
-  return spOrder(doc.sections).map(s=>{
-    const notes=(s.bullets||[]).filter(b=>String(b).trim()!=="")
-      .map(b=>`<div class="sp-note">${esc(String(b).replace(/^>>\s?/,""))}</div>`).join("");
-    const tbls=(s.tables||[]).map(t=>{
-      const hdrs=t.headers||[];
-      if(hdrs.length>2){
-        /* wide grid: keep the exact table */
-        const head=`<thead><tr>${hdrs.map(h=>`<th>${esc(h)}</th>`).join("")}</tr></thead>`;
-        const body=`<tbody>${(t.rows||[]).map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody>`;
-        return `${t.title?`<div class="sp-tbl-title">${esc(t.title)}</div>`:""}
-          <div class="doc-tbl-wrap" style="margin:8px 12px"><table class="doc-tbl">${head}${body}</table></div>`;
-      }
-      const rows=(t.rows||[]).map(r=>{
-        const label=r[0]!=null?String(r[0]):"";
-        const item=r[1]!=null?String(r[1]):"";
-        const lines=item.split(/\s\/\s/).map(x=>x.trim()).filter(x=>x!=="");
-        const inner=lines.length?lines.map(x=>`<span class="ln">${spTagHTML(esc(x))}</span>`).join(""):"—";
-        return `<div class="sp-row"><span class="sp-label">${esc(label)}</span><span class="sp-item${lines.length?"":" empty"}">${inner}</span></div>`;
+  return spOrder(doc.sections).map(function(s){
+    var notes=(s.bullets||[]).filter(function(b){ return String(b).trim()!==""; })
+      .map(function(b){ return '<div class="sp-note">'+esc(String(b).replace(/^>>\s?/,""))+'</div>'; }).join("");
+    var tbls=(s.tables||[]).map(function(t){
+      var hdrs=t.headers||[];
+      var rows=t.rows||[];
+      /* Group consecutive rows with the same position label */
+      var groups=[];
+      rows.forEach(function(r){
+        var label=r[0]!=null?String(r[0]):"";
+        var item=r[1]!=null?String(r[1]):"";
+        /* Split any lingering " / " items into separate entries */
+        var items=item?item.split(/\s\/\s/).map(function(x){ return x.trim(); }).filter(function(x){ return x!==""; }):[""];
+        var last=groups.length?groups[groups.length-1]:null;
+        if(last&&last.label===label){
+          last.items=last.items.concat(items);
+        } else {
+          groups.push({label:label,items:items});
+        }
+      });
+      var html=groups.map(function(g){
+        var slots=g.items.map(function(x){
+          if(!x) return '<span class="sp-slot empty">\u2014</span>';
+          return '<span class="sp-slot">'+spTagHTML(esc(x))+'</span>';
+        }).join("");
+        var multi=g.items.length>1?" multi":"";
+        return '<div class="sp-row"><span class="sp-label">'+esc(g.label)+'</span><span class="sp-slots'+multi+'">'+slots+'</span></div>';
       }).join("");
-      return `${t.title?`<div class="sp-tbl-title">${esc(t.title)}</div>`:""}<div class="sp-body">${rows}</div>`;
+      return (t.title?'<div class="sp-tbl-title">'+esc(t.title)+'</div>':'')+
+        '<div class="sp-body">'+html+'</div>';
     }).join("");
-    return `<div class="sp-block">
-      <div class="sp-head">${esc(s.category||s.subject||"Block")}</div>
-      ${notes}${tbls||'<div class="sp-body"></div>'}
-    </div>`;
+    return '<div class="sp-block">'+
+      '<div class="sp-head">'+esc(s.category||s.subject||"Block")+'</div>'+
+      notes+(tbls||'<div class="sp-body"></div>')+
+      '</div>';
   }).join("");
 }
 
