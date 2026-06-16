@@ -1612,7 +1612,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.9.0</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.9.1</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -3288,45 +3288,15 @@ async function readDocPages(){
   const status=document.getElementById("scanStatus");
   try{
     async function attempt(extra){
-const salesPlanPrompt=`You are transcribing a grocery store produce "Sales Plan" display sheet (Stop & Shop). The photo shows one page of a multi-page merchandising plan. Each page has a grid of BLOCKS — each block represents a physical display fixture (end cap, promo table, hero pod, 4-block bin, island display, value bin, etc.).
+const salesPlanPrompt=`You are transcribing a grocery store produce "Sales Plan" display sheet (Stop & Shop). The photo shows one page of a merchandising plan. Each page has a grid of titled BLOCKS — promo tables, end caps, hero pods, value bins, authorized displays, etc. Transcribe EVERYTHING into structured JSON. Be exact; do not summarize.
 
-Transcribe this page into structured JSON. Be exact — do not summarize, paraphrase, or skip anything.
+Each titled block becomes one SECTION:
+- "category" = the block's title exactly (e.g. "Refrigerated Promo Table", "Berry End 1 (Power Side)", "Grape End 1", "4 Block").
+- "subject" = "" , "contact" = ""
+- "bullets" = any free-text notes or instructions inside or under the block. One string each. [] if none.
+- "tables" = the block's grid. Most blocks are a two-column grid: a position/priority column and an item column. Use headers ["Position","Item"]. Put EACH labelled position as its own row. If a position has multiple items side by side (like Shelf or Well with 3–4 slots), join them with " / " in the item cell. Include (DEAL LOCK) or (SPOT BUY) tags after the item text where they appear. For numbered lists (Authorized Displays, Value Bin), use the number as the position and keep blank rows with "".
 
-FIXTURE TYPES — each block maps to one of these physical layouts:
-
-1. PROMO TABLE / HERO POD (has wings + shelves + wells):
-   Positions: Power Wing, Shelf (multiple slots L-to-R), Well (multiple slots L-to-R), Inside Wing, TPR
-   When a row (Shelf or Well) has MULTIPLE items side by side, output EACH slot as its own row:
-     ["Shelf", "Item A"], ["Shelf", "Item B"], ["Shelf", "Item C"]
-   NOT: ["Shelf", "Item A / Item B / Item C"]
-
-2. END CAP (has wings + numbered priority shelves):
-   Positions: Front Wing, 1, 2, 3, 4, Back Wing
-   Each numbered priority = one shelf level on the end cap.
-
-3. 4-BLOCK (2x2 bin display):
-   Positions should be: ["Top Left", item], ["Top Right", item], ["Bottom Left", item], ["Bottom Right", item]
-
-4. ISLAND / BERRY ISLAND / BACK OF TABLE:
-   Numbered positions or named positions (Shelf 1, Well 1, etc.)
-
-5. AUTHORIZED DISPLAYS / VALUE BIN / PALLET DROPS / ADDITIONAL PROGRAMS:
-   Numbered list: ["1", item], ["2", item], etc. Keep blank rows.
-
-Each block becomes one SECTION in the JSON:
-- "category" = block title exactly as printed (e.g. "Refrigerated Promo Table", "Berry End 1 (Power Side)")
-- "subject" = "", "contact" = ""
-- "bullets" = any notes/instructions inside or below the block. One string per note. [] if none.
-  Include directional notes like "AVOCADO END LOCATION", "DEAL LOCK", location instructions, etc.
-- "tables" = one table per block with headers ["Position","Item"]. One row per physical slot.
-
-CRITICAL RULES:
-- Output SEPARATE ROWS for each physical slot — if "Shelf" has 3 items side by side, that's 3 rows all labeled "Shelf", not one row with items joined by "/".
-- Transcribe item text VERBATIM including sizes (11x14, 2lb, 6oz), brand names, counts.
-- Append (DEAL LOCK) or (SPOT BUY) to the item text where those tags appear.
-- Capture EVERY block on the page, reading left-to-right, top-to-bottom.
-- date: ISO YYYY-MM-DD from any visible date (e.g. "$5 6/12-7/16" → "2026-06-12"). dateLabel: short label like "6/12–7/16".
-- Do NOT invent data. If a cell is empty, use "" for the item.
+CRITICAL: Only put items in the position where they actually appear on the sheet. Do NOT move items between positions. Wings (Front Wing, Back Wing, Power Wing, Inside Wing) typically hold only ONE item each. Shelf and Well rows hold multiple items side by side.
 
 Return ONLY valid JSON. No markdown, no backticks, no commentary.
 
@@ -3335,15 +3305,18 @@ Return ONLY valid JSON. No markdown, no backticks, no commentary.
    "bullets":["Note for all end caps/wings: End/Wing 1 should always be the power side"],
    "tables":[{"title":"","headers":["Position","Item"],"rows":[
      ["Power Wing","Lemons"],
-     ["Shelf","Strawberries 6oz 11x14"],
-     ["Shelf","Northwest Cherries"],
-     ["Shelf","Pint Blueberries 11x14"],
-     ["Well","Family Pack Mixed Berries"],
-     ["Well","Family Pack Cut Watermelon (DEAL LOCK)"],
-     ["Inside Wing","Limes"],
-     ["TPR",""]
+     ["Shelf","Strawberries 6oz 11x14 / Northwest Cherries / Pint Blueberries 11x14"],
+     ["Well","Family Pack Mixed Berries / Family Pack Cut Watermelon (DEAL LOCK)"],
+     ["Inside Wing","Limes"]
    ]}]}
-]}`;
+]}
+
+RULES:
+- date: ISO YYYY-MM-DD from any visible date. dateLabel: short label like "6/12–7/16".
+- Capture EVERY block on the page, left-to-right, top-to-bottom.
+- Transcribe item text VERBATIM — keep brand names, sizes (11x14, 2lb), counts exactly.
+- Wings hold ONE item. Shelves/Wells hold MULTIPLE items joined with " / ".
+- Do NOT invent or reorder. Accuracy matters most.`;
 
       const promptText=scanMode==="salesplan"?salesPlanPrompt:dailyNotesPrompt;
       const content=docPages.map(p=>({type:"image",source:{type:"base64",media_type:"image/jpeg",data:p.b64}}));
