@@ -686,7 +686,7 @@
   .doc-empty .ei svg{width:28px;height:28px;}
   .doc-empty h3{margin:0 0 5px;font-size:17px;font-weight:700;letter-spacing:-.02em;}
   .doc-empty p{margin:0 auto 18px;font-size:13px;color:var(--ink-3);line-height:1.55;max-width:260px;}
-  /* Display Plan — digital plan blocks */
+  /* Sales Plan — digital plan blocks */
   .sp-block{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
     box-shadow:var(--sh-sm);margin-bottom:11px;overflow:hidden;}
   .sp-head{background:var(--violet-tint);color:var(--violet);font-size:11px;font-weight:800;
@@ -707,40 +707,6 @@
     margin-left:5px;vertical-align:1.5px;white-space:nowrap;}
   .sp-note{font-size:11.5px;color:var(--ink-3);font-style:italic;line-height:1.5;padding:8px 12px 2px;}
   .sp-tbl-title{font-size:11px;font-weight:700;color:var(--ink-2);padding:8px 12px 0;}
-  /* Display Plan — refrigerated promo fixture (Shelf + Well + Wings) */
-  .sp-fixture{padding:9px 12px 11px;}
-  .sp-wings{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px;}
-  .sp-wing{flex:1;min-width:128px;background:var(--surface-3);border:1px dashed var(--line-2);border-radius:9px;padding:6px 10px;}
-  .sp-wing .wl{font-size:8.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);display:block;margin-bottom:2px;}
-  .sp-wing .wv{font-size:12.5px;color:var(--ink);line-height:1.35;}
-  .sp-deck-row{margin-bottom:9px;}
-  .sp-deck-row:last-child{margin-bottom:0;}
-  .sp-deck-label{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--brand);display:block;margin-bottom:5px;}
-  .sp-slots-num{display:flex;gap:6px;overflow-x:auto;padding:2px 1px 3px;-webkit-overflow-scrolling:touch;}
-  .sp-slot-num{flex:1 0 0;min-width:96px;background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:7px 8px 8px;position:relative;}
-  .sp-slot-num .n{position:absolute;top:-7px;left:-7px;width:18px;height:18px;border-radius:50%;background:var(--brand);color:#06210f;font-size:9.5px;font-weight:800;display:grid;place-items:center;box-shadow:var(--sh-sm);}
-  .sp-slot-num .v{font-size:12px;line-height:1.35;color:var(--ink);}
-  .sp-slot-num.empty .v{color:var(--ink-3);}
-  /* Display Plan — plain table (ends, islands, hero pods, lists) */
-  .sp-plain{width:100%;border-collapse:collapse;}
-  .sp-plain td{border-top:1px dashed var(--line);padding:8px 12px;vertical-align:top;font-size:13px;color:var(--ink);line-height:1.42;}
-  .sp-plain tr:first-child td{border-top:none;}
-  .sp-plain td.lab{width:92px;font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);padding-top:10px;white-space:nowrap;}
-  .sp-plain td.empty{color:var(--ink-3);}
-  .sp-plain .ln{display:block;}
-  .sp-plain .ln+.ln{margin-top:3px;}
-  /* description chip (sizes/sign cards like 11x14) */
-  .sp-desc{display:inline-block;font-size:8.5px;font-weight:800;letter-spacing:.04em;
-    padding:1.5px 6px;border-radius:999px;background:var(--surface-3);border:1px solid var(--line-2);
-    color:var(--ink-2);margin-left:5px;vertical-align:1.5px;white-space:nowrap;}
-  /* week shifter in the scan preview */
-  .sp-week{display:flex;align-items:center;justify-content:space-between;gap:10px;
-    background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:9px 11px;margin:4px 0 10px;}
-  .sp-week button{appearance:none;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);
-    font:inherit;font-size:16px;font-weight:700;width:36px;height:36px;border-radius:9px;cursor:pointer;flex:none;}
-  .sp-week button:active{background:var(--surface-3);}
-  .sp-week .wk{flex:1;text-align:center;font-size:12.5px;color:var(--ink-2);line-height:1.3;}
-  .sp-week .wk b{display:block;color:var(--brand);font-size:15px;letter-spacing:.01em;margin-top:1px;}
   /* edit-mode inputs */
   .doc-edit-line,.doc-edit-area{width:100%;font:inherit;font-size:13px;background:var(--surface-2);
     border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink);margin-bottom:7px;}
@@ -1147,18 +1113,17 @@ function clCounts(){
   return {total,done};
 }
 
-/* ===== Documents store (subsections: Daily Notes, Display Plan) ===== */
+/* ===== Documents store (subsections: Daily Notes, Sales Plan) ===== */
 const DOCS_KEY="pdp_documents_v2";
 const DOC_TYPES=["dailynotes","salesplan"];
-const DOC_LABEL={dailynotes:"Daily Notes",salesplan:"Display Plan"};
-const DOC_RETAIN_DAYS={dailynotes:14,salesplan:70};
+const DOC_LABEL={dailynotes:"Daily Notes",salesplan:"Sales Plan"};
+const DOC_RETAIN_DAYS=14;
 let docStore={dailynotes:[],salesplan:[]};
 let docActiveId={dailynotes:null,salesplan:null};
 
 function docPrune(){
+  const cutoff=Date.now()-DOC_RETAIN_DAYS*86400000;
   DOC_TYPES.forEach(t=>{
-    const days=(DOC_RETAIN_DAYS&&DOC_RETAIN_DAYS[t])||14;
-    const cutoff=Date.now()-days*86400000;
     docStore[t]=(docStore[t]||[]).filter(d=>{
       let ts=d.created||0;
       if(d.date){ const dt=Date.parse(d.date+"T00:00:00"); if(!isNaN(dt)) ts=Math.max(ts,dt); }
@@ -1181,13 +1146,13 @@ function docPrune(){
 function saveDocs(){ return writeK(DOCS_KEY,JSON.stringify(docStore)); }
 function sortDocs(t){ docStore[t].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.created||0)-(a.created||0)); }
 function activeDoc(t){ return docStore[t].find(d=>d.id===docActiveId[t])||docStore[t][0]||null; }
-/* one-time seed: example Display Plan from the printed plan (pages 8 & 10) */
+/* one-time seed: example Sales Plan from the printed plan (pages 8 & 10) */
 (function seedSalesPlan(){
   var FLAG="pdp_seed_salesplan_v1";
   try{ if(localStorage.getItem(FLAG)) return; }catch(e){}
   try{ localStorage.setItem(FLAG,"1"); }catch(e){}
   if(!docStore.salesplan.some(function(d){return d.id==="seed_salesplan_v1";})){
-    docStore.salesplan.unshift({"id": "seed_salesplan_v1", "date": "2026-06-12", "dateLabel": "6/12–6/18", "created": 1749700000000, "images": [], "sections": [{"category": "Refrigerated Promo Table", "subject": "", "contact": "", "bullets": ["Note for all end caps/wings: \"End/Wing 1\" should always be the power side of the department, this will differ by store. Weaker side will be \"End/Wing 2\""], "tables": [{"title": "", "headers": ["Position", "Item"], "rows": [["Power Wing", "Lemons"], ["Shelf", "Northwest Cherries / Northwest Cherries / Sweetest Batch Blueberries / Conventional Blackberries (SPOT BUY)"], ["Well", "1lb Strawberries/Raspberries 11x14 / Family Pack Mixed Berries / Family Pack Cut Watermelon / Pint Blueberries 11x14 (DEAL LOCK)"], ["Inside Wing", "Limes"]]}]}, {"category": "Dry Promo Table", "subject": "", "contact": "", "bullets": ["Note for Stores with two dry promo table: Use Front Table \"End 1\" items on the second dry promo table and place Avocado end on Front Table \"End 1\""], "tables": [{"title": "", "headers": ["Position", "Item"], "rows": [["Power Wing", "Mini Cucumbers (SPOT BUY)"], ["Shelf", "HH Peppers 11x14 / Green/Yellow Squash & Eggplant / HH Cucumbers 11x14"], ["Inside Wing", "Own Brand Granola 14 oz (7/16) (DEAL LOCK)"]]}]}, {"category": "Refrigerated Hero Pod", "subject": "", "contact": "", "bullets": [], "tables": [{"title": "", "headers": ["Position", "Item"], "rows": [["Shelf", "Watermelon Luau Bowls / Watermelon Luau Bowls / Store Choice"], ["Well", "Cut Watermelon 1/4s / Cut Watermelon 1/4s / Cut Watermelon 1/2s"]]}]}, {"category": "Stone Fruit End 2 (Power Side)", "subject": "", "contact": "", "bullets": ["AVOCADO END LOCATION"], "tables": [{"title": "", "headers": ["Priority", "Item"], "rows": [["Front Wing", "Organic Stone Fruit"], ["Left", "Mangoes"], ["Center", "Avocados"], ["Right", "Honey Mango"], ["Back Wing", "NP Avocados / Org Mini Avocado / 4ct Avocado"]]}]}, {"category": "Stone Fruit End 2", "subject": "", "contact": "", "bullets": ["Apple Promo End Should Stay With Apple Table, Citrus Promo End Should Stay With Citrus Table"], "tables": [{"title": "", "headers": ["Priority", "Item"], "rows": [["Front Wing", "Imported Pomegranates (1 box) Apricots (1 box)"], ["Left", "Cosmic Apples"], ["Center", "Eastern Peaches"], ["Right", "Cosmic Apples"], ["Back Wing", "Apple Tie In Rack"]]}]}, {"category": "Hero Pod 1", "subject": "", "contact": "", "bullets": [], "tables": [{"title": "", "headers": ["Position", "Item"], "rows": [["Left", "Pink Lady Apples / Anjou Pears"], ["Center", "Granny Smith Apples"], ["Right", "Fuji Apples / Red Anjou Pears"]]}]}, {"category": "Berry End 1 (Power Side)", "subject": "", "contact": "", "bullets": [], "tables": [{"title": "", "headers": ["Priority", "Item"], "rows": [["Front Wing", "Zespri Green and Gold Kiwi or Store Choice"], ["1", "Northwest Cherries (2 rows)"], ["2", "Sweetbatch Blackberries / Sweetbatch Raspberries"], ["3", "I Love Hydro Berries / NP Org Blueberries (DEAL LOCK)"], ["4", "Family Pack Mixed Berries"], ["Back Wing", "Entemann's Shipper / Chocolate Apples"]]}]}, {"category": "Grape End 1", "subject": "", "contact": "", "bullets": [], "tables": [{"title": "", "headers": ["Priority", "Item"], "rows": [["Front Wing", "Aurora OB Granola - Rhubarb (1 box) (DEAL LOCK)"], ["1", "Cotton Candy Grapes"], ["2", "Red Seedless Grapes"], ["3", "Green Seedless Grapes"], ["4", "Black Seedless Grapes"], ["Back Wing", "Berry Tie-in Rack (Place on Backside of Table)"]]}]}, {"category": "4 Block", "subject": "", "contact": "", "bullets": [], "tables": [{"title": "", "headers": ["Position", "Item"], "rows": [["Top Left", "Loose Corn"], ["Top Right", "Pre-Pack Corn 60% / Store Made Corn 40%"], ["Bottom Left", "Bulk Vidalia Onions"], ["Bottom Right", "Bulk Red Onions or Store Choice"]]}]}, {"category": "Avocado End", "subject": "", "contact": "", "bullets": ["TOI TOMATO LOCATION"], "tables": [{"title": "", "headers": ["Priority", "Item"], "rows": [["Front Wing", ""], ["1", "TOI Angel Sweet Pints"], ["2", "TOI Wild Wonder Tomatoes"], ["3", "TOI Flavor Bombs / Sugar Bombs (DEAL LOCK)"], ["Back Wing", ""]]}]}, {"category": "Avocado End — Location Options", "subject": "", "contact": "", "bullets": [], "tables": [{"title": "", "headers": ["Priority", "Location Options"], "rows": [["1", "Tomato Table"], ["2", "Secondary Fruit Table"], ["3", "Banana Table"]]}]}, {"category": "Authorized Displays", "subject": "", "contact": "", "bullets": [], "tables": [{"title": "", "headers": ["#", "Item"], "rows": [["1", "4ct Avocado Rack (Near Avocados)"], ["2", "Wonderful Pistachio .75 oz Shipper"], ["3", "Wonderful Seedless Lemons (Seafood)"], ["4", "Entemann's Shipper (Back wing Berry End)"], ["5", ""], ["6", ""], ["7", ""], ["8", ""], ["9", ""], ["10", ""], ["11", ""], ["12", ""], ["13", ""], ["14", ""], ["15", ""]]}]}, {"category": "Organic Fruit End (Power Side)", "subject": "", "contact": "", "bullets": [], "tables": [{"title": "", "headers": ["Priority", "Item"], "rows": [["Front Wing", ""], ["1", "2lb Organic Honeycrisp"], ["2", "NP 3lb Oranges"], ["3", "NP 2lb Barlet Pears"], ["4", "Organic 2lb Halo Mandarins"], ["Back Wing", "NP 3ct Lemon & Lime"]]}]}, {"category": "Organic Fruit End", "subject": "", "contact": "", "bullets": [], "tables": [{"title": "", "headers": ["Priority", "Item"], "rows": [["Front Wing", "Organic Honeycrisp"], ["Shelf 1", "Organic Fuji"], ["Shelf 2", "Organic Granny"], ["Well 1", "Organic Gala"], ["Well 2", "Organic Cosmic Crisp"], ["Well 3", ""]]}]}, {"category": "Refrigerated Veg Promo Table", "subject": "", "contact": "", "bullets": ["If Stores only have a refrigerated hero pod, utilize refrigerated promo end plan within hero pod fixture"], "tables": [{"title": "", "headers": ["Position", "Item"], "rows": [["Shelf", "Asparagus (SPOT BUY) / Asparagus (SPOT BUY) / Packaged Corn"], ["Well", "Little Leaf 4oz / Little Leaf 4oz / Little Leaf 4oz"], ["Wing", ""]]}]}, {"category": "Tomato End 2 or Soft Veg End", "subject": "", "contact": "", "bullets": ["Heirloom Tomatoes — Pick of the Season", "Includes 2.5oz Basil, Galic, Red & Vidalia Onions (see photo in Display Plan)", "If you do not have a free Dry Veg End, create a forward facing wing on the Tomato Table", "Stores without 4 bin block, display on Tomato End 2/Soft Veg End"], "tables": [{"title": "", "headers": ["Priority", "Item"], "rows": [["Front Wing", ""], ["1", ""], ["2", ""], ["3", ""], ["4", ""]]}]}, {"category": "Value Bin", "subject": "", "contact": "", "bullets": ["$5 6/12-7/16"], "tables": [{"title": "", "headers": ["#", "Item"], "rows": [["1", "Stop & Shop Almonds or Walnuts"], ["2", ""], ["3", ""]]}]}, {"category": "Potato End 1 (Power Side)", "subject": "", "contact": "", "bullets": ["Follow Planogram for Mini Potatoes"], "tables": [{"title": "", "headers": ["Priority", "Item"], "rows": [["Front Wing", ""], ["1", ""], ["2", ""], ["3", ""], ["4", ""]]}]}, {"category": "Potato End 2", "subject": "", "contact": "", "bullets": ["If you do not have 4 Bin #3 use this end to execute bulk potato/onion display"], "tables": [{"title": "", "headers": ["Priority", "Item"], "rows": [["Front Wing", ""], ["1", ""], ["2", ""], ["3", ""], ["4", ""]]}]}, {"category": "Additional Programs", "subject": "", "contact": "", "bullets": [], "tables": [{"title": "", "headers": ["#", "Item"], "rows": [["1", ""], ["2", ""], ["3", ""]]}]}]});
+    docStore.salesplan.unshift({"id": "seed_salesplan_v1", "date": "2026-06-12", "dateLabel": "Sales Plan · 6/12–7/16", "created": 1749700000000, "images": [], "sections": [{"category": "Refrigerated Promo Table", "subject": "", "contact": "", "bullets": ["Note for all end caps/wings: \"End/Wing 1\" should always be the power side of the department, this will differ by store. Weaker side will be \"End/Wing 2\""], "tables": [{"title": "", "headers": ["Position", "Item"], "rows": [["Power Wing", "Lemons"], ["Shelf", "Northwest Cherries / Northwest Cherries / Sweetest Batch Blueberries / Conventional Blackberries (SPOT BUY)"], ["Well", "1lb Strawberries/Raspberries 11x14 / Family Pack Mixed Berries / Family Pack Cut Watermelon / Pint Blueberries 11x14 (DEAL LOCK)"], ["Inside Wing", "Limes"]]}]}, {"category": "Dry Promo Table", "subject": "", "contact": "", "bullets": ["Note for Stores with two dry promo table: Use Front Table \"End 1\" items on the second dry promo table and place Avocado end on Front Table \"End 1\""], "tables": [{"title": "", "headers": ["Position", "Item"], "rows": [["Power Wing", "Mini Cucumbers (SPOT BUY)"], ["Shelf", "HH Peppers 11x14 / Green/Yellow Squash & Eggplant / HH Cucumbers 11x14"], ["Inside Wing", "Own Brand Granola 14 oz (7/16) (DEAL LOCK)"]]}]}, {"category": "Refrigerated Hero Pod", "subject": "", "contact": "", "bullets": [], "tables": [{"title": "", "headers": ["Position", "Item"], "rows": [["Shelf", "Watermelon Luau Bowls / Watermelon Luau Bowls / Store Choice"], ["Well", "Cut Watermelon 1/4s / Cut Watermelon 1/4s / Cut Watermelon 1/2s"]]}]}, {"category": "Stone Fruit End 2 (Power Side)", "subject": "", "contact": "", "bullets": ["AVOCADO END LOCATION"], "tables": [{"title": "", "headers": ["Priority", "Item"], "rows": [["Front Wing", "Organic Stone Fruit"], ["Left", "Mangoes"], ["Center", "Avocados"], ["Right", "Honey Mango"], ["Back Wing", "NP Avocados / Org Mini Avocado / 4ct Avocado"]]}]}, {"category": "Stone Fruit End 2", "subject": "", "contact": "", "bullets": ["Apple Promo End Should Stay With Apple Table, Citrus Promo End Should Stay With Citrus Table"], "tables": [{"title": "", "headers": ["Priority", "Item"], "rows": [["Front Wing", "Imported Pomegranates (1 box) Apricots (1 box)"], ["Left", "Cosmic Apples"], ["Center", "Eastern Peaches"], ["Right", "Cosmic Apples"], ["Back Wing", "Apple Tie In Rack"]]}]}, {"category": "Hero Pod 1", "subject": "", "contact": "", "bullets": [], "tables": [{"title": "", "headers": ["Position", "Item"], "rows": [["Left", "Pink Lady Apples / Anjou Pears"], ["Center", "Granny Smith Apples"], ["Right", "Fuji Apples / Red Anjou Pears"]]}]}, {"category": "Berry End 1 (Power Side)", "subject": "", "contact": "", "bullets": [], "tables": [{"title": "", "headers": ["Priority", "Item"], "rows": [["Front Wing", "Zespri Green and Gold Kiwi or Store Choice"], ["1", "Northwest Cherries (2 rows)"], ["2", "Sweetbatch Blackberries / Sweetbatch Raspberries"], ["3", "I Love Hydro Berries / NP Org Blueberries (DEAL LOCK)"], ["4", "Family Pack Mixed Berries"], ["Back Wing", "Entemann's Shipper / Chocolate Apples"]]}]}, {"category": "Grape End 1", "subject": "", "contact": "", "bullets": [], "tables": [{"title": "", "headers": ["Priority", "Item"], "rows": [["Front Wing", "Aurora OB Granola - Rhubarb (1 box) (DEAL LOCK)"], ["1", "Cotton Candy Grapes"], ["2", "Red Seedless Grapes"], ["3", "Green Seedless Grapes"], ["4", "Black Seedless Grapes"], ["Back Wing", "Berry Tie-in Rack (Place on Backside of Table)"]]}]}, {"category": "4 Block", "subject": "", "contact": "", "bullets": [], "tables": [{"title": "", "headers": ["Position", "Item"], "rows": [["Top Left", "Loose Corn"], ["Top Right", "Pre-Pack Corn 60% / Store Made Corn 40%"], ["Bottom Left", "Bulk Vidalia Onions"], ["Bottom Right", "Bulk Red Onions or Store Choice"]]}]}, {"category": "Avocado End", "subject": "", "contact": "", "bullets": ["TOI TOMATO LOCATION"], "tables": [{"title": "", "headers": ["Priority", "Item"], "rows": [["Front Wing", ""], ["1", "TOI Angel Sweet Pints"], ["2", "TOI Wild Wonder Tomatoes"], ["3", "TOI Flavor Bombs / Sugar Bombs (DEAL LOCK)"], ["Back Wing", ""]]}]}, {"category": "Avocado End — Location Options", "subject": "", "contact": "", "bullets": [], "tables": [{"title": "", "headers": ["Priority", "Location Options"], "rows": [["1", "Tomato Table"], ["2", "Secondary Fruit Table"], ["3", "Banana Table"]]}]}, {"category": "Authorized Displays", "subject": "", "contact": "", "bullets": [], "tables": [{"title": "", "headers": ["#", "Item"], "rows": [["1", "4ct Avocado Rack (Near Avocados)"], ["2", "Wonderful Pistachio .75 oz Shipper"], ["3", "Wonderful Seedless Lemons (Seafood)"], ["4", "Entemann's Shipper (Back wing Berry End)"], ["5", ""], ["6", ""], ["7", ""], ["8", ""], ["9", ""], ["10", ""], ["11", ""], ["12", ""], ["13", ""], ["14", ""], ["15", ""]]}]}, {"category": "Organic Fruit End (Power Side)", "subject": "", "contact": "", "bullets": [], "tables": [{"title": "", "headers": ["Priority", "Item"], "rows": [["Front Wing", ""], ["1", "2lb Organic Honeycrisp"], ["2", "NP 3lb Oranges"], ["3", "NP 2lb Barlet Pears"], ["4", "Organic 2lb Halo Mandarins"], ["Back Wing", "NP 3ct Lemon & Lime"]]}]}, {"category": "Organic Fruit End", "subject": "", "contact": "", "bullets": [], "tables": [{"title": "", "headers": ["Priority", "Item"], "rows": [["Front Wing", "Organic Honeycrisp"], ["Shelf 1", "Organic Fuji"], ["Shelf 2", "Organic Granny"], ["Well 1", "Organic Gala"], ["Well 2", "Organic Cosmic Crisp"], ["Well 3", ""]]}]}, {"category": "Refrigerated Veg Promo Table", "subject": "", "contact": "", "bullets": ["If Stores only have a refrigerated hero pod, utilize refrigerated promo end plan within hero pod fixture"], "tables": [{"title": "", "headers": ["Position", "Item"], "rows": [["Shelf", "Asparagus (SPOT BUY) / Asparagus (SPOT BUY) / Packaged Corn"], ["Well", "Little Leaf 4oz / Little Leaf 4oz / Little Leaf 4oz"], ["Wing", ""]]}]}, {"category": "Tomato End 2 or Soft Veg End", "subject": "", "contact": "", "bullets": ["Heirloom Tomatoes — Pick of the Season", "Includes 2.5oz Basil, Galic, Red & Vidalia Onions (see photo in Sales Plan)", "If you do not have a free Dry Veg End, create a forward facing wing on the Tomato Table", "Stores without 4 bin block, display on Tomato End 2/Soft Veg End"], "tables": [{"title": "", "headers": ["Priority", "Item"], "rows": [["Front Wing", ""], ["1", ""], ["2", ""], ["3", ""], ["4", ""]]}]}, {"category": "Value Bin", "subject": "", "contact": "", "bullets": ["$5 6/12-7/16"], "tables": [{"title": "", "headers": ["#", "Item"], "rows": [["1", "Stop & Shop Almonds or Walnuts"], ["2", ""], ["3", ""]]}]}, {"category": "Potato End 1 (Power Side)", "subject": "", "contact": "", "bullets": ["Follow Planogram for Mini Potatoes"], "tables": [{"title": "", "headers": ["Priority", "Item"], "rows": [["Front Wing", ""], ["1", ""], ["2", ""], ["3", ""], ["4", ""]]}]}, {"category": "Potato End 2", "subject": "", "contact": "", "bullets": ["If you do not have 4 Bin #3 use this end to execute bulk potato/onion display"], "tables": [{"title": "", "headers": ["Priority", "Item"], "rows": [["Front Wing", ""], ["1", ""], ["2", ""], ["3", ""], ["4", ""]]}]}, {"category": "Additional Programs", "subject": "", "contact": "", "bullets": [], "tables": [{"title": "", "headers": ["#", "Item"], "rows": [["1", ""], ["2", ""], ["3", ""]]}]}]});
     sortDocs("salesplan"); docPrune();
     if(docStore.salesplan.length) docActiveId.salesplan=docStore.salesplan[0].id;
     saveDocs();
@@ -1647,7 +1612,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.10.0</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.9.3</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -2443,7 +2408,7 @@ function renderSettings(){
     <div class="lbl" style="margin-top:6px">Anthropic API Key</div>
     <div class="panel" style="margin-bottom:0">
       <p style="font-size:13px;color:var(--ink-2);line-height:1.55;margin:0 0 14px">
-        Required for scanning (Schedule, GEV, Daily Notes, Display Plan).
+        Required for scanning (Schedule, GEV, Daily Notes, Sales Plan).
         The key is stored only on this device. Get one at <b>console.anthropic.com</b>.
       </p>
       <div class="field"><label>API Key</label>
@@ -3233,22 +3198,6 @@ function applyGevScan(){
 /* ================= DAILY NOTES SCAN (multi-page) ================= */
 let docPages=[]; /* [{imgSrc, store, b64}] */
 
-/* ---- Display Plan week = upcoming Friday → next Thursday ---- */
-function pad2(n){ return String(n).padStart(2,"0"); }
-function isoDate(d){ return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate()); }
-function mdLabel(d){ return (d.getMonth()+1)+"/"+d.getDate(); }
-function upcomingFriday(from){
-  const d=from?new Date(from):new Date(); d.setHours(0,0,0,0);
-  const add=(5-d.getDay()+7)%7; /* days until Friday; 0 if today is Friday */
-  d.setDate(d.getDate()+add);
-  return d;
-}
-function weekRangeLabel(friISO){
-  const fri=new Date(friISO+"T00:00:00"); const thu=new Date(fri); thu.setDate(thu.getDate()+6);
-  return mdLabel(fri)+"–"+mdLabel(thu);
-}
-
-
 /* Compress a file: a high-quality copy for the API and a smaller copy for storage. */
 async function compressImageFile(file){
   const imgSrc=await new Promise((ok,fail)=>{ const r=new FileReader(); r.onload=()=>ok(r.result); r.onerror=fail; r.readAsDataURL(file); });
@@ -3339,50 +3288,26 @@ async function readDocPages(){
   const status=document.getElementById("scanStatus");
   try{
     async function attempt(extra){
-const salesPlanPrompt=`You are transcribing a Stop & Shop produce "Display Plan" (the weekly merchandising plan), photographed across ONE OR MORE pages given in order. Each page is a grid of titled BLOCKS — refrigerated promo tables, end caps / islands, hero pods, value bins, authorized displays, etc. Transcribe EVERY block EXACTLY. Do not summarize, invent, or reorder.
+const salesPlanPrompt=`You are transcribing a grocery store produce "Sales Plan" / merchandising display plan (Stop & Shop), photographed across ONE OR MORE pages, given in order. The page is a grid of titled BLOCKS — promo tables, end caps, hero pods, value bins, authorized displays, etc. Transcribe EVERYTHING into structured JSON. Be exact; do not summarize.
 
-OUTPUT — ONLY valid JSON (no markdown, no backticks, no commentary):
-{"sections":[
-  {"category":"<block title, verbatim>","subject":"","contact":"","bullets":["<any printed note / LOCATION banner / instruction, one string each>"],
-   "tables":[{"title":"","headers":["Position","Item"],"rows":[["<position label>","<ONE item, verbatim>"]]}]}
+Each titled block becomes one SECTION:
+- "category" = the block's title exactly (e.g. "Refrigerated Promo Table", "Berry End 1 (Power Side)", "Grape End 1", "Authorized Displays", "Value Bin", "Organic Fruit End", "Potato End 2", "4 Block").
+- "subject" = "" , "contact" = "" (these don't apply here).
+- "bullets" = any free-text notes printed inside or under the block (the italic "Note:" lines, "...LOCATION" banners, instructions). One string each. [] if none.
+- "tables" = the block's grid. Most blocks are a two-column grid: a position/priority column (Power Wing, Shelf, Well, Inside Wing, Front Wing, Left, Center, Right, Back Wing, 1, 2, 3, 4, …) and an item column. Use headers like ["Priority","Item"] or ["Position","Item"] to match what's printed. Put EACH labelled row as its own row: [label, item text]. If a cell holds several items, keep them in the one item cell separated by " / ". Include "DEAL LOCK" / "SPOT BUY" tags in the item cell where they appear. Numbered lists (Authorized Displays 1–15, Value Bin 1–3) become rows [number, item] — include blank-numbered rows with "" item so the count is preserved.
+
+Return ONLY valid JSON. No markdown, no backticks, no commentary.
+
+{"date":"2026-06-12","dateLabel":"6/12–7/16","sections":[
+  {"category":"Refrigerated Promo Table","subject":"","contact":"","bullets":["Note: ..."],
+   "tables":[{"title":"","headers":["Position","Item"],"rows":[["Power Wing","Lemons"],["Shelf","Northwest Cherries / Northwest Cherries / Sweetest Batch Blueberries / Conventional Blackberries (SPOT BUY)"],["Well","1lb Strawberries/Raspberries 11x14 (DEAL LOCK)"],["Inside Wing","Limes"]]}]}
 ]}
 
-GOLDEN RULES
-- ONE ITEM PER ROW. Never combine two products in one cell. If a position holds several items side by side, output one row PER item, repeating the position label, in LEFT-TO-RIGHT order exactly as printed.
-- ORDER IS THE WHOLE POINT. Read each shelf/row strictly left to right, and positions top to bottom. The left-to-right sequence on a shelf, and the front-to-back order of an end/island, must be preserved EXACTLY.
-- VERBATIM item text: keep brand, size, and count (2lb, 3ct, 4oz) and any sign-size code such as "11x14" exactly as written.
-- DESCRIPTIONS / TAGS: keep promotional flags exactly where printed, in parentheses: (DEAL LOCK), (SPOT BUY), (TPR). Keep sign-size codes like "11x14" inline with the item they belong to.
-- A blank/empty slot is a row with "" as the item, so the shape and count are preserved.
-- Capture EVERY block on EVERY page, in printed order.
-
-HOW TO READ EACH BLOCK TYPE
-
-1) REFRIGERATED PROMO TABLE and REFRIGERATED VEG PROMO TABLE
-   These ALWAYS have a SHELF (upper deck) and a WELL (lower deck), plus WINGS on the ends.
-   - Wings ("Power Wing" / "Inside Wing" / "Wing"): one row each, label = the wing name.
-   - SHELF: one row per item across the shelf, label exactly "Shelf", LEFT to RIGHT.
-   - WELL: one row per item across the well, label exactly "Well", LEFT to RIGHT.
-   Example rows for a refrigerated promo table:
-     ["Power Wing","Lemons"]
-     ["Shelf","Northwest Cherries"]
-     ["Shelf","Northwest Cherries"]
-     ["Shelf","Sweetest Batch Blueberries"]
-     ["Shelf","Conventional Blackberries (SPOT BUY)"]
-     ["Well","1lb Strawberries/Raspberries 11x14"]
-     ["Well","Family Pack Mixed Berries"]
-     ["Inside Wing","Limes"]
-
-2) END CAPS and ISLANDS (Stone Fruit End, Berry End, Grape End, Potato End, Organic Fruit End, Avocado End, Tomato End, and the like)
-   Read in printed order, one row each:
-     - "Front Wing" first, if present;
-     - then the MAIN positions — either "Left","Center","Right", OR numbered "1","2","3","4" where top = front of the island and bottom = back;
-     - then "Back Wing" last, if present.
-   The numbered front-to-back order, and ESPECIALLY the Back Wing of berry/grape islands, are important — transcribe them exactly.
-
-3) HERO PODS, VALUE BIN, AUTHORIZED DISPLAYS, ADDITIONAL PROGRAMS, 4 BLOCK, and location-option lists
-   Transcribe with the natural labels shown (Left/Center/Right, Top Left.., 1..15, etc.), one item per row, blanks as "".
-
-Set "date":"" and "dateLabel":"" — the app assigns the display week itself; do not guess a date from the sheet (any printed date range like "6/12-7/16" is a promo period, not the display week).`;
+RULES:
+- date: ISO YYYY-MM-DD if any date range is visible (e.g. a "$5 6/12-7/16" tag → use the start, 2026-06-12). If none, use "". dateLabel: a short label like "6/12–7/16" or the page title.
+- Capture EVERY block on EVERY page, IN ORDER (left-to-right, top-to-bottom).
+- Transcribe item text VERBATIM — keep brand names, sizes (11x14, 2lb), and tags exactly.
+- Do NOT invent or reorder. Accuracy matters most.`;
 
       const promptText=scanMode==="salesplan"?salesPlanPrompt:dailyNotesPrompt;
       const content=docPages.map(p=>({type:"image",source:{type:"base64",media_type:"image/jpeg",data:p.b64}}));
@@ -3410,36 +3335,17 @@ Set "date":"" and "dateLabel":"" — the app assigns the display week itself; do
 
     scanParsed={ date:parsed.date||"", dateLabel:parsed.dateLabel||"", sections, images:docPages.map(p=>p.store) };
 
-    /* Display Plan: the doc is a one-week (Fri–Thu) plan — set the week ourselves, ignore any promo date on the sheet. */
-    if(scanMode==="salesplan"){
-      scanParsed.weekFri=isoDate(upcomingFriday());
-      scanParsed.date=scanParsed.weekFri;
-      scanParsed.dateLabel=weekRangeLabel(scanParsed.weekFri);
-    }
-    const weekUI=scanMode==="salesplan"?`
-      <div class="sp-week">
-        <button id="wkPrev" aria-label="Previous week">‹</button>
-        <div class="wk">Display week<b id="wkLabel">${esc(scanParsed.dateLabel)}</b></div>
-        <button id="wkNext" aria-label="Next week">›</button>
-      </div>`:"";
-
     scanBody.innerHTML=`
       <div class="scan-step"><div class="num">1</div>${docPages.length} page${docPages.length===1?"":"s"} captured</div>
       <div class="doc-thumbs">${scanParsed.images.map(s=>`<img src="${s}" class="doc-thumb">`).join("")}</div>
-      <div class="scan-step"><div class="num">2</div>Done — ${sections.length} section${sections.length===1?"":"s"}${(scanMode!=="salesplan"&&scanParsed.dateLabel)?" · "+esc(scanParsed.dateLabel):""}</div>
-      ${weekUI}
+      <div class="scan-step"><div class="num">2</div>Done — ${sections.length} section${sections.length===1?"":"s"}${scanParsed.dateLabel?" · "+esc(scanParsed.dateLabel):""}</div>
       <div style="max-height:46vh;overflow:auto;margin:4px 0 2px">${docSectionsHTML(scanParsed,scanMode==="salesplan"?"salesplan":"dailynotes")}</div>
-      <div class="scan-step"><div class="num">3</div>Save this ${scanMode==="salesplan"?"week":"page"}</div>
-      <div style="font-size:11px;color:var(--ink-3);text-align:center;line-height:1.5;padding:0 8px;">${scanMode==="salesplan"?"Saved under this display week. Re-scanning a week you already have lets you add to it or replace it.":"If a document for this date already exists, you can add these sections to it."} ⚠️ Check against the printout — AI can make mistakes.</div>
+      <div class="scan-step"><div class="num">3</div>Save this page</div>
+      <div style="font-size:11px;color:var(--ink-3);text-align:center;line-height:1.5;padding:0 8px;">If a document for this date already exists, you can add these sections to it. ⚠️ Check against the printout — AI can make mistakes.</div>
       <div class="scan-actions">
         <button class="btn ghost" id="scanRetry">Retry</button>
-        <button class="btn" id="scanApply">${I.check} Save ${scanMode==="salesplan"?"Week":"Page"}</button>
+        <button class="btn" id="scanApply">${I.check} Save Page</button>
       </div>`;
-    if(scanMode==="salesplan"){
-      const shift=(days)=>{ const d=new Date(scanParsed.weekFri+"T00:00:00"); d.setDate(d.getDate()+days); scanParsed.weekFri=isoDate(d); scanParsed.date=scanParsed.weekFri; scanParsed.dateLabel=weekRangeLabel(scanParsed.weekFri); const wl=document.getElementById("wkLabel"); if(wl) wl.textContent=scanParsed.dateLabel; };
-      const wp=document.getElementById("wkPrev"); if(wp) wp.onclick=()=>shift(-7);
-      const wn=document.getElementById("wkNext"); if(wn) wn.onclick=()=>shift(7);
-    }
     document.getElementById("scanRetry").onclick=()=>openScanOverlay(scanMode);
     document.getElementById("scanApply").onclick=applyDocScan;
   }catch(err){
@@ -3539,7 +3445,7 @@ function docSectionsHTML(doc,type){
   }).join("");
 }
 
-/* ---- Display Plan: render blocks like the printed plan ---- */
+/* ---- Sales Plan: render blocks like the printed plan ---- */
 function spRank(cat){
   const c=(cat||"").toLowerCase();
   if(c.includes("refrigerated veg promo")||c.includes("veg promo")) return 1;
@@ -3555,69 +3461,42 @@ function spOrder(sections){
     return ra!==rb?ra-rb:a.i-b.i;
   }).map(x=>x.s);
 }
-/* Item-description tagging: promo flags (amber) + sign-size codes like 11x14 (grey). Takes RAW text, escapes internally. */
-function spTagHTML(raw){
-  var t=esc(String(raw==null?"":raw));
-  t=t.replace(/\(?\b(DEAL LOCK|SPOT BUY|TPR)\b\)?/g,'<span class="sp-tag">$1</span>');
-  t=t.replace(/\b(\d{1,2}\s?[xX]\s?\d{1,2})\b/g,'<span class="sp-desc">$1</span>');
-  return t;
-}
-/* Group consecutive rows sharing a position label; split " / " into separate items, preserve order. */
-function spGroupRows(rows){
-  var groups=[];
-  (rows||[]).forEach(function(r){
-    var label=(r&&r[0]!=null)?String(r[0]).trim():"";
-    var item=(r&&r[1]!=null)?String(r[1]):"";
-    var items=item.trim()?item.split(/\s\/\s/).map(function(x){return x.trim();}).filter(function(x){return x!=="";}):[];
-    if(!items.length) items=[""];
-    var last=groups.length?groups[groups.length-1]:null;
-    if(last&&last.label.toLowerCase()===label.toLowerCase()){ last.items=last.items.concat(items); }
-    else groups.push({label:label,items:items});
-  });
-  return groups;
-}
-/* Only the two refrigerated promo tables get the Shelf/Well fixture view. */
-function spIsFixture(cat){ var c=(cat||"").toLowerCase(); return c.indexOf("refrigerated")>-1 && c.indexOf("promo")>-1; }
-function spIsWing(label){ return /wing/i.test(label||""); }
-
-function spFixtureHTML(groups){
-  var wings=[], decks=[];
-  groups.forEach(function(g){ (spIsWing(g.label)?wings:decks).push(g); });
-  var wingsHTML=wings.length?'<div class="sp-wings">'+wings.map(function(g){
-    var v=g.items.filter(function(x){return x;}).map(function(x){return spTagHTML(x);}).join(", ")||"—";
-    return '<div class="sp-wing"><span class="wl">'+esc(g.label)+'</span><span class="wv">'+v+'</span></div>';
-  }).join("")+'</div>':"";
-  var decksHTML=decks.map(function(g){
-    var slots=g.items.map(function(x,i){
-      var cls=x?"sp-slot-num":"sp-slot-num empty";
-      return '<div class="'+cls+'"><span class="n">'+(i+1)+'</span><span class="v">'+(x?spTagHTML(x):"—")+'</span></div>';
-    }).join("");
-    return '<div class="sp-deck-row"><span class="sp-deck-label">'+esc(g.label||"Deck")+'</span><div class="sp-slots-num">'+slots+'</div></div>';
-  }).join("");
-  return '<div class="sp-fixture">'+wingsHTML+decksHTML+'</div>';
-}
-function spPlainHTML(groups){
-  var rows=groups.map(function(g){
-    var has=g.items.some(function(x){return x;});
-    var cell=has?g.items.map(function(x){ return '<span class="ln">'+(x?spTagHTML(x):"—")+'</span>'; }).join("")
-                :'<span class="ln">—</span>';
-    return '<tr><td class="lab">'+esc(g.label)+'</td><td class="'+(has?"":"empty")+'">'+cell+'</td></tr>';
-  }).join("");
-  return '<table class="sp-plain"><tbody>'+rows+'</tbody></table>';
-}
+function spTagHTML(t){ return t.replace(/\((DEAL LOCK|SPOT BUY)\)/g,'<span class="sp-tag">$1</span>'); }
 function spSectionsHTML(doc){
   return spOrder(doc.sections).map(function(s){
-    var fixture=spIsFixture(s.category);
     var notes=(s.bullets||[]).filter(function(b){ return String(b).trim()!==""; })
       .map(function(b){ return '<div class="sp-note">'+esc(String(b).replace(/^>>\s?/,""))+'</div>'; }).join("");
     var tbls=(s.tables||[]).map(function(t){
-      var groups=spGroupRows(t.rows||[]);
-      var inner=fixture?spFixtureHTML(groups):spPlainHTML(groups);
-      return (t.title?'<div class="sp-tbl-title">'+esc(t.title)+'</div>':'')+inner;
+      var hdrs=t.headers||[];
+      var rows=t.rows||[];
+      /* Group consecutive rows with the same position label */
+      var groups=[];
+      rows.forEach(function(r){
+        var label=r[0]!=null?String(r[0]):"";
+        var item=r[1]!=null?String(r[1]):"";
+        /* Split any lingering " / " items into separate entries */
+        var items=item?item.split(/\s\/\s/).map(function(x){ return x.trim(); }).filter(function(x){ return x!==""; }):[""];
+        var last=groups.length?groups[groups.length-1]:null;
+        if(last&&last.label===label){
+          last.items=last.items.concat(items);
+        } else {
+          groups.push({label:label,items:items});
+        }
+      });
+      var html=groups.map(function(g){
+        var slots=g.items.map(function(x){
+          if(!x) return '<span class="sp-slot empty">\u2014</span>';
+          return '<span class="sp-slot">'+spTagHTML(esc(x))+'</span>';
+        }).join("");
+        var multi=g.items.length>1?" multi":"";
+        return '<div class="sp-row"><span class="sp-label">'+esc(g.label)+'</span><span class="sp-slots'+multi+'">'+slots+'</span></div>';
+      }).join("");
+      return (t.title?'<div class="sp-tbl-title">'+esc(t.title)+'</div>':'')+
+        '<div class="sp-body">'+html+'</div>';
     }).join("");
     return '<div class="sp-block">'+
       '<div class="sp-head">'+esc(s.category||s.subject||"Block")+'</div>'+
-      notes+(tbls||'<div class="sp-fixture"></div>')+
+      notes+(tbls||'<div class="sp-body"></div>')+
       '</div>';
   }).join("");
 }
@@ -3702,7 +3581,7 @@ function renderDocHub(){
         <div class="badge">SOON</div>
       </div>
     </div>
-    <div class="hintline" style="text-align:center;margin-top:16px">Daily Notes keep the last two weeks; Display Plan keeps recent weeks. Scanned items are editable and deletable.</div>`;
+    <div class="hintline" style="text-align:center;margin-top:16px">Each section keeps the last two weeks, newest first. Scanned items are editable and deletable.</div>`;
   view.querySelectorAll("[data-doctype]").forEach(b=>b.onclick=()=>{ docView=b.dataset.doctype; docEdit=false; render(); window.scrollTo(0,0); });
 }
 

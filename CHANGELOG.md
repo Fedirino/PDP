@@ -4,106 +4,33 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
-## [5.4.0] — 2026-06-15
-
-### Fixed
-- **Scanning (Schedule, GEV, Daily Notes, Sales Plan) was failing for everyone.** The app calls `/api/scan`, but the Netlify serverless function that handles that path didn't exist in the repo — so every scan hit a dead endpoint. Added the missing function and routing:
-  - `netlify/functions/scan.js` — server-side proxy that injects the Anthropic API key (kept private as a Netlify environment variable) and forwards scan requests. The key never ships in the client.
-  - `netlify.toml` — maps `/api/scan` → the function and sets the static publish + functions directories.
-- **Clearer scan errors.** When the scan endpoint is missing or returns a web page instead of data, the app now says so explicitly (e.g. "Scan service not found (/api/scan). The Netlify function may not be deployed.") instead of a generic "Unknown error."
-
-### Deployment — REQUIRED after deploying these files
-1. Make sure `netlify/functions/scan.js` and `netlify.toml` are committed to the repo root.
-2. In Netlify: **Site settings → Environment variables → Add** a variable named `ANTHROPIC_API_KEY` with your Anthropic key as the value. Then **redeploy** (or trigger a new deploy) so the function picks it up.
-3. After deploy, test a scan. If it still fails, the error message will now point at the cause.
-
-### Files
-- `index.html` — Main app (v5.4.0)
-- `netlify/functions/scan.js` — NEW serverless scan proxy
-- `netlify.toml` — NEW Netlify routing/config
-- `pdp-old-v5_3_0.html` — Archived v5.3.0
-- `sw.js` — Service worker (cache v5.4.0)
-- `CHANGELOG.md` — This file
-
----
-
-## [5.3.0] — 2026-06-14
-
-### Added
-- **Export load list as default code.** In the Holes tab, tap **Edit** on the Sections screen and a new **"Export as default code"** button appears at the bottom. It opens a full-screen panel containing your current load list rendered as a ready-to-paste `seed()` function. Tap **Copy all**, then replace the existing `seed()` in index.html with it to make your edited list the built-in default for new installs. Handles grouped sections (subsections), plain sections, and safely escapes quotes in item names.
-
-### Why
-- The default load list lives in the `seed()` function and only applies on a fresh install. Previously, edits made inside the app couldn't easily become the new baked-in default. This bridges that gap: build/edit the list in the app, export the code, paste it in.
-
-### Files
-- `index.html` — Main app (v5.3.0)
-- `pdp-old-v5_2_0.html` — Archived v5.2.0
-- `sw.js` — Service worker (cache v5.3.0)
-- `CHANGELOG.md` — This file
-
----
-
-## [5.2.0] — 2026-06-14
+## [5.10.0] — 2026-06-15
 
 ### Changed
-- **Daily Checklist simplified to one daily list.** Reverted the brief multi-list/category design back to a single, simple checklist: add bulleted tasks, tap to check them off, edit and delete. Checked tasks drop to a "Done" group at the bottom and the whole list auto-unchecks at the start of each new day. Edit mode (top-right) handles add / rename / delete / reorder.
-- Home and Tools summaries show the single list's progress (e.g. "4 of 9 done today").
-- Any tasks created under the short-lived v5.1.0 multi-list format are migrated automatically into the simple list.
-
-### Kept from 5.1.0
-- The themed in-app dialog sheet (replacing native `prompt()` / `confirm()`) remains in use for the Checklist and GEV List actions.
-
-### Files
-- `index.html` — Main app (v5.2.0)
-- `pdp-old-v5_1_0.html` — Archived v5.1.0
-- `sw.js` — Service worker (cache v5.2.0)
-- `CHANGELOG.md` — This file
-
----
-
-## [5.1.0] — 2026-06-14
-
-### Changed
-- **Daily Checklist rebuilt to work like the GEV List.** The checklist is now a full category-based, multi-list tool instead of a flat task list:
-  - **Multiple named checklists** (Opening, Closing, Truck Day, etc.) selectable from a dropdown, with New / Rename / Delete.
-  - **Categories** (Backroom, Sales Floor, Cooler…) each holding their own tasks, with add / rename / delete and per-task reorder.
-  - **Tap to check off** — completed tasks drop into a single "Done" group at the bottom, exactly like GEV's crossed-off behavior.
-  - **Daily auto-reset** is preserved and now runs per-list: each checklist's checkmarks clear automatically at the start of a new day, while the task structure stays.
-  - No scan — checklists are built and edited by hand, as requested.
-  - Existing flat checklist items are **migrated automatically** into an "Opening" list under a "Tasks" category, so nothing is lost.
-- **Home & Tools summaries** now reflect all checklists combined (e.g. "2 lists · 7 of 14 done today").
+- **"Sales Plan" is now "Display Plan"** everywhere in the app (tab section, scan flow, settings, toasts). Existing saved plans are untouched — only the labels changed.
+- **Reworked the Display Plan scan prompt.** It is now fixture-aware and order-strict, which fixes the "wrong spots" problem seen on the second week:
+  - **One item per row, left-to-right.** The model no longer crams several products into one cell. Each physical slot becomes its own row in printed order, so a shelf's left-to-right sequence is preserved exactly.
+  - **Refrigerated Promo Table & Refrigerated Veg Promo Table** are read as a **Shelf** (upper deck) + **Well** (lower deck) with **Wings** on the ends, each read left-to-right.
+  - **End caps / islands** (Stone Fruit, Berry, Grape, Potato, Organic Fruit, Avocado, Tomato…) are read in printed order: Front Wing → main positions (Left/Center/Right or 1–4, front-to-back) → Back Wing. The back-wing and island order are called out as critical.
+  - The sheet's promo date range (e.g. "6/12-7/16") is no longer mistaken for the display week — the app sets the week itself (see below).
 
 ### Added
-- **Themed in-app dialog sheet** replaces native browser `prompt()` / `confirm()` for all GEV List and Daily Checklist actions. Native dialogs are unreliable in installed PWAs (especially on iOS) and broke the dark theme; the new bottom sheet matches the app, animates in, supports Enter-to-confirm, and uses a red confirm button for destructive actions. (GEV and Checklist fully migrated; other tabs to follow.)
+- **Item-description tags.** Promo flags **DEAL LOCK**, **SPOT BUY**, and **TPR** render as amber chips. Sign-size codes like **11x14** now render as a small grey chip attached to their item, instead of being lost in the text.
+- **Display weeks (Fri → Thu).** Each Display Plan is a one-week plan running the upcoming **Friday through the next Thursday**. When you scan, the week is auto-set and shown with **‹ ›** buttons so you can shift it a week back/forward before saving. Add as many weeks as you like; switch between them with the date dropdown. Re-scanning an existing week lets you add to it or replace it.
 
-### UX audit notes (for follow-up)
-- 7 `prompt()` and ~15 `confirm()` calls remain in Holes, Schedule, Notes, and Documents — these still use native dialogs and should be migrated to the new sheet in a future pass.
-- Tab bar carries 7 destinations, which is tight on small phones; worth considering grouping later.
+### Display rendering
+- **Refrigerated promo tables** now draw as a true fixture: wings broken out separately on top, then numbered Shelf slots, then numbered Well slots — so order on each deck is unmistakable.
+- **Every other block** (ends, islands, hero pods, value bins, authorized displays) draws as a clean, ordered **plain table** (Position | Item), matching the printed layout.
 
-### Files
-- `index.html` — Main app (v5.1.0)
-- `pdp-old-v5_0_0.html` — Archived v5.0.0
-- `sw.js` — Service worker (cache v5.1.0)
-- `CHANGELOG.md` — This file
-
----
-
-## [5.0.0] — 2026-06-14
-
-### Added
-- **Multi-photo upload**: Upload button now supports selecting multiple images at once. In schedule/GEV scan mode, selected photos queue and process one at a time — after applying each result the next image loads automatically. In document scan mode (Daily Notes / Sales Plan) all selected pages are added to the page strip at once.
-- **Daily Checklist card on Home**: The home screen now shows a tap-to-open Daily Checklist card with a live task progress summary ("3 of 7 done"). Replaces the freeform Reminders textarea.
-- **Produce Fun Fact of the Day**: A fresh fact rotates every day on the home screen, sourced from a 50-fact library covering nutrition, botany, and produce trivia. Fully offline — no API call needed.
-
-### Changed
-- **Home screen layout**: "Today" section replaces "Reminders" — houses the new Checklist card. Fun Fact panel added below it.
-- Version bumped to v5.0.0.
+### Storage / retention
+- Display Plan retention extended to **70 days (~10 weeks)** so older weeks aren't pruned too soon. Daily Notes still keep the last two weeks.
 
 ### Files
-- `index.html` — Main app (v5.0.0)
-- `pdp-old-v4_9_0.html` — Archived v4.9.0
-- `sw.js` — Service worker (cache v5.0.0)
-- `CHANGELOG.md` — This file
+- `index.html` — Main app (v5.10.0)
+- `sw.js` — cache bumped to `pdp-v5.10.0`
+- `pdp-old-v5_9_3.html` — archived previous version
+- `CHANGELOG.md` — this file
+- `manifest.json`, icons — unchanged
 
 ---
 
