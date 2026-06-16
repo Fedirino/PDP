@@ -1,11 +1,36 @@
 // Netlify Function: /api/scan
-// Proxies Produce Department Portal scan requests to the Anthropic Messages API.
-// The API key lives ONLY here (set as an environment variable in Netlify),
-// never in the client bundle. The frontend POSTs {model, max_tokens, messages}
-// and receives the raw Anthropic response back unchanged.
+// Proxies PDP scan requests to Anthropic using Node's built-in https module
+// (avoids fetch() compatibility issues across Node versions).
+
+const https = require("https");
+
+function anthropicRequest(apiKey, body) {
+  return new Promise((resolve, reject) => {
+    const data = JSON.stringify(body);
+    const options = {
+      hostname: "api.anthropic.com",
+      path: "/v1/messages",
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(data),
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+      },
+    };
+    const req = https.request(options, (res) => {
+      let raw = "";
+      res.on("data", (chunk) => { raw += chunk; });
+      res.on("end", () => resolve({ status: res.statusCode, body: raw }));
+    });
+    req.on("error", reject);
+    req.setTimeout(25000, () => { req.destroy(new Error("Anthropic request timed out")); });
+    req.write(data);
+    req.end();
+  });
+}
 
 exports.handler = async (event) => {
-  // CORS / preflight (same-origin in practice, but harmless to allow)
   const headers = {
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
@@ -32,13 +57,12 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         error: {
           type: "config_error",
-          message: "Server is missing ANTHROPIC_API_KEY. Set it in Netlify → Site settings → Environment variables.",
+          message: "ANTHROPIC_API_KEY is not set. Add it in Netlify → Site configuration → Environment variables, then redeploy.",
         },
       }),
     };
   }
 
-  // Parse + lightly validate the incoming body.
   let payload;
   try {
     payload = JSON.parse(event.body || "{}");
@@ -57,7 +81,6 @@ exports.handler = async (event) => {
     };
   }
 
-  // Forward to Anthropic. Cap max_tokens defensively.
   const body = {
     model: payload.model || "claude-sonnet-4-6",
     max_tokens: Math.min(payload.max_tokens || 4096, 8192),
@@ -65,28 +88,17 @@ exports.handler = async (event) => {
   };
 
   try {
-    const upstream = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify(body),
-    });
-
-    const text = await upstream.text(); // pass through verbatim
-    return {
-      statusCode: upstream.status,
-      headers,
-      body: text,
-    };
+    const result = await anthropicRequest(apiKey, body);
+    return { statusCode: result.status, headers, body: result.body };
   } catch (e) {
     return {
       statusCode: 502,
       headers,
       body: JSON.stringify({
-        error: { type: "upstream_error", message: "Could not reach Anthropic: " + (e && e.message ? e.message : "unknown") },
+        error: {
+          type: "upstream_error",
+          message: "Could not reach Anthropic: " + (e && e.message ? e.message : "unknown"),
+        },
       }),
     };
   }
