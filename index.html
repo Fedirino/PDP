@@ -1612,7 +1612,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.9.1</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.9.2</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -3288,35 +3288,32 @@ async function readDocPages(){
   const status=document.getElementById("scanStatus");
   try{
     async function attempt(extra){
-const salesPlanPrompt=`You are transcribing a grocery store produce "Sales Plan" display sheet (Stop & Shop). The photo shows one page of a merchandising plan. Each page has a grid of titled BLOCKS — promo tables, end caps, hero pods, value bins, authorized displays, etc. Transcribe EVERYTHING into structured JSON. Be exact; do not summarize.
+const salesPlanPrompt=`You are reading a grocery store produce display plan (one page). The page has a grid of titled BLOCKS. Each block has a title and a two-column table: position labels on the left, item names on the right.
 
-Each titled block becomes one SECTION:
-- "category" = the block's title exactly (e.g. "Refrigerated Promo Table", "Berry End 1 (Power Side)", "Grape End 1", "4 Block").
-- "subject" = "" , "contact" = ""
-- "bullets" = any free-text notes or instructions inside or under the block. One string each. [] if none.
-- "tables" = the block's grid. Most blocks are a two-column grid: a position/priority column and an item column. Use headers ["Position","Item"]. Put EACH labelled position as its own row. If a position has multiple items side by side (like Shelf or Well with 3–4 slots), join them with " / " in the item cell. Include (DEAL LOCK) or (SPOT BUY) tags after the item text where they appear. For numbered lists (Authorized Displays, Value Bin), use the number as the position and keep blank rows with "".
+Transcribe EXACTLY what is printed. Do NOT move items between positions. Do NOT reorganize. Read each block's grid cell by cell.
 
-CRITICAL: Only put items in the position where they actually appear on the sheet. Do NOT move items between positions. Wings (Front Wing, Back Wing, Power Wing, Inside Wing) typically hold only ONE item each. Shelf and Well rows hold multiple items side by side.
+Each block = one section in the JSON:
+- "category": the block title exactly as printed
+- "subject": "", "contact": ""
+- "bullets": any notes or instructions printed inside/under the block. [] if none.
+- "tables": [{"title":"","headers":["Position","Item"],"rows":[[position, item], ...]}]
+  - Read each row of the grid as [position label, item text]
+  - If one position has multiple items side by side, join them with " / "
+  - Include (DEAL LOCK) / (SPOT BUY) tags where printed
+  - Keep empty cells as ""
 
-Return ONLY valid JSON. No markdown, no backticks, no commentary.
+Return ONLY valid JSON. No markdown, no backticks.
 
-{"date":"2026-06-12","dateLabel":"6/12–7/16","sections":[
-  {"category":"Refrigerated Promo Table","subject":"","contact":"",
-   "bullets":["Note for all end caps/wings: End/Wing 1 should always be the power side"],
-   "tables":[{"title":"","headers":["Position","Item"],"rows":[
-     ["Power Wing","Lemons"],
-     ["Shelf","Strawberries 6oz 11x14 / Northwest Cherries / Pint Blueberries 11x14"],
-     ["Well","Family Pack Mixed Berries / Family Pack Cut Watermelon (DEAL LOCK)"],
-     ["Inside Wing","Limes"]
-   ]}]}
+{"date":"","dateLabel":"","sections":[
+  {"category":"Block Title","subject":"","contact":"","bullets":[],
+   "tables":[{"title":"","headers":["Position","Item"],"rows":[["Power Wing","Lemons"],["Shelf","Item A / Item B / Item C"],["Well","Item D / Item E"],["Inside Wing","Limes"]]}]}
 ]}
 
 RULES:
-- date: ISO YYYY-MM-DD from any visible date. dateLabel: short label like "6/12–7/16".
-- Capture EVERY block on the page, left-to-right, top-to-bottom.
-- Transcribe item text VERBATIM — keep brand names, sizes (11x14, 2lb), counts exactly.
-- Wings hold ONE item. Shelves/Wells hold MULTIPLE items joined with " / ".
-- Do NOT invent or reorder. Accuracy matters most.`;
+- Read left-to-right, top-to-bottom across the page
+- Transcribe VERBATIM — keep sizes, brand names, counts exactly as printed
+- Do NOT reorder or move items to different positions
+- date: ISO YYYY-MM-DD from any visible date range. dateLabel: short label.`;
 
       const promptText=scanMode==="salesplan"?salesPlanPrompt:dailyNotesPrompt;
       const content=docPages.map(p=>({type:"image",source:{type:"base64",media_type:"image/jpeg",data:p.b64}}));
