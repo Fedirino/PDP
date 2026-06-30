@@ -3391,6 +3391,15 @@ HOW TO READ EACH BLOCK TYPE
 3) 4 BLOCK / VALUE BIN / AUTHORIZED DISPLAYS / ADDITIONAL PROGRAMS / location-option lists:
    Transcribe with the natural labels shown (Top Left/Top Right/Bottom Left/Bottom Right, 1..15, etc.), one item per row, blanks as "".
 
+4) SALE ITEMS / ORDER CODE LIST / DEAL LOCK TABLES:
+   Some pages include a separate item-code pricing table or right-margin sale list. Include these too — they matter.
+   - Transcribe every visible row exactly as printed.
+   - Use a table with headers ["Item Code","Description","NE Price"].
+   - If the printed page only shows one price column (e.g. "Retail"), use that as the NE Price value.
+   - If a row also shows NY/UOM, you may use them to help read the row, but do not output them unless the page specifically requires them.
+   - Keep the row order exactly as printed.
+   - If the page has multiple sale-item tables, make one section per table or page and preserve the printed title when there is one.
+
 Set "date":"" and "dateLabel":"" — the app assigns the display week itself; do not guess a date from the sheet (any printed range like "6/12-7/16" is a promo period, not the display week).`;
 
       const promptText=scanMode==="salesplan"?salesPlanPrompt:dailyNotesPrompt;
