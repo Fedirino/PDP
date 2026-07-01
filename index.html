@@ -3450,13 +3450,15 @@ RULES:
 
 const salesItemsPrompt=`You are transcribing a grocery store weekly "Sales Items" / order-code sheet photographed across ONE OR MORE pages, given in order. This is a flat item list, often with multiple pages. Transcribe EVERYTHING into structured JSON — do not summarize, do not skip anything.
 
-Each page or printed table becomes a SECTION. Preserve the printed title or week label in "category" when visible; otherwise use a short page title like "Page 1".
+Treat "regular sale items" and "DEAL LOCK" pages as separate sections when they are visually separated on the printed sheet. If a page is clearly a dedicated deal-lock page, create a section whose category/title makes that explicit (for example: "Deal Lock Items") and do not mix it into the regular sale-item section. Preserve the printed title or week label in "category" when visible; otherwise use a short page title like "Page 1".
 
 Return ONLY valid JSON. No markdown, no backticks, no commentary.
 
 {"date":"","dateLabel":"Week 28 2026","sections":[
   {"category":"Week 28 2026 Order Code List","subject":"","contact":"","bullets":[],
-   "tables":[{"title":"","headers":["Item Number","Description","Price","Tue","Thur"],"rows":[["133206","RED SALSA MEDIUM 12 OZ","$4.49","",""]]}]}
+   "tables":[{"title":"","headers":["Item Number","Description","Price","Tue","Thur"],"rows":[["133206","RED SALSA MEDIUM 12 OZ","$4.49","",""]]}]},
+  {"category":"Deal Lock Items","subject":"","contact":"","bullets":[],
+   "tables":[{"title":"","headers":["Item Number","Description","Price","Tue","Thur"],"rows":[["142277","+IMP RED PEPPERS 22 CT","4/$5","",""]]}]}
 ]}
 
 RULES:
@@ -3948,8 +3950,20 @@ function renderDocEdit(type,d){
   view.querySelectorAll(".doc-edit-line[data-ttl]").forEach(inp=>inp.oninput=()=>{ d.sections[+inp.dataset.si].tables[+inp.dataset.ti].title=inp.value; });
   view.querySelectorAll(".doc-edit-cell").forEach(inp=>inp.oninput=()=>{
     const s=d.sections[+inp.dataset.si], t=s.tables[+inp.dataset.ti];
-    if(inp.dataset.h!=null) t.headers[+inp.dataset.h]=inp.value;
-    else t.rows[+inp.dataset.r][+inp.dataset.c]=inp.value;
+    const raw=inp.value;
+    if(inp.dataset.h!=null){
+      t.headers[+inp.dataset.h]=raw;
+      return;
+    }
+    const r=+inp.dataset.r, c=+inp.dataset.c;
+    const isPriceCell = type==="salesitems" && c===2;
+    const isManualCell = type==="salesitems" && (c===3 || c===4);
+    const cleaned = isPriceCell ? raw.replace(/[^0-9/$.,-]/g,"") : raw;
+    if(isManualCell){
+      t.rows[r][c]=raw.replace(/[^0-9]/g,"");
+    } else {
+      t.rows[r][c]=cleaned;
+    }
   });
   /* structural buttons (sync handled by oninput already) */
   const addSec=document.getElementById("docAddSec");
