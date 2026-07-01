@@ -8,13 +8,13 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#135c2c">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.18.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.18.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.19.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.19.0">
 <link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.18.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.18.0">
-<link rel="apple-touch-icon" href="icon192.png?v=5.18.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.19.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.19.0">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -1765,7 +1765,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.18.0</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.19.0</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -3456,9 +3456,9 @@ Return ONLY valid JSON. No markdown, no backticks, no commentary.
 
 {"date":"","dateLabel":"Week 28 2026","sections":[
   {"category":"Week 28 2026 Order Code List","subject":"","contact":"","bullets":[],
-   "tables":[{"title":"","headers":["Item Number","Price","Tue","Thur","Description"],"rows":[["133206","$4.49","","","RED SALSA MEDIUM 12 OZ"]]}]},
+   "tables":[{"title":"","headers":["Tue","Thur","Item Number","Price","Description"],"rows":[["","","133206","$4.49","RED SALSA MEDIUM 12 OZ"]]}]},
   {"category":"Deal Lock Items","subject":"","contact":"","bullets":[],
-   "tables":[{"title":"","headers":["Item Number","Price","Tue","Thur","Description"],"rows":[["142277","4/$5","","","+IMP RED PEPPERS 22 CT"]]}]}
+   "tables":[{"title":"","headers":["Tue","Thur","Item Number","Price","Description"],"rows":[["","","142277","4/$5","+IMP RED PEPPERS 22 CT"]]}]}
 ]}
 
 RULES:
@@ -3957,17 +3957,27 @@ function renderDocEdit(type,d){
     }
     const r=+inp.dataset.r, c=+inp.dataset.c;
     const isSalesItems = type==="salesitems";
-    const isNumberCell = isSalesItems && (c===0 || c===1 || c===2 || c===3);
+    const isTueThurCell = isSalesItems && (c===0 || c===1);
+    const isItemCell = isSalesItems && c===2;
+    const isPriceCell = isSalesItems && c===3;
     const isDescCell = isSalesItems && c===4;
-    const isQuickTypeCell = isSalesItems && (c===1 || c===2 || c===3);
-    const cleaned = isNumberCell ? raw.replace(/[^0-9/$.,-]/g,"") : raw;
+    if(isTueThurCell){
+      t.rows[r][c] = raw.replace(/[^0-9]/g,"").slice(0,2);
+      return;
+    }
+    if(isItemCell){
+      t.rows[r][c] = raw.replace(/[^0-9]/g,"");
+      return;
+    }
+    if(isPriceCell){
+      t.rows[r][c] = raw.replace(/[^0-9/$.,-]/g,"");
+      return;
+    }
     if(isDescCell){
       t.rows[r][c]=raw;
-    } else if(isQuickTypeCell){
-      t.rows[r][c]=cleaned.replace(/[^0-9/$.,-]/g,"");
-    } else {
-      t.rows[r][c]=cleaned;
+      return;
     }
+    t.rows[r][c]=raw;
   });
   /* structural buttons (sync handled by oninput already) */
   const addSec=document.getElementById("docAddSec");
