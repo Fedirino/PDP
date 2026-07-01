@@ -4,16 +4,17 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
-## [5.11.1] — 2026-06-15
+## [5.13.0] — 2026-07-01
 
 ### Changed
-- **New default Holes / Load List.** Replaced the built-in `seed()` with the current curated list. Highlights: **Promo Tables → Front & Veg End** now ship pre-filled; **Endcaps** gains Pineapple (Melons) and Asian Pear (Pears); **Veg Wall** is reorganized from one flat list into 10 subsections (Convenience, Mushrooms, Herbs, Lettuce, Greens/Roots, Cooking Greens, Cabbage/Cauliflower, Carrots, Cucumber, Salads); and Stone Fruit, Tomatoes, and Potatoes pick up a few additional SKUs. 12 sections, 228 items total.
-- This is the built-in default for **fresh installs / reset only** — existing devices keep their current Holes list and pull progress untouched.
+- **OpenRouter is now the default AI provider.** PDP’s scan/settings AI path now defaults to OpenRouter instead of Anthropic, while still allowing Anthropic to be selected manually.
+- **Provider selection + key storage were added.** Settings now let you choose Anthropic or OpenRouter, store the matching key locally, and set an OpenRouter model.
+- **OpenRouter request routing was added.** Scan requests now call OpenRouter’s chat completions endpoint when that provider is selected.
+- This change preserves the existing Anthropic path for users who want to keep using it.
 
 ### Files
-- `index.html` — Main app (v5.11.1)
-- `sw.js` — cache bumped to `pdp-v5.11.1`
-- `pdp-old-v5_11_0.html` — archived previous version
+- `index.html` — Main app (OpenRouter default + provider switch)
+- `sw.js` — cache bumped to `pdp-v5.13.0`
 - `CHANGELOG.md` — this file
 - `manifest.json`, icons — unchanged
 

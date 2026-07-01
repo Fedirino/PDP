@@ -902,15 +902,18 @@ async function cloudHydrateSchedule() {
 async function cloudHydrateDocs() {
   if (!firebaseDb) return;
   try {
-    const [dnSnap, spSnap] = await Promise.all([
+    const [dnSnap, spSnap, siSnap] = await Promise.all([
       firebaseDb.collection("dailynotes").orderBy("created", "desc").get(),
-      firebaseDb.collection("salesplan").orderBy("created", "desc").get()
+      firebaseDb.collection("salesplan").orderBy("created", "desc").get(),
+      firebaseDb.collection("salesitems").orderBy("created", "desc").get()
     ]);
     const remoteDN = dnSnap.docs.map(function (d) { return d.data(); }).filter(Boolean);
     const remoteSP = spSnap.docs.map(function (d) { return d.data(); }).filter(Boolean);
-    if (remoteDN.length || remoteSP.length) {
+    const remoteSI = siSnap.docs.map(function (d) { return d.data(); }).filter(Boolean);
+    if (remoteDN.length || remoteSP.length || remoteSI.length) {
       docStore.dailynotes = remoteDN;
       docStore.salesplan = remoteSP;
+      docStore.salesitems = remoteSI;
       DOC_TYPES.forEach(function (t) { if (!Array.isArray(docStore[t])) docStore[t] = []; });
       docPrune();
       DOC_TYPES.forEach(function (t) { if (docStore[t].length) docActiveId[t] = docStore[t][0].id; });
@@ -920,7 +923,8 @@ async function cloudHydrateDocs() {
     }
     await Promise.all([
       cloudSyncCollection("dailynotes", docStore.dailynotes),
-      cloudSyncCollection("salesplan", docStore.salesplan)
+      cloudSyncCollection("salesplan", docStore.salesplan),
+      cloudSyncCollection("salesitems", docStore.salesitems)
     ]);
   } catch (e) {}
 }
@@ -1257,13 +1261,13 @@ function clCounts(){
   return {total,done};
 }
 
-/* ===== Documents store (subsections: Daily Notes, Display Plan) ===== */
+/* ===== Documents store (subsections: Daily Notes, Display Plan, Sales Items) ===== */
 const DOCS_KEY="pdp_documents_v2";
-const DOC_TYPES=["dailynotes","salesplan"];
-const DOC_LABEL={dailynotes:"Daily Notes",salesplan:"Display Plan"};
-const DOC_RETAIN_DAYS={dailynotes:14,salesplan:70};
-let docStore={dailynotes:[],salesplan:[]};
-let docActiveId={dailynotes:null,salesplan:null};
+const DOC_TYPES=["dailynotes","salesplan","salesitems"];
+const DOC_LABEL={dailynotes:"Daily Notes",salesplan:"Display Plan",salesitems:"Sales Items"};
+const DOC_RETAIN_DAYS={dailynotes:14,salesplan:70,salesitems:70};
+let docStore={dailynotes:[],salesplan:[],salesitems:[]};
+let docActiveId={dailynotes:null,salesplan:null,salesitems:null};
 
 function docPrune(){
   DOC_TYPES.forEach(t=>{
@@ -1279,7 +1283,7 @@ function docPrune(){
 (function loadDocs(){
   let raw=null; try{ raw=JSON.parse(readK(DOCS_KEY)); }catch(e){ raw=null; }
   if(raw&&typeof raw==="object"&&!Array.isArray(raw)){
-    docStore={dailynotes:raw.dailynotes||[],salesplan:raw.salesplan||[]};
+    docStore={dailynotes:raw.dailynotes||[],salesplan:raw.salesplan||[],salesitems:raw.salesitems||[]};
   } else {
     /* migrate from v1 (a plain array of daily-notes docs) */
     try{ const old=JSON.parse(readK("pdp_documents_v1")); if(Array.isArray(old)) docStore.dailynotes=old; }catch(e){}
@@ -1288,7 +1292,7 @@ function docPrune(){
   docPrune();
   DOC_TYPES.forEach(t=>{ if(docStore[t].length) docActiveId[t]=docStore[t][0].id; });
 })();
-function saveDocs(){ const ok=writeK(DOCS_KEY,JSON.stringify(docStore)); if(firebaseDb&&cloudReady){ cloudSyncCollection("dailynotes",docStore.dailynotes).catch(function(){}); cloudSyncCollection("salesplan",docStore.salesplan).catch(function(){}); } return ok; }
+function saveDocs(){ const ok=writeK(DOCS_KEY,JSON.stringify(docStore)); if(firebaseDb&&cloudReady){ cloudSyncCollection("dailynotes",docStore.dailynotes).catch(function(){}); cloudSyncCollection("salesplan",docStore.salesplan).catch(function(){}); cloudSyncCollection("salesitems",docStore.salesitems).catch(function(){}); } return ok; }
 function sortDocs(t){ docStore[t].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.created||0)-(a.created||0)); }
 function activeDoc(t){ return docStore[t].find(d=>d.id===docActiveId[t])||docStore[t][0]||null; }
 /* one-time seed: example Display Plan from the printed plan (pages 8 & 10) */
@@ -1370,7 +1374,7 @@ function requestNotifPermission(){
 }
 
 let toolView="hub"; /* hub | notes | noteEdit | calendar | calculator | checklist */
-let docView="hub"; /* hub | dailynotes | salesplan */
+let docView="hub"; /* hub | dailynotes | salesplan | salesitems */
 let docEdit=false;
 let editingNoteId=null;
 
@@ -1757,7 +1761,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.12.0</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.13.0</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -3018,7 +3022,7 @@ document.getElementById("scanClose").onclick=closeScanOverlay;
 function openScanOverlay(mode){
   scanParsed=null;
   scanMode=mode||"schedule";
-  if(scanMode==="dailynotes"||scanMode==="salesplan"){
+  if(scanMode==="dailynotes"||scanMode==="salesplan"||scanMode==="salesitems"){
     docPages=[];
     scanOverlay.classList.add("open");
     document.body.style.overflow="hidden";
@@ -3280,7 +3284,7 @@ RULES:
 scanFileInput.onchange=function(){
   const files=scanFileInput.files;
   if(!files||!files.length){ scanFileInput.value=""; return; }
-  if(scanMode==="dailynotes"||scanMode==="salesplan"){
+  if(scanMode==="dailynotes"||scanMode==="salesplan"||scanMode==="salesitems"){
     Array.from(files).forEach(f=>addDocPage(f));
   } else {
     if(files.length===1){ handleScanFile(files[0]); }
@@ -3403,7 +3407,7 @@ function openDocScanCollect(){
       <button class="btn ghost block" id="docUpload" style="flex:1">${I.upload||I.plus} Upload</button>
     </div>
     <div class="pg-strip" id="pgStrip">${docPages.map((p,i)=>pgItemHTML(p,i)).join("")}</div>
-    <div class="hintline" style="text-align:center">${scanMode==="salesplan"?"Hold the page straight and fill the frame. For a dense plan, scan it in 2–3 close-ups (e.g. top half, bottom half) rather than one far shot — sharper text means items land in the right spot. Each shot adds to this week.":"Scan one page at a time. Each scan adds to the current "+lbl.toLowerCase()+"."}</div>
+    <div class="hintline" style="text-align:center">${(scanMode==="salesplan"||scanMode==="salesitems")?"Hold the page straight and fill the frame. For a dense weekly sheet, scan it in 2–3 close-ups (top / middle / bottom) rather than one far shot — sharper text means items land in the right spot. Each shot adds to this week.":"Scan one page at a time. Each scan adds to the current "+lbl.toLowerCase()+"."}</div>
     <div class="scan-actions" style="margin-top:14px">
       <button class="btn block" id="docRead" style="${n?"":"opacity:.4;pointer-events:none"}">${I.scan} Read page</button>
     </div>`;
@@ -3439,6 +3443,25 @@ RULES:
 - bullets: one string per bullet, transcribed VERBATIM. For an indented/nested sub-bullet, prefix the string with ">> " (two angle brackets and a space). If a section has no bullets, use [].
 - tables: reproduce EXACTLY as printed — same column headers (left to right) and same rows. Each row is an array of cell strings matching the header order. Use "" for blank cells. Keep all numbers, %, codes, and dates as written. If a section has no table, use [].
 - Do NOT invent, reorder, round, or summarize. Transcribe precisely. Accuracy matters more than anything.`;
+
+const salesItemsPrompt=`You are transcribing a grocery store weekly "Sales Items" / order-code sheet photographed across ONE OR MORE pages, given in order. This is a flat item list, often with multiple pages. Transcribe EVERYTHING into structured JSON — do not summarize, do not skip anything.
+
+Each page or printed table becomes a SECTION. Preserve the printed title or week label in "category" when visible; otherwise use a short page title like "Page 1".
+
+Return ONLY valid JSON. No markdown, no backticks, no commentary.
+
+{"date":"","dateLabel":"Week 28 2026","sections":[
+  {"category":"Week 28 2026 Order Code List","subject":"","contact":"","bullets":[],
+   "tables":[{"title":"","headers":["Item Number","Description","Price","Tue","Thur"],"rows":[["133206","RED SALSA MEDIUM 12 OZ","$4.49","",""]]}]}
+]}
+
+RULES:
+- date: leave as "" unless the page clearly shows a real calendar date. dateLabel: the printed week/title label exactly as shown, e.g. "Week 28 2026" or "Week 28 2026 Order Code List".
+- Capture EVERY page in order. If a sheet spans multiple pages, keep the rows in printed order across all pages.
+- Transcribe item number, description, and price exactly as printed.
+- PRICE RULE: if BOTH NE and NY prices are present, use the NE price in "Price" and ignore the NY price. If only one price is present, use it. If no price is visible, leave "Price" blank.
+- Leave "Tue" and "Thur" blank for manual entry unless a value is explicitly printed there.
+- Do NOT invent, reorder, round, or summarize. Accuracy matters more than anything.`;
 
 async function readDocPages(){
   if(!docPages.length) return;
@@ -3498,7 +3521,7 @@ HOW TO READ EACH BLOCK TYPE
 
 Set "date":"" and "dateLabel":"" — the app assigns the display week itself; do not guess a date from the sheet (any printed range like "6/12-7/16" is a promo period, not the display week).`;
 
-      const promptText=scanMode==="salesplan"?salesPlanPrompt:dailyNotesPrompt;
+      const promptText=scanMode==="salesplan"?salesPlanPrompt:(scanMode==="salesitems"?salesItemsPrompt:dailyNotesPrompt);
       const content=docPages.map(p=>({type:"image",source:{type:"base64",media_type:"image/jpeg",data:p.b64}}));
       content.push({type:"text",text:promptText+(extra||"")});
       const data=await anthropicFetch({model:"claude-sonnet-4-6",max_tokens:8192,messages:[{role:"user",content}]});
@@ -3573,7 +3596,7 @@ async function applyDocScan(){
   if(!scanParsed||!scanParsed.sections) return;
   const type=(scanMode==="salesplan")?"salesplan":"dailynotes";
   const today=new Date(), pad=function(n){ return String(n).padStart(2,"0"); };
-  const date=scanParsed.date||today.getFullYear()+"-"+pad(today.getMonth()+1)+"-"+pad(today.getDate());
+  const date=scanParsed.date||((type==="salesitems")?"":today.getFullYear()+"-"+pad(today.getMonth()+1)+"-"+pad(today.getDate()));
   const dateLabel=scanParsed.dateLabel||today.toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"2-digit",day:"2-digit"});
   const arr=docStore[type];
   const existing=arr.find(function(d){ return d.date===date; });
@@ -3806,12 +3829,12 @@ document.getElementById("imgOverlay").addEventListener("click",e=>{ if(e.target.
 
 /* ================= DOCUMENTS TAB ================= */
 function renderDocs(){
-  if(docView==="dailynotes"||docView==="salesplan") return renderDocSection(docView);
+  if(docView==="dailynotes"||docView==="salesplan"||docView==="salesitems") return renderDocSection(docView);
   return renderDocHub();
 }
 
 function renderDocHub(){
-  const dn=docStore.dailynotes.length, sp=docStore.salesplan.length;
+  const dn=docStore.dailynotes.length, sp=docStore.salesplan.length, si=docStore.salesitems.length;
   const card=(type,ic,sub)=>{
     const n=docStore[type].length;
     return `<button class="tile compact" data-doctype="${type}" style="flex-direction:row;align-items:center;gap:12px;padding:13px 14px">
@@ -3825,6 +3848,7 @@ function renderDocHub(){
     <div class="tiles">
       ${card("dailynotes",I.note,"Scan the daily bulletin")}
       ${card("salesplan",I.clip,"Scan the weekly display plan")}
+      ${card("salesitems",I.clip,"Scan the weekly sales item sheet")}
     </div>
     <div class="lbl">Coming Soon</div>
     <div class="tiles">
@@ -3834,7 +3858,7 @@ function renderDocHub(){
         <div class="badge">SOON</div>
       </div>
     </div>
-    <div class="hintline" style="text-align:center;margin-top:16px">Daily Notes keep the last two weeks; Display Plan keeps recent weeks. Scanned items are editable and deletable.</div>`;
+    <div class="hintline" style="text-align:center;margin-top:16px">Daily Notes keep the last two weeks; Display Plan and Sales Items keep recent weeks. Scanned documents are editable and deletable.</div>`;
   view.querySelectorAll("[data-doctype]").forEach(b=>b.onclick=()=>{ docView=b.dataset.doctype; docEdit=false; render(); window.scrollTo(0,0); });
 }
 
@@ -3843,7 +3867,7 @@ function renderDocSection(type){
   if(!arr.length){
     view.innerHTML=`
       <div class="doc-empty">
-        <div class="ei">${type==="salesplan"?I.clip:I.note}</div>
+        <div class="ei">${type==="salesplan"||type==="salesitems"?I.clip:I.note}</div>
         <h3>No ${lbl.toLowerCase()} yet</h3>
         <p>Scan the printed ${lbl.toLowerCase()} and Claude turns it into a clean digital copy — text, exact tables, and the original photo, stored by date.</p>
         <button class="btn" id="docScanEmpty" style="margin:0 auto;min-width:210px">${I.scan} Scan ${lbl}</button>
@@ -3927,7 +3951,7 @@ function renderDocEdit(type,d){
   const addSec=document.getElementById("docAddSec");
   if(addSec) addSec.onclick=()=>{ d.sections.push({category:"",subject:"",contact:"",bullets:[],tables:[]}); render(); };
   view.querySelectorAll("[data-delsec]").forEach(b=>b.onclick=()=>{ if(confirm("Delete this section?")){ d.sections.splice(+b.dataset.delsec,1); render(); } });
-  view.querySelectorAll("[data-addtbl]").forEach(b=>b.onclick=()=>{ d.sections[+b.dataset.addtbl].tables.push({title:"",headers:["Position","Item"],rows:[["",""]]}); render(); });
+  view.querySelectorAll("[data-addtbl]").forEach(b=>b.onclick=()=>{ d.sections[+b.dataset.addtbl].tables.push({title:"",headers:type==="salesitems"?["Item Number","Description","Price","Tue","Thur"]:["Position","Item"],rows:[type==="salesitems"?["", "", "", "", ""]:["",""]]}); render(); });
   view.querySelectorAll("[data-addrow]").forEach(b=>b.onclick=()=>{ const[si,ti]=b.dataset.addrow.split(".").map(Number); const t=d.sections[si].tables[ti]; const w=(t.headers||[]).length||(t.rows[0]?t.rows[0].length:2); t.rows.push(Array(w).fill("")); render(); });
   view.querySelectorAll("[data-delrow]").forEach(b=>b.onclick=()=>{ const[si,ti,ri]=b.dataset.delrow.split(".").map(Number); d.sections[si].tables[ti].rows.splice(ri,1); render(); });
 }
