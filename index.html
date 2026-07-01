@@ -1601,9 +1601,11 @@ function renderTopbar(){
 /* ---- Tab bar ---- */
 function renderTabbar(){
   const tabs=[["home","Home",I.home],["stencil","Stencil",I.search],["loadlist","Holes",I.clip],["gev","GEV",I.gev],["schedule","Schedule",I.cal],["docs","Docs",I.folder],["tools","Tools",I.tools]];
-  tabbar.innerHTML=tabs.map(([id,label,ic])=>
+  const tabbarEl=document.getElementById("tabbar");
+  if(!tabbarEl) return;
+  tabbarEl.innerHTML=tabs.map(([id,label,ic])=>
     `<button class="tab${tab===id?" active":""}" data-tab="${id}"><span class="ic">${ic}</span><span>${label}</span></button>`).join("");
-  tabbar.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+  tabbarEl.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 }
 
 /* ---- Home ---- */
