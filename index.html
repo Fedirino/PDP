@@ -1584,7 +1584,7 @@ function renderTopbar(){
     if(toolView!=="hub") right=`<button class="tb-act" id="toolBack">${I.back} Back</button>`;
     if(toolView==="checklist") right=`<button class="tb-act" id="clEditAct">${clEdit?"Done":"Edit"}</button>`+right;
   }
-  topbar.innerHTML=`<div class="brand"><img src="${LOGO_SM}" alt="PDP"></div><div class="tb-tt"><h1>${title}</h1></div>${right}`;
+  const topbarEl=document.getElementById("topbar"); if(topbarEl) topbarEl.innerHTML=`<div class="brand"><img src="${LOGO_SM}" alt="PDP"></div><div class="tb-tt"><h1>${title}</h1></div>${right}`;
   const ea=document.getElementById("editAct"); if(ea) ea.onclick=()=>{ ll.edit=!ll.edit; render(); };
   const stea=document.getElementById("stencilEditAct"); if(stea) stea.onclick=()=>{ stencilEdit=!stencilEdit; render(); };
   const sea=document.getElementById("schEditAct"); if(sea) sea.onclick=()=>{ schEdit=!schEdit; render(); };
