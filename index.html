@@ -1533,9 +1533,9 @@ var tab="home";
 let stencilState={ query:"", showAll:true };
 let ll={ screen:"sections", sectionId:null, open:{}, edit:false };
 
-const topbar=document.getElementById("topbar");
-const view=document.getElementById("view");
-const tabbar=document.getElementById("tabbar");
+var topbar=document.getElementById("topbar");
+var view=document.getElementById("view");
+var tabbar=document.getElementById("tabbar");
 
 function setTab(t){ tab=t;
   if(t==="loadlist"&&ll.screen==="section"&&!sectionById(ll.sectionId)) ll.screen="sections";
