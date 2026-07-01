@@ -1270,7 +1270,7 @@ const DOCS_KEY="pdp_documents_v2";
 const DOC_TYPES=["dailynotes","salesplan","salesitems"];
 const DOC_LABEL={dailynotes:"Daily Notes",salesplan:"Display Plan",salesitems:"Sales Items"};
 const DOC_RETAIN_DAYS={dailynotes:14,salesplan:70,salesitems:70};
-let docStore={dailynotes:[],salesplan:[],salesitems:[]};
+
 let docActiveId={dailynotes:null,salesplan:null,salesitems:null};
 
 function docPrune(){
@@ -3448,7 +3448,7 @@ RULES:
 - tables: reproduce EXACTLY as printed — same column headers (left to right) and same rows. Each row is an array of cell strings matching the header order. Use "" for blank cells. Keep all numbers, %, codes, and dates as written. If a section has no table, use [].
 - Do NOT invent, reorder, round, or summarize. Transcribe precisely. Accuracy matters more than anything.`;
 
-const salesItemsPrompt=`You are transcribing a grocery store weekly "Sales Items" / order-code sheet photographed across ONE OR MORE pages, given in order. This is a flat item list, often with multiple pages. Transcribe EVERYTHING into structured JSON — do not summarize, do not skip anything.
+const salesItemsPrompt=`You are transcribing a grocery store weekly "Order Code List" / sale-items sheet photographed across ONE OR MORE pages, given in order. This is a flat item list, often with multiple pages. Transcribe EVERYTHING into structured JSON — do not summarize, do not skip anything.
 
 Treat "regular sale items" and "DEAL LOCK" pages as separate sections when they are visually separated on the printed sheet. If a page is clearly a dedicated deal-lock page, create a section whose category/title makes that explicit (for example: "Deal Lock Items") and do not mix it into the regular sale-item section. Preserve the printed title or week label in "category" when visible; otherwise use a short page title like "Page 1".
 
@@ -3854,7 +3854,7 @@ function renderDocHub(){
     <div class="tiles">
       ${card("dailynotes",I.note,"Scan the daily bulletin")}
       ${card("salesplan",I.clip,"Scan the weekly display plan")}
-      ${card("salesitems",I.clip,"Scan the weekly sales item sheet")}
+      ${card("salesitems",I.clip,"Scan the weekly sales items sheet")}
     </div>
     <div class="lbl">Coming Soon</div>
     <div class="tiles">
