@@ -3456,9 +3456,9 @@ Return ONLY valid JSON. No markdown, no backticks, no commentary.
 
 {"date":"","dateLabel":"Week 28 2026","sections":[
   {"category":"Week 28 2026 Order Code List","subject":"","contact":"","bullets":[],
-   "tables":[{"title":"","headers":["Item Number","Description","Price","Tue","Thur"],"rows":[["133206","RED SALSA MEDIUM 12 OZ","$4.49","",""]]}]},
+   "tables":[{"title":"","headers":["Item Number","Price","Tue","Thur","Description"],"rows":[["133206","$4.49","","","RED SALSA MEDIUM 12 OZ"]]}]},
   {"category":"Deal Lock Items","subject":"","contact":"","bullets":[],
-   "tables":[{"title":"","headers":["Item Number","Description","Price","Tue","Thur"],"rows":[["142277","+IMP RED PEPPERS 22 CT","4/$5","",""]]}]}
+   "tables":[{"title":"","headers":["Item Number","Price","Tue","Thur","Description"],"rows":[["142277","4/$5","","","+IMP RED PEPPERS 22 CT"]]}]}
 ]}
 
 RULES:
@@ -3956,11 +3956,15 @@ function renderDocEdit(type,d){
       return;
     }
     const r=+inp.dataset.r, c=+inp.dataset.c;
-    const isPriceCell = type==="salesitems" && c===2;
-    const isManualCell = type==="salesitems" && (c===3 || c===4);
-    const cleaned = isPriceCell ? raw.replace(/[^0-9/$.,-]/g,"") : raw;
-    if(isManualCell){
-      t.rows[r][c]=raw.replace(/[^0-9]/g,"");
+    const isSalesItems = type==="salesitems";
+    const isNumberCell = isSalesItems && (c===0 || c===1 || c===2 || c===3);
+    const isDescCell = isSalesItems && c===4;
+    const isQuickTypeCell = isSalesItems && (c===1 || c===2 || c===3);
+    const cleaned = isNumberCell ? raw.replace(/[^0-9/$.,-]/g,"") : raw;
+    if(isDescCell){
+      t.rows[r][c]=raw;
+    } else if(isQuickTypeCell){
+      t.rows[r][c]=cleaned.replace(/[^0-9/$.,-]/g,"");
     } else {
       t.rows[r][c]=cleaned;
     }
