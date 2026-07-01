@@ -1614,62 +1614,62 @@ function homeRemGet(){ try{ return localStorage.getItem(HOME_REM_KEY)||""; }catc
 function homeRemSave(v){ try{ localStorage.setItem(HOME_REM_KEY,v); }catch(e){} }
 
 /* ---- Produce Fun Facts ---- */
-const PRODUCE_FACTS=[
-  "Strawberries are the only fruit with seeds on the outside — each berry has about 200 of them.",
-  "Bananas are technically berries, but strawberries are not.",
-  "A pineapple takes about 18–24 months to grow and produces only one fruit per plant per season.",
-  "Avocados don't ripen on the tree — they only start ripening once they're picked.",
-  "Watermelons are 92% water and were once used as canteens by desert travelers.",
-  "Apples belong to the rose family, along with pears, peaches, plums, and cherries.",
-  "One pomegranate can contain up to 1,400 seeds.",
-  "Cranberries bounce when ripe — it's one way growers test them.",
-  "The bright orange color of carrots comes from beta-carotene, which the body converts to vitamin A.",
-  "Lemons contain more sugar than strawberries — they just taste sour because of their high citric acid.",
-  "Grapes explode when microwaved — the skin creates a plasma reaction.",
-  "Tomatoes were once thought to be poisonous in Europe because they're in the nightshade family.",
-  "A head of broccoli is actually thousands of unopened flower buds.",
-  "Mangoes are the most widely consumed fruit in the world.",
-  "Blueberries are one of the only naturally blue foods in existence.",
-  "Raspberries are hollow in the middle — they slide off a small core when picked.",
-  "Bell peppers are technically fruits, and red ones have 11 times more beta-carotene than green ones.",
-  "Garlic has been used medicinally for over 7,000 years.",
-  "Kiwi fruit was originally called 'Chinese gooseberry' before New Zealand growers rebranded it.",
-  "One cup of kale has more vitamin C than an orange.",
-  "Celery is 95% water and requires more calories to digest than it provides.",
-  "Cherries are a natural source of melatonin, which helps regulate sleep.",
-  "Dragon fruit is the edible flower of a cactus species.",
-  "A single fig contains hundreds of tiny flowers — you eat the flowers, not a fruit.",
-  "Grapefruit can interfere with over 85 medications by blocking a key liver enzyme.",
-  "Pears ripen from the inside out — by the time the skin feels soft, they may be overripe.",
-  "The artichoke is a flower bud. If left to bloom it produces a stunning purple thistle.",
-  "Sweet corn loses about 50% of its sugar within 24 hours of being picked.",
-  "Spinach wilts fast because its cells retain a lot of water — cold temps slow that process.",
-  "Cucumbers are 96% water — more than any other fruit or vegetable.",
-  "Asparagus grows incredibly fast — up to 10 inches in a single day under ideal conditions.",
-  "Papaya contains papain, an enzyme so powerful it's used in meat tenderizers.",
-  "Coconuts are technically drupes (stone fruits), not nuts.",
-  "A single lemon tree can produce up to 600 pounds of lemons per year.",
-  "Romaine lettuce has more nutritional value than iceberg — it contains vitamins A, C, and K.",
-  "Brussels sprouts are bite-sized members of the cabbage family, bred in Belgium in the 1200s.",
-  "Jackfruit is the largest tree fruit in the world, sometimes exceeding 100 pounds.",
-  "Durian is the only fruit legally banned from some hotels and transit systems due to its powerful odor.",
-  "Eating beets can temporarily turn your urine pink or red — a harmless effect called beeturia.",
-  "The Honeycrisp apple was developed at the University of Minnesota specifically for cold climates.",
-  "Persimmons must be fully ripe before eating — unripe ones cause an intensely astringent reaction.",
-  "Rhubarb stalks are edible, but the leaves are toxic — they contain oxalic acid.",
-  "Star fruit contains caramboxin, which is toxic to people with kidney disease.",
-  "One acre of apple trees can produce up to 800 bushels per year.",
-  "Clementines are a hybrid of mandarin and sweet orange — and they're almost always seedless.",
-  "Fennel fronds, stalks, bulb, and seeds are all edible and taste of anise.",
-  "Snap peas are one of the few vegetables you can eat entire — pod, seeds, and all.",
-  "Jicama looks like a turnip but tastes like a water chestnut and is eaten raw in Mexico.",
-  "Purple cauliflower gets its color from the same antioxidant found in red cabbage and red wine.",
-  "Edamame are just immature soybeans — the same beans that become tofu and soy milk when fully mature.",
-];
 function getDailyFact(){
+  const facts=[
+    "Strawberries are the only fruit with seeds on the outside — each berry has about 200 of them.",
+    "Bananas are technically berries, but strawberries are not.",
+    "A pineapple takes about 18–24 months to grow and produces only one fruit per plant per season.",
+    "Avocados don't ripen on the tree — they only start ripening once they're picked.",
+    "Watermelons are 92% water and were once used as canteens by desert travelers.",
+    "Apples belong to the rose family, along with pears, peaches, plums, and cherries.",
+    "One pomegranate can contain up to 1,400 seeds.",
+    "Cranberries bounce when ripe — it's one way growers test them.",
+    "The bright orange color of carrots comes from beta-carotene, which the body converts to vitamin A.",
+    "Lemons contain more sugar than strawberries — they just taste sour because of their high citric acid.",
+    "Grapes explode when microwaved — the skin creates a plasma reaction.",
+    "Tomatoes were once thought to be poisonous in Europe because they're in the nightshade family.",
+    "A head of broccoli is actually thousands of unopened flower buds.",
+    "Mangoes are the most widely consumed fruit in the world.",
+    "Blueberries are one of the only naturally blue foods in existence.",
+    "Raspberries are hollow in the middle — they slide off a small core when picked.",
+    "Bell peppers are technically fruits, and red ones have 11 times more beta-carotene than green ones.",
+    "Garlic has been used medicinally for over 7,000 years.",
+    "Kiwi fruit was originally called 'Chinese gooseberry' before New Zealand growers rebranded it.",
+    "One cup of kale has more vitamin C than an orange.",
+    "Celery is 95% water and requires more calories to digest than it provides.",
+    "Cherries are a natural source of melatonin, which helps regulate sleep.",
+    "Dragon fruit is the edible flower of a cactus species.",
+    "A single fig contains hundreds of tiny flowers — you eat the flowers, not a fruit.",
+    "Grapefruit can interfere with over 85 medications by blocking a key liver enzyme.",
+    "Pears ripen from the inside out — by the time the skin feels soft, they may be overripe.",
+    "The artichoke is a flower bud. If left to bloom it produces a stunning purple thistle.",
+    "Sweet corn loses about 50% of its sugar within 24 hours of being picked.",
+    "Spinach wilts fast because its cells retain a lot of water — cold temps slow that process.",
+    "Cucumbers are 96% water — more than any other fruit or vegetable.",
+    "Asparagus grows incredibly fast — up to 10 inches in a single day under ideal conditions.",
+    "Papaya contains papain, an enzyme so powerful it's used in meat tenderizers.",
+    "Coconuts are technically drupes (stone fruits), not nuts.",
+    "A single lemon tree can produce up to 600 pounds of lemons per year.",
+    "Romaine lettuce has more nutritional value than iceberg — it contains vitamins A, C, and K.",
+    "Brussels sprouts are bite-sized members of the cabbage family, bred in Belgium in the 1200s.",
+    "Jackfruit is the largest tree fruit in the world, sometimes exceeding 100 pounds.",
+    "Durian is the only fruit legally banned from some hotels and transit systems due to its powerful odor.",
+    "Eating beets can temporarily turn your urine pink or red — a harmless effect called beeturia.",
+    "The Honeycrisp apple was developed at the University of Minnesota specifically for cold climates.",
+    "Persimmons must be fully ripe before eating — unripe ones cause an intensely astringent reaction.",
+    "Rhubarb stalks are edible, but the leaves are toxic — they contain oxalic acid.",
+    "Star fruit contains caramboxin, which is toxic to people with kidney disease.",
+    "One acre of apple trees can produce up to 800 bushels per year.",
+    "Clementines are a hybrid of mandarin and sweet orange — and they're almost always seedless.",
+    "Fennel fronds, stalks, bulb, and seeds are all edible and taste of anise.",
+    "Snap peas are one of the few vegetables you can eat entire — pod, seeds, and all.",
+    "Jicama looks like a turnip but tastes like a water chestnut and is eaten raw in Mexico.",
+    "Purple cauliflower gets its color from the same antioxidant found in red cabbage and red wine.",
+    "Edamame are just immature soybeans — the same beans that become tofu and soy milk when fully mature.",
+  ];
   const d=new Date();
   const seed=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
-  return PRODUCE_FACTS[seed%PRODUCE_FACTS.length];
+  return facts[seed%facts.length];
 }
 
 function parseShiftStart(s){
@@ -1717,6 +1717,8 @@ function nextEmployeeIn(){
   return null;
 }
 function renderHome(){
+  const viewEl=document.getElementById("view");
+  if(!viewEl) return;
   const now=new Date();
   const date=now.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
   const time=now.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
@@ -1731,7 +1733,7 @@ function renderHome(){
     {tab:"docs",ic:I.folder,cls:"violet",t:"Documents"},
     {tab:"tools",ic:I.tools,cls:"amber",t:"Tools"}
   ];
-  view.innerHTML=
+  viewEl.innerHTML=
     `<div class="hero">
        <div style="position:relative;display:flex;align-items:center;gap:14px;margin-bottom:4px;">
          <img src="${LOGO_MD}" alt="PDP" style="width:58px;height:58px;object-fit:contain;filter:drop-shadow(0 2px 5px rgba(0,0,0,.25));">
@@ -1768,7 +1770,7 @@ function renderHome(){
          </button>`).join("")}
      </div>
      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.21.0</div>`;
-  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
+  viewEl.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
   if(hclBtn){
@@ -1788,7 +1790,8 @@ function renderHome(){
   }
   startHomeClock();
 }
-let homeClockTimer=null;
+
+var homeClockTimer=null;
 function startHomeClock(){
   clearInterval(homeClockTimer);
   homeClockTimer=setInterval(()=>{
