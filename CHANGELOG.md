@@ -14,7 +14,7 @@ All notable changes to the Produce Department Portal are documented here.
 
 ### Files
 - `index.html` — Main app (OpenRouter default + provider switch)
-- `sw.js` — cache bumped to `pdp-v5.13.0`
+- `sw.js` — cache bumped to `pdp-v5.14.0`
 - `CHANGELOG.md` — this file
 - `manifest.json`, icons — unchanged
 
