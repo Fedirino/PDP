@@ -4,7 +4,7 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
-## [5.19.0] — 2026-07-01
+## [5.20.0] — 2026-07-01
 
 ### Changed
 - **OpenRouter is now the default AI provider.** PDP’s scan/settings AI path now defaults to OpenRouter instead of Anthropic, while still allowing Anthropic to be selected manually.

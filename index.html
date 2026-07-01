@@ -1765,7 +1765,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.19.0</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.20.0</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -3600,7 +3600,7 @@ Set "date":"" and "dateLabel":"" — the app assigns the display week itself; do
 
 async function applyDocScan(){
   if(!scanParsed||!scanParsed.sections) return;
-  const type=(scanMode==="salesplan")?"salesplan":"dailynotes";
+  const type=(scanMode==="salesplan")?"salesplan":(scanMode==="salesitems"?"salesitems":"dailynotes");
   const today=new Date(), pad=function(n){ return String(n).padStart(2,"0"); };
   const date=scanParsed.date||((type==="salesitems")?"":today.getFullYear()+"-"+pad(today.getMonth()+1)+"-"+pad(today.getDate()));
   const dateLabel=scanParsed.dateLabel||today.toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"2-digit",day:"2-digit"});
@@ -3894,14 +3894,33 @@ function renderDocSection(type){
     </div>
     <div class="doc-actions">
       <button class="btn ghost" id="docCopyTxt">${I.copy} Copy text</button>
+      <button class="btn ghost" id="docQuickAdd">${I.plus} Quick add Tue/Thur</button>
       <button class="btn ghost danger-txt" id="docDel">${I.trash} Delete</button>
     </div>
+    ${type==="salesitems"?`<div class="doc-quickbar" style="display:grid;grid-template-columns:72px 72px 1fr 88px 1.6fr auto;gap:6px;align-items:center;margin:8px 0 4px">
+      <input class="doc-edit-cell" id="qTue" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="Tue">
+      <input class="doc-edit-cell" id="qThur" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="Thur">
+      <input class="doc-edit-cell" id="qItem" inputmode="numeric" placeholder="Item #">
+      <input class="doc-edit-cell" id="qPrice" inputmode="text" placeholder="Price">
+      <input class="doc-edit-cell" id="qDesc" inputmode="text" placeholder="Description">
+      <button class="btn" id="docQuickAddRow" style="padding:8px 12px">${I.plus} Add</button>
+    </div>`:""}
     <div class="doc-meta">Saved ${esc(savedStr)} · ${d.sections.length} section${d.sections.length===1?"":"s"}</div>
     ${docSectionsHTML(d,type)}`;
 
   const sel=document.getElementById("docSel");
   if(sel) sel.onchange=function(){ docActiveId[type]=this.value; render(); window.scrollTo(0,0); };
   const ct=document.getElementById("docCopyTxt"); if(ct) ct.onclick=()=>copyText(docToText(d),lbl+" copied");
+  const qa=document.getElementById("docQuickAdd"); if(qa) qa.onclick=()=>{ docEdit=true; render(); window.scrollTo(0,0); setTimeout(()=>{ const first=document.querySelector('.doc-edit-cell[data-h="0"]'); if(first) first.focus(); },0); };
+  const qrow=document.getElementById("docQuickAddRow"); if(qrow){ qrow.onclick=()=>{
+    const qTue=document.getElementById("qTue"), qThur=document.getElementById("qThur"), qItem=document.getElementById("qItem"), qPrice=document.getElementById("qPrice"), qDesc=document.getElementById("qDesc");
+    const row=[qTue&&qTue.value?qTue.value.replace(/[^0-9]/g,"").slice(0,2):"", qThur&&qThur.value?qThur.value.replace(/[^0-9]/g,"").slice(0,2):"", qItem&&qItem.value?qItem.value.replace(/[^0-9]/g,""):"", qPrice&&qPrice.value?qPrice.value.replace(/[^0-9/$.,-]/g,""):"", qDesc&&qDesc.value?qDesc.value:""];
+    if(!d.sections.length) d.sections.push({category:"",subject:"",contact:"",bullets:[],tables:[{title:"",headers:["Tue","Thur","Item Number","Price","Description"],rows:[]}]});
+    const sec=d.sections[0];
+    if(!sec.tables||!sec.tables.length) sec.tables=[{title:"",headers:["Tue","Thur","Item Number","Price","Description"],rows:[]}];
+    sec.tables[0].rows.unshift(row);
+    saveDocs(); render(); toast("Row added");
+  }; }
   const dl=document.getElementById("docDel"); if(dl) dl.onclick=()=>{
     if(!confirm(`Delete "${d.dateLabel||d.date}" from ${lbl}?`)) return;
     docStore[type]=arr.filter(x=>x.id!==d.id);
