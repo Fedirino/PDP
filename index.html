@@ -1769,7 +1769,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.21.1</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.21.2</div>`;
   viewEl.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -4013,11 +4013,25 @@ function renderDocEdit(type,d){
 }
 
 /* ================= Boot ================= */
-initFirebase();
-cloudHydrateAll().catch(function(){});
-render();
-scheduleReminderNotifs();
-if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+function bootPDP(){
+  try{
+    initFirebase();
+    cloudHydrateAll().catch(function(){});
+    render();
+    scheduleReminderNotifs();
+    if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+  }catch(e){
+    console.error(e);
+    try{
+      const viewEl=document.getElementById('view');
+      if(viewEl && !viewEl.innerHTML.trim()){
+        viewEl.innerHTML=`<div class="empty"><div class="ei">⚠️</div><b>PDP failed to boot</b><br>${esc(e && e.message ? e.message : 'Unknown error')}</div>`;
+      }
+    }catch(_e){}
+  }
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bootPDP,{once:true});
+else setTimeout(bootPDP,0);
 </script>
 </body>
 </html>
