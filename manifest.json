@@ -2,7 +2,7 @@
   "name": "Produce Department Portal",
   "short_name": "PDP",
   "description": "Offline produce department tools — stencil lookup, holes list, GEV checklist, schedule, and more.",
-  "start_url": "./?v=5.21.12&cb=1",
+  "start_url": "./?v=5.21.0&cb=1",
   "display": "standalone",
   "background_color": "#0b110d",
   "theme_color": "#135c2c",
