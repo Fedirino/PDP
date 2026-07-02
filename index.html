@@ -805,14 +805,14 @@
 <div class="boot-msg" id="bootMsg">
   <div class="bm-title">Loading PDP…</div>
   <div class="bm-sub">If you only see black, this will open a clean browser tab in a moment.</div>
-  <a class="bm-link" id="bootLink" href="https://producedepartmentportal.web.app/?v=5.21.8&cb=1" target="_top" rel="noopener">Open fresh link</a>
+  <a class="bm-link" id="bootLink" href="https://producedepartmentportal.web.app/?v=5.21.10&cb=1" target="_top" rel="noopener">Open fresh link</a>
 </div>
 <div id="shell">
-
+  <div class="topbar" id="topbar"></div>
   <main id="view"></main>
   <nav class="tabbar"><div class="inner" id="tabbar"></div></nav>
 </div>
-<div class="scan-overlay" id="scanOverlay">
+
   <div class="scan-bar"><div class="t">Scan Schedule</div><button id="scanClose">Cancel</button></div>
   <div class="scan-body" id="scanBody"></div>
 </div>
@@ -1783,7 +1783,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.21.8</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.21.10</div>`;
   viewEl.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -4033,6 +4033,8 @@ function bootPDP(){
     cloudHydrateAll().catch(function(){});
     render();
     scheduleReminderNotifs();
+    const bootEl=document.getElementById('bootMsg');
+    if(bootEl) bootEl.remove();
     if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
   }catch(e){
     console.error(e);
@@ -4044,9 +4046,7 @@ function bootPDP(){
     }catch(_e){}
   }
 }
-if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bootPDP,{once:true});
-else setTimeout(bootPDP,0);
-setTimeout(()=>{ const b=document.getElementById('bootLink'); if(b) location.replace(b.href); }, 900);
+bootPDP();
 </script>
 </body>
 </html>
