@@ -3647,11 +3647,11 @@ async function applyDocScan(){
     docStore[type]=arr.filter(function(d){ return d.id!==existing.id; });
   }
 
-  var doc={ id:"doc_"+Date.now(), date:date, dateLabel:dateLabel, created:Date.now(), images:[], sections:scanParsed.sections };
+  var doc={ id:"doc_"+Date.now(), date:date, dateLabel:scanParsed.dateLabel||scanParsed.date||date||"", created:Date.now(), images:[], sections:scanParsed.sections };
   docStore[type].unshift(doc);
   sortDocs(type);
   docPrune();
-  docActiveId[type]=doc.id;
+
   var ok2=saveDocs();
   closeScanOverlay();
   tab="docs"; docView=type; docEdit=false; render(); window.scrollTo(0,0);
