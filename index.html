@@ -1590,10 +1590,10 @@ function renderTopbar(){
   const sea=document.getElementById("schEditAct"); if(sea) sea.onclick=()=>{ schEdit=!schEdit; render(); };
   const ssa=document.getElementById("schScanAct"); if(ssa) ssa.onclick=()=>openScanOverlay("schedule");
   const gsa=document.getElementById("gevScanAct"); if(gsa) gsa.onclick=()=>openScanOverlay("gev");
-  const dsa=document.getElementById("docScanAct"); if(dsa) dsa.onclick=()=>openScanOverlay(docView);
+  const dsa=document.getElementById("docScanAct"); if(dsa) dsa.onclick=()=>{ const target=docView==="salesitems"?"salesitems":(docView==="salesplan"?"salesplan":"dailynotes"); openScanOverlay(target); };
   const dea=document.getElementById("docEditAct"); if(dea) dea.onclick=()=>{ if(docEdit){ saveDocs(); } docEdit=!docEdit; render(); };
   const dba=document.getElementById("docBack"); if(dba) dba.onclick=()=>{ if(docEdit){ saveDocs(); docEdit=false; } docView="hub"; render(); window.scrollTo(0,0); };
-  const gea=document.getElementById("gevEditAct"); if(gea) gea.onclick=()=>{ gevEdit=!gevEdit; render(); };
+
   const tba=document.getElementById("toolBack"); if(tba) tba.onclick=()=>{ toolView="hub"; clEdit=false; render(); };
   const clea=document.getElementById("clEditAct"); if(clea) clea.onclick=()=>{ clEdit=!clEdit; render(); };
 }
@@ -3570,10 +3570,10 @@ Set "date":"" and "dateLabel":"" — the app assigns the display week itself; do
       <div class="doc-thumbs">${scanParsed.images.map(s=>`<img src="${s}" class="doc-thumb">`).join("")}</div>
       <div class="scan-step"><div class="num">2</div>Done — ${sections.length} section${sections.length===1?"":"s"}${(scanMode!=="salesplan"&&scanParsed.dateLabel)?" · "+esc(scanParsed.dateLabel):""}</div>
       ${weekUI}
-      <div style="max-height:46vh;overflow:auto;margin:4px 0 2px">${docSectionsHTML(scanParsed,scanMode==="salesplan"?"salesplan":"dailynotes")}</div>
+      <div style="max-height:46vh;overflow:auto;margin:4px 0 2px">${docSectionsHTML(scanParsed,scanMode==="salesplan"?"salesplan":(scanMode==="salesitems"?"salesitems":"dailynotes"))}</div>
       <div class="scan-step"><div class="num">3</div>Save this ${scanMode==="salesplan"?"week":"page"}</div>
-      <div style="font-size:11px;color:var(--ink-3);text-align:center;line-height:1.5;padding:0 8px;">${scanMode==="salesplan"?"Saved under this display week. Re-scanning a week you already have lets you add to it or replace it.":"If a document for this date already exists, you can add these sections to it."} ⚠️ Check against the printout — AI can make mistakes.</div>
-      <div class="scan-actions">
+      <div style="font-size:11px;color:var(--ink-3);text-align:center;line-height:1.5;padding:0 8px;">${scanMode==="salesplan"?"Saved under this display week. Re-scanning a week you already have lets you add to it or replace it.":(scanMode==="salesitems"?"Saved as Sales Items only — it should never fall through to Daily Notes.":"If a document for this date already exists, you can add these sections to it.")} ⚠️ Check against the printout — AI can make mistakes.</div>
+
         <button class="btn ghost" id="scanRetry">Retry</button>
         <button class="btn" id="scanApply">${I.check} Save ${scanMode==="salesplan"?"Week":"Page"}</button>
       </div>`;
