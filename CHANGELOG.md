@@ -4,6 +4,13 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.17.3] — 2026-07-01
+
+### Fixed
+- Removed `zoom: 1.22` from global body style — UI was rendering 22% too large vs baseline.
+
+---
+
 ## [5.21.0] — 2026-07-01
 
 ### Changed
