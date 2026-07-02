@@ -1388,10 +1388,10 @@ function requestNotifPermission(){
   });
 }
 
-let toolView="hub"; /* hub | notes | noteEdit | calendar | calculator | checklist */
-let docView="hub"; /* hub | dailynotes | salesplan | salesitems */
-let docEdit=false;
-let editingNoteId=null;
+var toolView="hub"; /* hub | notes | noteEdit | calendar | calculator | checklist */
+var docView="hub"; /* hub | dailynotes | salesplan | salesitems */
+var docEdit=false;
+var editingNoteId=null;
 
 /* ======= Helpers ======= */
 function esc(s){ return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
