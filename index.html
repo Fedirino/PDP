@@ -8,13 +8,13 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#135c2c">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.19.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.19.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.18.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.17.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.17.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.17.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.19.0">
-<link rel="apple-touch-icon" href="icon192.png?v=5.19.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.17.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.17.0">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -1270,7 +1270,7 @@ const DOCS_KEY="pdp_documents_v2";
 const DOC_TYPES=["dailynotes","salesplan","salesitems"];
 const DOC_LABEL={dailynotes:"Daily Notes",salesplan:"Display Plan",salesitems:"Sales Items"};
 const DOC_RETAIN_DAYS={dailynotes:14,salesplan:70,salesitems:70};
-
+let docStore={dailynotes:[],salesplan:[],salesitems:[]};
 let docActiveId={dailynotes:null,salesplan:null,salesitems:null};
 
 function docPrune(){
@@ -1529,13 +1529,13 @@ function wireStencilSuggest(inputId, addFn){
 }
 
 /* ======= App navigation ======= */
-var tab="home";
+let tab="home";
 let stencilState={ query:"", showAll:true };
 let ll={ screen:"sections", sectionId:null, open:{}, edit:false };
 
-var topbar=document.getElementById("topbar");
-var view=document.getElementById("view");
-var tabbar=document.getElementById("tabbar");
+const topbar=document.getElementById("topbar");
+const view=document.getElementById("view");
+const tabbar=document.getElementById("tabbar");
 
 function setTab(t){ tab=t;
   if(t==="loadlist"&&ll.screen==="section"&&!sectionById(ll.sectionId)) ll.screen="sections";
@@ -1584,7 +1584,7 @@ function renderTopbar(){
     if(toolView!=="hub") right=`<button class="tb-act" id="toolBack">${I.back} Back</button>`;
     if(toolView==="checklist") right=`<button class="tb-act" id="clEditAct">${clEdit?"Done":"Edit"}</button>`+right;
   }
-  const topbarEl=document.getElementById("topbar"); if(topbarEl) topbarEl.innerHTML=`<div class="brand"><img src="${LOGO_SM}" alt="PDP"></div><div class="tb-tt"><h1>${title}</h1></div>${right}`;
+  topbar.innerHTML=`<div class="brand"><img src="${LOGO_SM}" alt="PDP"></div><div class="tb-tt"><h1>${title}</h1></div>${right}`;
   const ea=document.getElementById("editAct"); if(ea) ea.onclick=()=>{ ll.edit=!ll.edit; render(); };
   const stea=document.getElementById("stencilEditAct"); if(stea) stea.onclick=()=>{ stencilEdit=!stencilEdit; render(); };
   const sea=document.getElementById("schEditAct"); if(sea) sea.onclick=()=>{ schEdit=!schEdit; render(); };
@@ -1601,11 +1601,9 @@ function renderTopbar(){
 /* ---- Tab bar ---- */
 function renderTabbar(){
   const tabs=[["home","Home",I.home],["stencil","Stencil",I.search],["loadlist","Holes",I.clip],["gev","GEV",I.gev],["schedule","Schedule",I.cal],["docs","Docs",I.folder],["tools","Tools",I.tools]];
-  const tabbarEl=document.getElementById("tabbar");
-  if(!tabbarEl) return;
-  tabbarEl.innerHTML=tabs.map(([id,label,ic])=>
+  tabbar.innerHTML=tabs.map(([id,label,ic])=>
     `<button class="tab${tab===id?" active":""}" data-tab="${id}"><span class="ic">${ic}</span><span>${label}</span></button>`).join("");
-  tabbarEl.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+  tabbar.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
 }
 
 /* ---- Home ---- */
@@ -1614,62 +1612,62 @@ function homeRemGet(){ try{ return localStorage.getItem(HOME_REM_KEY)||""; }catc
 function homeRemSave(v){ try{ localStorage.setItem(HOME_REM_KEY,v); }catch(e){} }
 
 /* ---- Produce Fun Facts ---- */
+const PRODUCE_FACTS=[
+  "Strawberries are the only fruit with seeds on the outside — each berry has about 200 of them.",
+  "Bananas are technically berries, but strawberries are not.",
+  "A pineapple takes about 18–24 months to grow and produces only one fruit per plant per season.",
+  "Avocados don't ripen on the tree — they only start ripening once they're picked.",
+  "Watermelons are 92% water and were once used as canteens by desert travelers.",
+  "Apples belong to the rose family, along with pears, peaches, plums, and cherries.",
+  "One pomegranate can contain up to 1,400 seeds.",
+  "Cranberries bounce when ripe — it's one way growers test them.",
+  "The bright orange color of carrots comes from beta-carotene, which the body converts to vitamin A.",
+  "Lemons contain more sugar than strawberries — they just taste sour because of their high citric acid.",
+  "Grapes explode when microwaved — the skin creates a plasma reaction.",
+  "Tomatoes were once thought to be poisonous in Europe because they're in the nightshade family.",
+  "A head of broccoli is actually thousands of unopened flower buds.",
+  "Mangoes are the most widely consumed fruit in the world.",
+  "Blueberries are one of the only naturally blue foods in existence.",
+  "Raspberries are hollow in the middle — they slide off a small core when picked.",
+  "Bell peppers are technically fruits, and red ones have 11 times more beta-carotene than green ones.",
+  "Garlic has been used medicinally for over 7,000 years.",
+  "Kiwi fruit was originally called 'Chinese gooseberry' before New Zealand growers rebranded it.",
+  "One cup of kale has more vitamin C than an orange.",
+  "Celery is 95% water and requires more calories to digest than it provides.",
+  "Cherries are a natural source of melatonin, which helps regulate sleep.",
+  "Dragon fruit is the edible flower of a cactus species.",
+  "A single fig contains hundreds of tiny flowers — you eat the flowers, not a fruit.",
+  "Grapefruit can interfere with over 85 medications by blocking a key liver enzyme.",
+  "Pears ripen from the inside out — by the time the skin feels soft, they may be overripe.",
+  "The artichoke is a flower bud. If left to bloom it produces a stunning purple thistle.",
+  "Sweet corn loses about 50% of its sugar within 24 hours of being picked.",
+  "Spinach wilts fast because its cells retain a lot of water — cold temps slow that process.",
+  "Cucumbers are 96% water — more than any other fruit or vegetable.",
+  "Asparagus grows incredibly fast — up to 10 inches in a single day under ideal conditions.",
+  "Papaya contains papain, an enzyme so powerful it's used in meat tenderizers.",
+  "Coconuts are technically drupes (stone fruits), not nuts.",
+  "A single lemon tree can produce up to 600 pounds of lemons per year.",
+  "Romaine lettuce has more nutritional value than iceberg — it contains vitamins A, C, and K.",
+  "Brussels sprouts are bite-sized members of the cabbage family, bred in Belgium in the 1200s.",
+  "Jackfruit is the largest tree fruit in the world, sometimes exceeding 100 pounds.",
+  "Durian is the only fruit legally banned from some hotels and transit systems due to its powerful odor.",
+  "Eating beets can temporarily turn your urine pink or red — a harmless effect called beeturia.",
+  "The Honeycrisp apple was developed at the University of Minnesota specifically for cold climates.",
+  "Persimmons must be fully ripe before eating — unripe ones cause an intensely astringent reaction.",
+  "Rhubarb stalks are edible, but the leaves are toxic — they contain oxalic acid.",
+  "Star fruit contains caramboxin, which is toxic to people with kidney disease.",
+  "One acre of apple trees can produce up to 800 bushels per year.",
+  "Clementines are a hybrid of mandarin and sweet orange — and they're almost always seedless.",
+  "Fennel fronds, stalks, bulb, and seeds are all edible and taste of anise.",
+  "Snap peas are one of the few vegetables you can eat entire — pod, seeds, and all.",
+  "Jicama looks like a turnip but tastes like a water chestnut and is eaten raw in Mexico.",
+  "Purple cauliflower gets its color from the same antioxidant found in red cabbage and red wine.",
+  "Edamame are just immature soybeans — the same beans that become tofu and soy milk when fully mature.",
+];
 function getDailyFact(){
-  const facts=[
-    "Strawberries are the only fruit with seeds on the outside — each berry has about 200 of them.",
-    "Bananas are technically berries, but strawberries are not.",
-    "A pineapple takes about 18–24 months to grow and produces only one fruit per plant per season.",
-    "Avocados don't ripen on the tree — they only start ripening once they're picked.",
-    "Watermelons are 92% water and were once used as canteens by desert travelers.",
-    "Apples belong to the rose family, along with pears, peaches, plums, and cherries.",
-    "One pomegranate can contain up to 1,400 seeds.",
-    "Cranberries bounce when ripe — it's one way growers test them.",
-    "The bright orange color of carrots comes from beta-carotene, which the body converts to vitamin A.",
-    "Lemons contain more sugar than strawberries — they just taste sour because of their high citric acid.",
-    "Grapes explode when microwaved — the skin creates a plasma reaction.",
-    "Tomatoes were once thought to be poisonous in Europe because they're in the nightshade family.",
-    "A head of broccoli is actually thousands of unopened flower buds.",
-    "Mangoes are the most widely consumed fruit in the world.",
-    "Blueberries are one of the only naturally blue foods in existence.",
-    "Raspberries are hollow in the middle — they slide off a small core when picked.",
-    "Bell peppers are technically fruits, and red ones have 11 times more beta-carotene than green ones.",
-    "Garlic has been used medicinally for over 7,000 years.",
-    "Kiwi fruit was originally called 'Chinese gooseberry' before New Zealand growers rebranded it.",
-    "One cup of kale has more vitamin C than an orange.",
-    "Celery is 95% water and requires more calories to digest than it provides.",
-    "Cherries are a natural source of melatonin, which helps regulate sleep.",
-    "Dragon fruit is the edible flower of a cactus species.",
-    "A single fig contains hundreds of tiny flowers — you eat the flowers, not a fruit.",
-    "Grapefruit can interfere with over 85 medications by blocking a key liver enzyme.",
-    "Pears ripen from the inside out — by the time the skin feels soft, they may be overripe.",
-    "The artichoke is a flower bud. If left to bloom it produces a stunning purple thistle.",
-    "Sweet corn loses about 50% of its sugar within 24 hours of being picked.",
-    "Spinach wilts fast because its cells retain a lot of water — cold temps slow that process.",
-    "Cucumbers are 96% water — more than any other fruit or vegetable.",
-    "Asparagus grows incredibly fast — up to 10 inches in a single day under ideal conditions.",
-    "Papaya contains papain, an enzyme so powerful it's used in meat tenderizers.",
-    "Coconuts are technically drupes (stone fruits), not nuts.",
-    "A single lemon tree can produce up to 600 pounds of lemons per year.",
-    "Romaine lettuce has more nutritional value than iceberg — it contains vitamins A, C, and K.",
-    "Brussels sprouts are bite-sized members of the cabbage family, bred in Belgium in the 1200s.",
-    "Jackfruit is the largest tree fruit in the world, sometimes exceeding 100 pounds.",
-    "Durian is the only fruit legally banned from some hotels and transit systems due to its powerful odor.",
-    "Eating beets can temporarily turn your urine pink or red — a harmless effect called beeturia.",
-    "The Honeycrisp apple was developed at the University of Minnesota specifically for cold climates.",
-    "Persimmons must be fully ripe before eating — unripe ones cause an intensely astringent reaction.",
-    "Rhubarb stalks are edible, but the leaves are toxic — they contain oxalic acid.",
-    "Star fruit contains caramboxin, which is toxic to people with kidney disease.",
-    "One acre of apple trees can produce up to 800 bushels per year.",
-    "Clementines are a hybrid of mandarin and sweet orange — and they're almost always seedless.",
-    "Fennel fronds, stalks, bulb, and seeds are all edible and taste of anise.",
-    "Snap peas are one of the few vegetables you can eat entire — pod, seeds, and all.",
-    "Jicama looks like a turnip but tastes like a water chestnut and is eaten raw in Mexico.",
-    "Purple cauliflower gets its color from the same antioxidant found in red cabbage and red wine.",
-    "Edamame are just immature soybeans — the same beans that become tofu and soy milk when fully mature.",
-  ];
   const d=new Date();
   const seed=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
-  return facts[seed%facts.length];
+  return PRODUCE_FACTS[seed%PRODUCE_FACTS.length];
 }
 
 function parseShiftStart(s){
@@ -1717,8 +1715,6 @@ function nextEmployeeIn(){
   return null;
 }
 function renderHome(){
-  const viewEl=document.getElementById("view");
-  if(!viewEl) return;
   const now=new Date();
   const date=now.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});
   const time=now.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
@@ -1733,7 +1729,7 @@ function renderHome(){
     {tab:"docs",ic:I.folder,cls:"violet",t:"Documents"},
     {tab:"tools",ic:I.tools,cls:"amber",t:"Tools"}
   ];
-  viewEl.innerHTML=
+  view.innerHTML=
     `<div class="hero">
        <div style="position:relative;display:flex;align-items:center;gap:14px;margin-bottom:4px;">
          <img src="${LOGO_MD}" alt="PDP" style="width:58px;height:58px;object-fit:contain;filter:drop-shadow(0 2px 5px rgba(0,0,0,.25));">
@@ -1769,8 +1765,8 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.21.0</div>`;
-  viewEl.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.17.0</div>`;
+  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
   if(hclBtn){
@@ -1790,8 +1786,7 @@ function renderHome(){
   }
   startHomeClock();
 }
-
-var homeClockTimer=null;
+let homeClockTimer=null;
 function startHomeClock(){
   clearInterval(homeClockTimer);
   homeClockTimer=setInterval(()=>{
@@ -3453,17 +3448,15 @@ RULES:
 - tables: reproduce EXACTLY as printed — same column headers (left to right) and same rows. Each row is an array of cell strings matching the header order. Use "" for blank cells. Keep all numbers, %, codes, and dates as written. If a section has no table, use [].
 - Do NOT invent, reorder, round, or summarize. Transcribe precisely. Accuracy matters more than anything.`;
 
-const salesItemsPrompt=`You are transcribing a grocery store weekly "Order Code List" / sale-items sheet photographed across ONE OR MORE pages, given in order. This is a flat item list, often with multiple pages. Transcribe EVERYTHING into structured JSON — do not summarize, do not skip anything.
+const salesItemsPrompt=`You are transcribing a grocery store weekly "Sales Items" / order-code sheet photographed across ONE OR MORE pages, given in order. This is a flat item list, often with multiple pages. Transcribe EVERYTHING into structured JSON — do not summarize, do not skip anything.
 
-Treat "regular sale items" and "DEAL LOCK" pages as separate sections when they are visually separated on the printed sheet. If a page is clearly a dedicated deal-lock page, create a section whose category/title makes that explicit (for example: "Deal Lock Items") and do not mix it into the regular sale-item section. Preserve the printed title or week label in "category" when visible; otherwise use a short page title like "Page 1".
+Each page or printed table becomes a SECTION. Preserve the printed title or week label in "category" when visible; otherwise use a short page title like "Page 1".
 
 Return ONLY valid JSON. No markdown, no backticks, no commentary.
 
 {"date":"","dateLabel":"Week 28 2026","sections":[
   {"category":"Week 28 2026 Order Code List","subject":"","contact":"","bullets":[],
-   "tables":[{"title":"","headers":["Tue","Thur","Item Number","Price","Description"],"rows":[["","","133206","$4.49","RED SALSA MEDIUM 12 OZ"]]}]},
-  {"category":"Deal Lock Items","subject":"","contact":"","bullets":[],
-   "tables":[{"title":"","headers":["Tue","Thur","Item Number","Price","Description"],"rows":[["","","142277","4/$5","+IMP RED PEPPERS 22 CT"]]}]}
+   "tables":[{"title":"","headers":["Item Number","Description","Price","Tue","Thur"],"rows":[["133206","RED SALSA MEDIUM 12 OZ","$4.49","",""]]}]}
 ]}
 
 RULES:
@@ -3605,7 +3598,7 @@ Set "date":"" and "dateLabel":"" — the app assigns the display week itself; do
 
 async function applyDocScan(){
   if(!scanParsed||!scanParsed.sections) return;
-  const type=(scanMode==="salesplan")?"salesplan":(scanMode==="salesitems"?"salesitems":"dailynotes");
+  const type=(scanMode==="salesplan")?"salesplan":"dailynotes";
   const today=new Date(), pad=function(n){ return String(n).padStart(2,"0"); };
   const date=scanParsed.date||((type==="salesitems")?"":today.getFullYear()+"-"+pad(today.getMonth()+1)+"-"+pad(today.getDate()));
   const dateLabel=scanParsed.dateLabel||today.toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"2-digit",day:"2-digit"});
@@ -3859,7 +3852,7 @@ function renderDocHub(){
     <div class="tiles">
       ${card("dailynotes",I.note,"Scan the daily bulletin")}
       ${card("salesplan",I.clip,"Scan the weekly display plan")}
-      ${card("salesitems",I.clip,"Scan the weekly sales items sheet")}
+      ${card("salesitems",I.clip,"Scan the weekly sales item sheet")}
     </div>
     <div class="lbl">Coming Soon</div>
     <div class="tiles">
@@ -3899,33 +3892,14 @@ function renderDocSection(type){
     </div>
     <div class="doc-actions">
       <button class="btn ghost" id="docCopyTxt">${I.copy} Copy text</button>
-      <button class="btn ghost" id="docQuickAdd">${I.plus} Quick add Tue/Thur</button>
       <button class="btn ghost danger-txt" id="docDel">${I.trash} Delete</button>
     </div>
-    ${type==="salesitems"?`<div class="doc-quickbar" style="display:grid;grid-template-columns:72px 72px 1fr 88px 1.6fr auto;gap:6px;align-items:center;margin:8px 0 4px">
-      <input class="doc-edit-cell" id="qTue" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="Tue">
-      <input class="doc-edit-cell" id="qThur" inputmode="numeric" pattern="[0-9]*" maxlength="2" placeholder="Thur">
-      <input class="doc-edit-cell" id="qItem" inputmode="numeric" placeholder="Item #">
-      <input class="doc-edit-cell" id="qPrice" inputmode="text" placeholder="Price">
-      <input class="doc-edit-cell" id="qDesc" inputmode="text" placeholder="Description">
-      <button class="btn" id="docQuickAddRow" style="padding:8px 12px">${I.plus} Add</button>
-    </div>`:""}
     <div class="doc-meta">Saved ${esc(savedStr)} · ${d.sections.length} section${d.sections.length===1?"":"s"}</div>
     ${docSectionsHTML(d,type)}`;
 
   const sel=document.getElementById("docSel");
   if(sel) sel.onchange=function(){ docActiveId[type]=this.value; render(); window.scrollTo(0,0); };
   const ct=document.getElementById("docCopyTxt"); if(ct) ct.onclick=()=>copyText(docToText(d),lbl+" copied");
-  const qa=document.getElementById("docQuickAdd"); if(qa) qa.onclick=()=>{ docEdit=true; render(); window.scrollTo(0,0); setTimeout(()=>{ const first=document.querySelector('.doc-edit-cell[data-h="0"]'); if(first) first.focus(); },0); };
-  const qrow=document.getElementById("docQuickAddRow"); if(qrow){ qrow.onclick=()=>{
-    const qTue=document.getElementById("qTue"), qThur=document.getElementById("qThur"), qItem=document.getElementById("qItem"), qPrice=document.getElementById("qPrice"), qDesc=document.getElementById("qDesc");
-    const row=[qTue&&qTue.value?qTue.value.replace(/[^0-9]/g,"").slice(0,2):"", qThur&&qThur.value?qThur.value.replace(/[^0-9]/g,"").slice(0,2):"", qItem&&qItem.value?qItem.value.replace(/[^0-9]/g,""):"", qPrice&&qPrice.value?qPrice.value.replace(/[^0-9/$.,-]/g,""):"", qDesc&&qDesc.value?qDesc.value:""];
-    if(!d.sections.length) d.sections.push({category:"",subject:"",contact:"",bullets:[],tables:[{title:"",headers:["Tue","Thur","Item Number","Price","Description"],rows:[]}]});
-    const sec=d.sections[0];
-    if(!sec.tables||!sec.tables.length) sec.tables=[{title:"",headers:["Tue","Thur","Item Number","Price","Description"],rows:[]}];
-    sec.tables[0].rows.unshift(row);
-    saveDocs(); render(); toast("Row added");
-  }; }
   const dl=document.getElementById("docDel"); if(dl) dl.onclick=()=>{
     if(!confirm(`Delete "${d.dateLabel||d.date}" from ${lbl}?`)) return;
     docStore[type]=arr.filter(x=>x.id!==d.id);
@@ -3974,34 +3948,8 @@ function renderDocEdit(type,d){
   view.querySelectorAll(".doc-edit-line[data-ttl]").forEach(inp=>inp.oninput=()=>{ d.sections[+inp.dataset.si].tables[+inp.dataset.ti].title=inp.value; });
   view.querySelectorAll(".doc-edit-cell").forEach(inp=>inp.oninput=()=>{
     const s=d.sections[+inp.dataset.si], t=s.tables[+inp.dataset.ti];
-    const raw=inp.value;
-    if(inp.dataset.h!=null){
-      t.headers[+inp.dataset.h]=raw;
-      return;
-    }
-    const r=+inp.dataset.r, c=+inp.dataset.c;
-    const isSalesItems = type==="salesitems";
-    const isTueThurCell = isSalesItems && (c===0 || c===1);
-    const isItemCell = isSalesItems && c===2;
-    const isPriceCell = isSalesItems && c===3;
-    const isDescCell = isSalesItems && c===4;
-    if(isTueThurCell){
-      t.rows[r][c] = raw.replace(/[^0-9]/g,"").slice(0,2);
-      return;
-    }
-    if(isItemCell){
-      t.rows[r][c] = raw.replace(/[^0-9]/g,"");
-      return;
-    }
-    if(isPriceCell){
-      t.rows[r][c] = raw.replace(/[^0-9/$.,-]/g,"");
-      return;
-    }
-    if(isDescCell){
-      t.rows[r][c]=raw;
-      return;
-    }
-    t.rows[r][c]=raw;
+    if(inp.dataset.h!=null) t.headers[+inp.dataset.h]=inp.value;
+    else t.rows[+inp.dataset.r][+inp.dataset.c]=inp.value;
   });
   /* structural buttons (sync handled by oninput already) */
   const addSec=document.getElementById("docAddSec");
