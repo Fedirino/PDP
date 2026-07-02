@@ -3448,23 +3448,24 @@ RULES:
 - tables: reproduce EXACTLY as printed — same column headers (left to right) and same rows. Each row is an array of cell strings matching the header order. Use "" for blank cells. Keep all numbers, %, codes, and dates as written. If a section has no table, use [].
 - Do NOT invent, reorder, round, or summarize. Transcribe precisely. Accuracy matters more than anything.`;
 
-const salesItemsPrompt=`You are transcribing a grocery store weekly "Sales Items" / order-code sheet photographed across ONE OR MORE pages, given in order. This is a flat item list, often with multiple pages. Transcribe EVERYTHING into structured JSON — do not summarize, do not skip anything.
+const salesItemsPrompt=`You are transcribing a grocery store weekly "Sales Items" sheet photographed across ONE OR MORE pages, given in order. The printed paper may be labeled "Order Code List" — that is the same document type. It is NOT the weekly display plan / sales plan. This is a flat item list, often with multiple pages. Some sheets are also labeled "Deal Lock Program" and use the same order-code table style. Transcribe EVERYTHING into structured JSON — do not summarize, do not skip anything.
 
-Each page or printed table becomes a SECTION. Preserve the printed title or week label in "category" when visible; otherwise use a short page title like "Page 1".
+Each page or printed table becomes a SECTION. Preserve the printed title or week label in "category" when visible; otherwise use a short page title like "Page 1". If the sheet title says "Deal Lock Program", preserve that wording in the category/title.
 
 Return ONLY valid JSON. No markdown, no backticks, no commentary.
 
 {"date":"","dateLabel":"Week 28 2026","sections":[
   {"category":"Week 28 2026 Order Code List","subject":"","contact":"","bullets":[],
-   "tables":[{"title":"","headers":["Item Number","Description","Price","Tue","Thur"],"rows":[["133206","RED SALSA MEDIUM 12 OZ","$4.49","",""]]}]}
+   "tables":[{"title":"","headers":["Mon","Tue","Item Number","Description","Price"],"rows":[["","","133206","RED SALSA MEDIUM 12 OZ","$4.49"]]}]}
 ]}
 
 RULES:
-- date: leave as "" unless the page clearly shows a real calendar date. dateLabel: the printed week/title label exactly as shown, e.g. "Week 28 2026" or "Week 28 2026 Order Code List".
+- date: leave as "" unless the page clearly shows a real calendar date. dateLabel: the printed week/title label exactly as shown, e.g. "Week 28 2026", "Week 28 2026 Order Code List", or "e 6 Deal Lock Program".
 - Capture EVERY page in order. If a sheet spans multiple pages, keep the rows in printed order across all pages.
-- Transcribe item number, description, and price exactly as printed.
-- PRICE RULE: if BOTH NE and NY prices are present, use the NE price in "Price" and ignore the NY price. If only one price is present, use it. If no price is visible, leave "Price" blank.
-- Leave "Tue" and "Thur" blank for manual entry unless a value is explicitly printed there.
+- Transcribe item code, description, and price exactly as printed.
+- PRICE RULE: if BOTH NE and NY prices are present, use the NE price in "Price" and ignore the NY price. If only one price is present, use it. If the page only shows one price column like "Retail", use that value for "Price".
+- Leave "Mon" and "Tue" blank for manual entry unless a value is explicitly printed there.
+- If the printed table includes only code/description/Retail, map them to Item Number / Description / Price.
 - Do NOT invent, reorder, round, or summarize. Accuracy matters more than anything.`;
 
 async function readDocPages(){
@@ -3598,10 +3599,10 @@ Set "date":"" and "dateLabel":"" — the app assigns the display week itself; do
 
 async function applyDocScan(){
   if(!scanParsed||!scanParsed.sections) return;
-  const type=(scanMode==="salesplan")?"salesplan":"dailynotes";
+  const type=(scanMode==="salesplan")?"salesplan":(scanMode==="salesitems"?"salesitems":"dailynotes");
   const today=new Date(), pad=function(n){ return String(n).padStart(2,"0"); };
   const date=scanParsed.date||((type==="salesitems")?"":today.getFullYear()+"-"+pad(today.getMonth()+1)+"-"+pad(today.getDate()));
-  const dateLabel=scanParsed.dateLabel||today.toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"2-digit",day:"2-digit"});
+
   const arr=docStore[type];
   const existing=arr.find(function(d){ return d.date===date; });
 
@@ -3931,12 +3932,22 @@ function renderDocEdit(type,d){
       </div>
     </div>`;
   };
+  const quickBar=type==="salesitems"?`
+    <div class="doc-qe" style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:10px 0 12px">
+      <input class="doc-edit-cell" id="qeMon" placeholder="Mon">
+      <input class="doc-edit-cell" id="qeTue" placeholder="Tue">
+      <input class="doc-edit-cell" id="qeItem" placeholder="Item #">
+      <input class="doc-edit-cell" id="qeDesc" placeholder="Description" style="grid-column:span 2">
+      <input class="doc-edit-cell" id="qePrice" placeholder="Price">
+      <button class="btn" id="qeAdd" style="grid-column:1/-1">${I.plus} Quick add row</button>
+    </div>`:"";
   view.innerHTML=`
     <div class="lbl" style="margin-top:2px">Editing · ${lbl}</div>
     <div class="doc-top">
       <input class="doc-sel" id="docEditLabel" value="${esc(d.dateLabel||d.date||"")}" placeholder="Title / date label">
     </div>
     <div class="doc-meta">Tap <b>Done</b> (top right) to save your changes.</div>
+    ${quickBar}
     ${(d.sections||[]).map((s,si)=>secHTML(s,si)).join("")}
     <button class="btn ghost block" id="docAddSec" style="margin-top:6px">${I.plus} Add section</button>`;
 
@@ -3951,14 +3962,31 @@ function renderDocEdit(type,d){
     if(inp.dataset.h!=null) t.headers[+inp.dataset.h]=inp.value;
     else t.rows[+inp.dataset.r][+inp.dataset.c]=inp.value;
   });
-  /* structural buttons (sync handled by oninput already) */
   const addSec=document.getElementById("docAddSec");
   if(addSec) addSec.onclick=()=>{ d.sections.push({category:"",subject:"",contact:"",bullets:[],tables:[]}); render(); };
   view.querySelectorAll("[data-delsec]").forEach(b=>b.onclick=()=>{ if(confirm("Delete this section?")){ d.sections.splice(+b.dataset.delsec,1); render(); } });
-  view.querySelectorAll("[data-addtbl]").forEach(b=>b.onclick=()=>{ d.sections[+b.dataset.addtbl].tables.push({title:"",headers:type==="salesitems"?["Item Number","Description","Price","Tue","Thur"]:["Position","Item"],rows:[type==="salesitems"?["", "", "", "", ""]:["",""]]}); render(); });
+  view.querySelectorAll("[data-addtbl]").forEach(b=>b.onclick=()=>{ d.sections[+b.dataset.addtbl].tables.push({title:"",headers:type==="salesitems"?["Mon","Tue","Item Number","Description","Price"]:["Position","Item"],rows:[type==="salesitems"?["", "", "", "", ""]:["",""]]}); render(); });
   view.querySelectorAll("[data-addrow]").forEach(b=>b.onclick=()=>{ const[si,ti]=b.dataset.addrow.split(".").map(Number); const t=d.sections[si].tables[ti]; const w=(t.headers||[]).length||(t.rows[0]?t.rows[0].length:2); t.rows.push(Array(w).fill("")); render(); });
   view.querySelectorAll("[data-delrow]").forEach(b=>b.onclick=()=>{ const[si,ti,ri]=b.dataset.delrow.split(".").map(Number); d.sections[si].tables[ti].rows.splice(ri,1); render(); });
+  if(type==="salesitems"){
+    const qeAdd=document.getElementById("qeAdd");
+    if(qeAdd) qeAdd.onclick=()=>{
+      const mon=(document.getElementById("qeMon").value||"").trim();
+      const tue=(document.getElementById("qeTue").value||"").trim();
+      const item=(document.getElementById("qeItem").value||"").trim();
+      const desc=(document.getElementById("qeDesc").value||"").trim();
+      const price=(document.getElementById("qePrice").value||"").trim();
+      if(!item&&!desc&&!price&&!mon&&!tue) return;
+      if(!d.sections.length) d.sections.push({category:"",subject:"",contact:"",bullets:[],tables:[]});
+      if(!d.sections[0].tables.length) d.sections[0].tables.push({title:"",headers:["Mon","Tue","Item Number","Description","Price"],rows:[]});
+      const t=d.sections[0].tables[0];
+      if((t.headers||[]).join("|")!==["Mon","Tue","Item Number","Description","Price"].join("|")) t.headers=["Mon","Tue","Item Number","Description","Price"];
+      t.rows.unshift([mon,tue,item,desc,price]);
+      render();
+    };
+  }
 }
+
 
 /* ================= Boot ================= */
 initFirebase();
