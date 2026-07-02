@@ -3570,14 +3570,14 @@ Set "date":"" and "dateLabel":"" — the app assigns the display week itself; do
       <div class="doc-thumbs">${scanParsed.images.map(s=>`<img src="${s}" class="doc-thumb">`).join("")}</div>
       <div class="scan-step"><div class="num">2</div>Done — ${sections.length} section${sections.length===1?"":"s"}${(scanMode!=="salesplan"&&scanParsed.dateLabel)?" · "+esc(scanParsed.dateLabel):""}</div>
       ${weekUI}
-      <div style="max-height:46vh;overflow:auto;margin:4px 0 2px">${docSectionsHTML(scanParsed,scanMode==="salesplan"?"salesplan":"dailynotes")}</div>
-      <div class="scan-step"><div class="num">3</div>Save this ${scanMode==="salesplan"?"week":"page"}</div>
-      <div style="font-size:11px;color:var(--ink-3);text-align:center;line-height:1.5;padding:0 8px;">${scanMode==="salesplan"?"Saved under this display week. Re-scanning a week you already have lets you add to it or replace it.":"If a document for this date already exists, you can add these sections to it."} ⚠️ Check against the printout — AI can make mistakes.</div>
+      <div style="max-height:46vh;overflow:auto;margin:4px 0 2px">${docSectionsHTML(scanParsed,scanMode==="salesplan"?"salesplan":(scanMode==="salesitems"?"salesitems":"dailynotes"))}</div>
+      <div class="scan-step"><div class="num">3</div>Save this ${scanMode==="salesplan"?"week":(scanMode==="salesitems"?"page":"page")}</div>
+      <div style="font-size:11px;color:var(--ink-3);text-align:center;line-height:1.5;padding:0 8px;">${scanMode==="salesplan"?"Saved under this display week. Re-scanning a week you already have lets you add to it or replace it.":(scanMode==="salesitems"?"Saved as Sales Items only — it should never fall through to Daily Notes.":"If a document for this date already exists, you can add these sections to it.")} ⚠️ Check against the printout — AI can make mistakes.</div>
       <div class="scan-actions">
         <button class="btn ghost" id="scanRetry">Retry</button>
         <button class="btn" id="scanApply">${I.check} Save ${scanMode==="salesplan"?"Week":"Page"}</button>
       </div>`;
-    if(scanMode==="salesplan"){
+
       const shift=(days)=>{ const d=new Date(scanParsed.weekFri+"T00:00:00"); d.setDate(d.getDate()+days); scanParsed.weekFri=isoDate(d); scanParsed.date=scanParsed.weekFri; scanParsed.dateLabel=weekRangeLabel(scanParsed.weekFri); const wl=document.getElementById("wkLabel"); if(wl) wl.textContent=scanParsed.dateLabel; };
       const wp=document.getElementById("wkPrev"); if(wp) wp.onclick=()=>shift(-7);
       const wn=document.getElementById("wkNext"); if(wn) wn.onclick=()=>shift(7);
