@@ -51,12 +51,13 @@
   }
   .tnum{font-variant-numeric:tabular-nums;}
   .boot-msg{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;
-    text-align:center;padding:24px;color:var(--ink);background:var(--bg);z-index:1;}
+    text-align:center;padding:24px;color:var(--ink);background:var(--bg);z-index:9999;pointer-events:auto;}
   .boot-msg .bm-title{font-size:22px;font-weight:800;letter-spacing:-.02em;}
   .boot-msg .bm-sub{font-size:14px;line-height:1.5;color:var(--ink-2);max-width:320px;}
-  .boot-msg .bm-link{color:var(--brand-ink);text-decoration:none;font-weight:700;}
-  .boot-msg .bm-link:active{text-decoration:underline;}
-  #shell{position:relative;min-height:100%;display:flex;flex-direction:column;max-width:600px;margin:0 auto;z-index:2;}
+  .boot-msg .bm-link{appearance:none;border:none;border-radius:999px;padding:12px 18px;background:var(--brand);color:#fff;
+    text-decoration:none;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;touch-action:manipulation;}
+  .boot-msg .bm-link:active{transform:scale(.985);background:var(--brand-d);}
+  #shell{position:relative;min-height:100%;display:flex;flex-direction:column;max-width:600px;margin:0 auto;z-index:1;}
 
   .topbar{
     position:sticky;top:0;z-index:30;background:rgba(11,17,13,.86);
@@ -801,11 +802,11 @@
 <body>
 <div class="boot-msg" id="bootMsg">
   <div class="bm-title">Loading PDP…</div>
-  <div class="bm-sub">If you only see black, tap the link below to force a clean reload in a regular browser tab.</div>
-  <a class="bm-link" href="./?v=5.21.4&cb=1">Open fresh link</a>
+  <div class="bm-sub">If you only see black, tap the button below to force a clean reload in a regular browser tab.</div>
+  <button class="bm-link" id="bootLink" type="button" data-href="./?v=5.21.5&cb=1">Open fresh link</button>
 </div>
 <div id="shell">
-  <div class="topbar" id="topbar"></div>
+
   <main id="view"></main>
   <nav class="tabbar"><div class="inner" id="tabbar"></div></nav>
 </div>
@@ -4043,6 +4044,12 @@ function bootPDP(){
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bootPDP,{once:true});
 else setTimeout(bootPDP,0);
+const bootLink=document.getElementById('bootLink');
+if(bootLink){
+  const go=()=>location.href=bootLink.dataset.href;
+  bootLink.addEventListener('click',e=>{ e.preventDefault(); go(); });
+  bootLink.addEventListener('touchend',e=>{ e.preventDefault(); go(); },{passive:false});
+}
 </script>
 </body>
 </html>
