@@ -57,7 +57,9 @@
   .boot-msg .bm-link{appearance:none;border:none;border-radius:999px;padding:12px 18px;background:var(--brand);color:#fff;
     text-decoration:none;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;touch-action:manipulation;}
   .boot-msg .bm-link:active{transform:scale(.985);background:var(--brand-d);}
-  #shell{position:relative;min-height:100%;display:flex;flex-direction:column;max-width:600px;margin:0 auto;z-index:1;}
+  .boot-msg .bm-link:visited{color:#fff;}
+  .boot-msg .bm-link:link{color:#fff;}
+
 
   .topbar{
     position:sticky;top:0;z-index:30;background:rgba(11,17,13,.86);
@@ -802,8 +804,8 @@
 <body>
 <div class="boot-msg" id="bootMsg">
   <div class="bm-title">Loading PDP…</div>
-  <div class="bm-sub">If you only see black, tap the button below to force a clean reload in a regular browser tab.</div>
-  <button class="bm-link" id="bootLink" type="button" data-href="./?v=5.21.6&cb=1">Open fresh link</button>
+  <div class="bm-sub">If you only see black, this will open a clean browser tab in a moment.</div>
+  <a class="bm-link" id="bootLink" href="https://producedepartmentportal.web.app/?v=5.21.8&cb=1" target="_top" rel="noopener">Open fresh link</a>
 </div>
 <div id="shell">
 
@@ -1781,7 +1783,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.21.6</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.21.8</div>`;
   viewEl.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -4044,12 +4046,7 @@ function bootPDP(){
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bootPDP,{once:true});
 else setTimeout(bootPDP,0);
-const bootLink=document.getElementById('bootLink');
-if(bootLink){
-  const go=()=>location.href=bootLink.dataset.href;
-  bootLink.addEventListener('click',e=>{ e.preventDefault(); go(); });
-  bootLink.addEventListener('touchend',e=>{ e.preventDefault(); go(); },{passive:false});
-}
+setTimeout(()=>{ const b=document.getElementById('bootLink'); if(b) location.replace(b.href); }, 900);
 </script>
 </body>
 </html>
