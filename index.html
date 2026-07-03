@@ -3487,12 +3487,12 @@ OUTPUT — ONLY valid JSON (no markdown, no backticks, no commentary):
 
 GOLDEN RULES
 - ORDER AND POSITION ARE THE WHOLE POINT. An item in the wrong column or wrong order is a failure. Read every shelf/row strictly LEFT to RIGHT, and stacked positions TOP to BOTTOM.
-- VERBATIM item text: keep brand, size, count (2lb, 3ct, 6oz) and any sign-size code such as "11x14" exactly as written.
+- VERBATIM item text: keep brand, size, count (2lb, 3ct, 6oz) and any sign-size code such as "11x14" exactly as written. If the print is fuzzy, prefer the known produce brand name "Little Leaf" over OCR mistakes like "Little Loot".
 - DESCRIPTIONS / TAGS belong to the cell they are printed in: keep size codes like "11x14" and the promo flags (DEAL LOCK), (SPOT BUY), (TPR) with the item/column where they appear.
 - A blank slot is a row with "" as the item, so the shape/count is preserved.
 - Capture EVERY block on EVERY page, in printed order.
 
-HOW TO READ EACH BLOCK TYPE
+
 
 1) PROMO TABLES and HERO PODS (Refrigerated Promo Table, Refrigerated Veg Promo Table, Dry Promo Table, Refrigerated Hero Pod, etc.) — these are a 2-D GRID:
    - A SHELF (upper deck) sits directly ABOVE a WELL (lower deck). The Shelf and the Well have the SAME number of COLUMNS, and Well column N is directly BELOW Shelf column N — they are vertically aligned. First COUNT the columns, then read column by column, left to right.
@@ -3550,7 +3550,35 @@ Set "date":"" and "dateLabel":"" — the app assigns the display week itself; do
     })):[];
     if(!sections.length) throw new Error("No sections found in the notes.");
 
-    scanParsed={ date:parsed.date||"", dateLabel:parsed.dateLabel||"", sections, images:docPages.map(p=>p.store) };
+    const scanBrandAliases={
+      "Little Loot":"Little Leaf"
+    };
+    function normalizeScanText(v){
+      let s=String(v==null?"":v);
+      Object.keys(scanBrandAliases).forEach(function(from){
+        s=s.replace(new RegExp("\\b"+from.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\b","gi"),scanBrandAliases[from]);
+      });
+      return s;
+    }
+    function normalizeScanParsedSections(list){
+      return (list||[]).map(function(s){
+        return {
+          category: normalizeScanText(s.category||""),
+          contact: normalizeScanText(s.contact||""),
+          subject: normalizeScanText(s.subject||""),
+          bullets: Array.isArray(s.bullets)?s.bullets.map(function(b){ return normalizeScanText(b); }):[],
+          tables: Array.isArray(s.tables)?s.tables.map(function(t){
+            return {
+              title: normalizeScanText(t.title||""),
+              headers: Array.isArray(t.headers)?t.headers.map(function(h){ return normalizeScanText(h); }):[],
+              rows: Array.isArray(t.rows)?t.rows.map(function(r){ return Array.isArray(r)?r.map(function(c){ return normalizeScanText(c); }):[]; }):[]
+            };
+          }):[]
+        };
+      });
+    }
+
+    scanParsed={ date:parsed.date||"", dateLabel:parsed.dateLabel||"", sections:normalizeScanParsedSections(sections), images:docPages.map(p=>p.store) };
 
     /* Display Plan: the doc is a one-week (Fri–Thu) plan — set the week ourselves, ignore any promo date on the sheet. */
     if(scanMode==="salesplan"){
