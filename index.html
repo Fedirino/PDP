@@ -1811,7 +1811,7 @@ async function cloudHydrateDocs() {
       cloudSyncCollection("salesplan", docStore.salesplan),
       cloudSyncCollection("salesitems", docStore.salesitems)
     ]);
-  } catch (e) {}
+  } catch (e) { console.error("cloudHydrateDocs:",e); }
 }
 async function cloudHydrateAll() {
   if (!firebaseDb) return;
@@ -2219,7 +2219,7 @@ function docPrune(){
   docPrune();
   DOC_TYPES.forEach(t=>{ if(docStore[t].length) docActiveId[t]=docStore[t][0].id; });
 })();
-function saveDocs(){ const ok=writeK(DOCS_KEY,JSON.stringify(docStore)); if(firebaseDb&&cloudReady){ cloudSyncCollection("dailynotes",docStore.dailynotes).catch(function(){}); cloudSyncCollection("salesplan",docStore.salesplan).catch(function(){}); cloudSyncCollection("salesitems",docStore.salesitems).catch(function(){}); } return ok; }
+function saveDocs(){ const ok=writeK(DOCS_KEY,JSON.stringify(docStore)); if(firebaseDb&&cloudReady){ cloudSyncCollection("dailynotes",docStore.dailynotes).catch(function(e){ console.error("dailynotes sync:",e); }); cloudSyncCollection("salesplan",docStore.salesplan).catch(function(e){ console.error("salesplan sync:",e); }); cloudSyncCollection("salesitems",docStore.salesitems).catch(function(e){ console.error("salesitems sync:",e); }); } return ok; }
 function sortDocs(t){ docStore[t].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.created||0)-(a.created||0)); }
 function activeDoc(t){ return docStore[t].find(d=>d.id===docActiveId[t])||docStore[t][0]||null; }
 /* one-time seed: example Display Plan from the printed plan (pages 8 & 10) */
