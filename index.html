@@ -8,12 +8,12 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#135c2c">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.17.4">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.17.4">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.17.4">
+<link rel="apple-touch-icon" href="icon192.png?v=5.17.5">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.17.5">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.17.5">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.17.4">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.17.5">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -1686,14 +1686,27 @@ function initFirebase() {
   firebaseDb = firebase.firestore();
   firebaseAuth = firebase.auth();
   try { firebaseAuth.setPersistence(firebase.Auth.Persistence.LOCAL); } catch (e) {}
+  let authSettleTimer = null;
   firebaseAuth.onAuthStateChanged(function (user) {
     shared.user = user;
     if(user && !user.isAnonymous){
       sync.email = user.email;
       sync.mode = 'cloud';
+      if(authSettleTimer){ clearTimeout(authSettleTimer); authSettleTimer = null; }
     } else {
       sync.email = null;
       sync.mode = 'local';
+      // Give Firebase a moment to restore a persisted Google credential before
+      // falling back to anonymous sign-in. This prevents the anonymous session
+      // from trampling a Google credential that's still loading from IndexedDB.
+      if(!authSettleTimer){
+        authSettleTimer = setTimeout(function(){
+          authSettleTimer = null;
+          if(!shared.user || shared.user.isAnonymous){
+            firebaseAuth.signInAnonymously().catch(function(){});
+          }
+        }, 1500);
+      }
     }
     loadSharedConfig().then(function(){
       if(!cloudReady){ cloudReady = true; cloudHydrateAll().catch(function(){}); }
@@ -1702,7 +1715,6 @@ function initFirebase() {
       if(!cloudReady){ cloudReady = true; cloudHydrateAll().catch(function(){}); }
     });
   });
-  firebaseAuth.signInAnonymously().catch(function () {});
   return true;
 }
 
