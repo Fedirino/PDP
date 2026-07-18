@@ -8,12 +8,12 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#135c2c">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.17.5">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.17.5">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.17.5">
+<link rel="apple-touch-icon" href="icon192.png?v=5.17.6">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.17.6">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.17.6">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.17.5">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.17.6">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -2731,7 +2731,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.17.3</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.17.6</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -3239,6 +3239,8 @@ function renderSchedule(){
     <button class="${schWeek===0?"on":""}" data-schw="0">${sched.weeks[0].label}</button>
     <button class="${schWeek===1?"on":""}" data-schw="1">${sched.weeks[1].label}</button>
   </div>`;
+  /* Push-next-week button — only on Next Week tab in view mode */
+  const pushBtn=(schWeek===1&&!schEdit)?`<div style="margin:2px 8px 0;text-align:center"><button class="btn ghost" id="schPush" style="font-size:12px;padding:5px 14px;color:var(--accent);border-color:var(--accent);width:100%">${I.up} Push Next Week → This Week</button></div>`:"";
   let body="";
   if(!w.employees.length && !schEdit){
     body=`<div class="empty"><div class="ei">${I.cal}</div>No employees added yet.<br>Tap <b>Scan</b> to photograph a schedule, or <b>Edit</b> to add manually.</div>`;
@@ -3293,14 +3295,25 @@ function renderSchedule(){
   }
   body+=`<div class="sch-note">${w.employees.length} employee${w.employees.length!==1?"s":""} · tap a shift to edit · stored on device</div>`;
   if(w.employees.length) body+=`<div style="text-align:center;margin-top:8px"><button class="btn ghost" id="schClearAll" style="font-size:11px;padding:6px 14px">${I.x} Clear All Employees</button></div>`;
-  view.innerHTML=seg+body;
+  view.innerHTML=seg+pushBtn+body;
 
-  /* Wire week tabs */
+    /* Wire week tabs */
   view.querySelectorAll("[data-schw]").forEach(b=>b.onclick=()=>{ schWeek=parseInt(b.dataset.schw); render(); });
   const dateInp=document.getElementById("schDate");
   if(dateInp) dateInp.onchange=()=>{ w.startDate=dateInp.value; saveSched(); render(); };
   const clearAll=document.getElementById("schClearAll");
   if(clearAll) clearAll.onclick=()=>{ if(confirm("Remove all employees from "+w.label+"?")){ w.employees=[]; w.startDate=""; saveSched(); toast("Schedule cleared"); render(); } };
+  /* Wire push-next-week button */
+  const schPush=document.getElementById("schPush");
+  if(schPush) schPush.onclick=()=>{
+    const next=sched.weeks[1];
+    if(!next.employees.length){ toast("Next Week is empty"); return; }
+    if(!confirm("Replace This Week's schedule with Next Week's data?")) return;
+    sched.weeks[0].employees=JSON.parse(JSON.stringify(next.employees));
+    sched.weeks[0].startDate=next.startDate;
+    next.employees=[]; next.startDate="";
+    schWeek=0; saveSched(); toast("Pushed Next Week → This Week"); render();
+  };
 
   if(schEdit){
     /* Wire name inputs */

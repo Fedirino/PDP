@@ -11,6 +11,16 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.17.6] — 2026-07-18
+
+### Added
+- **Push Next Week → This Week button** on the Schedule tab. When viewing "Next Week," a button appears that deep-copies all employees, shifts, and start date to "This Week," then clears Next Week for fresh input. Includes confirmation dialog and empty-guard.
+
+### Fixed
+- Version markers now consistent across UI footer, manifest, and service worker (all v5.17.6).
+
+---
+
 ## [5.21.0] — 2026-07-01
 
 ### Changed
