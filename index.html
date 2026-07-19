@@ -4463,17 +4463,16 @@ Return ONLY valid JSON. No markdown, no backticks, no commentary.
 
 {"date":"","dateLabel":"Week 28 2026","sections":[
   {"category":"Week 28 2026 Order Code List","subject":"","contact":"","bullets":[],
-   "tables":[{"title":"","headers":["Mon","Tue","Item Number","Description","Price"],"rows":[["","","133206","RED SALSA MEDIUM 12 OZ","$4.49"]]}]}
-]}
+   "tables":[{"title":"","headers":["Item Number","Description","Price"],"rows":[["133206","RED SALSA MEDIUM 12 OZ","$4.49"]]}]}
+   ]}
 
-RULES:
-- date: leave as "" unless the page clearly shows a real calendar date. dateLabel: the printed week/title label exactly as shown, e.g. "Week 28 2026", "Week 28 2026 Order Code List", or "e 6 Deal Lock Program".
-- Capture EVERY page in order. If a sheet spans multiple pages, keep the rows in printed order across all pages.
-- Transcribe item code, description, and price exactly as printed.
-- PRICE RULE: if BOTH NE and NY prices are present, use the NE price in "Price" and ignore the NY price. If only one price is present, use it. If the page only shows one price column like "Retail", use that value for "Price".
-- Leave "Mon" and "Tue" blank for manual entry unless a value is explicitly printed there.
-- If the printed table includes only code/description/Retail, map them to Item Number / Description / Price.
-- Do NOT invent, reorder, round, or summarize. Accuracy matters more than anything.`;
+   RULES:
+   - date: leave as "" unless the page clearly shows a real calendar date. dateLabel: the printed week/title label exactly as shown, e.g. "Week 28 2026", "Week 28 2026 Order Code List", or "e 6 Deal Lock Program".
+   - Capture EVERY page in order. If a sheet spans multiple pages, keep the rows in printed order across all pages.
+   - Transcribe item code, description, and price exactly as printed.
+   - PRICE RULE: if BOTH NE and NY prices are present, use the NE price in "Price" and ignore the NY price. If only one price is present, use it. If the page only shows one price column like "Retail", use that value for "Price".
+   - If the printed table includes only code/description/Retail, map them to Item Number / Description / Price.
+   - Do NOT invent, reorder, round, or summarize. Accuracy matters more than anything.`;
 
 async function readDocPages(){
   if(!docPages.length) return;
@@ -4939,23 +4938,13 @@ function renderDocEdit(type,d){
       </div>
     </div>`;
   };
-  const quickBar=type==="salesitems"?`
-    <div class="doc-qe" style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:10px 0 12px">
-      <input class="doc-edit-cell" id="qeMon" placeholder="Mon">
-      <input class="doc-edit-cell" id="qeTue" placeholder="Tue">
-      <input class="doc-edit-cell" id="qeItem" placeholder="Item #">
-      <input class="doc-edit-cell" id="qeDesc" placeholder="Description" style="grid-column:span 2">
-      <input class="doc-edit-cell" id="qePrice" placeholder="Price">
-      <button class="btn" id="qeAdd" style="grid-column:1/-1">${I.plus} Quick add row</button>
-    </div>`:"";
-  view.innerHTML=`
-    <div class="lbl" style="margin-top:2px">Editing · ${lbl}</div>
-    <div class="doc-top">
-      <input class="doc-sel" id="docEditLabel" value="${esc(d.dateLabel||d.date||"")}" placeholder="Title / date label">
-    </div>
-    <div class="doc-meta">Tap <b>Done</b> (top right) to save your changes.</div>
-    ${quickBar}
-    ${(d.sections||[]).map((s,si)=>secHTML(s,si)).join("")}
+    view.innerHTML=`
+      <div class="lbl" style="margin-top:2px">Editing · ${lbl}</div>
+      <div class="doc-top">
+        <input class="doc-sel" id="docEditLabel" value="${esc(d.dateLabel||d.date||"")}" placeholder="Title / date label">
+      </div>
+      <div class="doc-meta">Tap <b>Done</b> (top right) to save your changes.</div>
+      ${(d.sections||[]).map((s,si)=>secHTML(s,si)).join("")}
     <button class="btn ghost block" id="docAddSec" style="margin-top:6px">${I.plus} Add section</button>`;
 
   /* live-bind text fields to the model */
@@ -4972,26 +4961,10 @@ function renderDocEdit(type,d){
   const addSec=document.getElementById("docAddSec");
   if(addSec) addSec.onclick=()=>{ d.sections.push({category:"",subject:"",contact:"",bullets:[],tables:[]}); render(); };
   view.querySelectorAll("[data-delsec]").forEach(b=>b.onclick=()=>{ if(confirm("Delete this section?")){ d.sections.splice(+b.dataset.delsec,1); render(); } });
-  view.querySelectorAll("[data-addtbl]").forEach(b=>b.onclick=()=>{ d.sections[+b.dataset.addtbl].tables.push({title:"",headers:type==="salesitems"?["Mon","Tue","Item Number","Description","Price"]:["Position","Item"],rows:[type==="salesitems"?["", "", "", "", ""]:["",""]]}); render(); });
+  view.querySelectorAll("[data-addtbl]").forEach(b=>b.onclick=()=>{ d.sections[+b.dataset.addtbl].tables.push({title:"",headers:type==="salesitems"?["Item Number","Description","Price"]:["Position","Item"],rows:[type==="salesitems"?["", "", ""]:["",""]]}); render(); });
   view.querySelectorAll("[data-addrow]").forEach(b=>b.onclick=()=>{ const[si,ti]=b.dataset.addrow.split(".").map(Number); const t=d.sections[si].tables[ti]; const w=(t.headers||[]).length||(t.rows[0]?t.rows[0].length:2); t.rows.push(Array(w).fill("")); render(); });
   view.querySelectorAll("[data-delrow]").forEach(b=>b.onclick=()=>{ const[si,ti,ri]=b.dataset.delrow.split(".").map(Number); d.sections[si].tables[ti].rows.splice(ri,1); render(); });
-  if(type==="salesitems"){
-    const qeAdd=document.getElementById("qeAdd");
-    if(qeAdd) qeAdd.onclick=()=>{
-      const mon=(document.getElementById("qeMon").value||"").trim();
-      const tue=(document.getElementById("qeTue").value||"").trim();
-      const item=(document.getElementById("qeItem").value||"").trim();
-      const desc=(document.getElementById("qeDesc").value||"").trim();
-      const price=(document.getElementById("qePrice").value||"").trim();
-      if(!item&&!desc&&!price&&!mon&&!tue) return;
-      if(!d.sections.length) d.sections.push({category:"",subject:"",contact:"",bullets:[],tables:[]});
-      if(!d.sections[0].tables.length) d.sections[0].tables.push({title:"",headers:["Mon","Tue","Item Number","Description","Price"],rows:[]});
-      const t=d.sections[0].tables[0];
-      if((t.headers||[]).join("|")!==["Mon","Tue","Item Number","Description","Price"].join("|")) t.headers=["Mon","Tue","Item Number","Description","Price"];
-      t.rows.unshift([mon,tue,item,desc,price]);
-      render();
-    };
-  }
+    /* quick-entry bar removed — use inline table editing */
 }
 
 
