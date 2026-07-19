@@ -19,6 +19,7 @@ All notable changes to the Produce Department Portal are documented here.
 ### Maintenance
 - **Added a dependency-free project verifier** for JavaScript/JSON syntax, embedded stencil data, duplicate named functions, local asset references, and consistent version markers.
 - **Deployment now runs verification first** and excludes repository documentation, source stencil files, and maintenance scripts from Firebase Hosting.
+- **Firebase Hosting is now the sole documented deployment target;** obsolete legacy-host references were removed.
 
 ### Files
 - `index.html` — Main app (v5.17.7)
@@ -141,24 +142,6 @@ All notable changes to the Produce Department Portal are documented here.
 - `pdp-old-v5_9_3.html` — archived previous version
 - `CHANGELOG.md` — this file
 - `manifest.json`, icons — unchanged
-
----
-
-## [4.9.0] — 2026-06-14
-
-### Changed
-- **Netlify proxy for API calls**: All Claude AI scan requests now route through a Netlify serverless function (`netlify/functions/scan.js`) instead of calling Anthropic directly from the browser. The API key lives in Netlify's environment variables — never in GitHub source code or the browser.
-- **API key UI removed**: No more "Enter API key" prompt or "Change API key" button. Scans just work for all coworkers with no setup required.
-
-### Added
-- `netlify/functions/scan.js` — Serverless proxy function. Reads `ANTHROPIC_API_KEY` from Netlify environment and forwards requests to Anthropic.
-
-### Files
-- `index.html` — Main app (v4.9.0)
-- `pdp-old-v4_8_0.html` — Archived v4.8.0
-- `sw.js` — Service worker (cache v4.9.0)
-- `netlify/functions/scan.js` — NEW: API proxy function
-- `CHANGELOG.md` — This file
 
 ---
 
