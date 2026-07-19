@@ -4,10 +4,33 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
-## [5.17.3] — 2026-07-01
+## [5.17.7] — 2026-07-19
 
-### Fixed
-- Removed `zoom: 1.22` from global body style — UI was rendering 22% too large vs baseline.
+### Changed
+- **Sales Items tables reduced to three columns.** The `Mon` and `Tue` columns were removed; tables are now Item Number / Description / Price.
+- **Scan prompt updated to match.** The example JSON and the rule instructing the model to leave `Mon`/`Tue` blank for manual entry were removed, so scans return the three-column shape directly.
+- **"Add table" now seeds the three-column layout** for Sales Items instead of the old five-column one.
+
+### Removed
+- **Quick-entry bar** in the Sales Items editor (the five-field row plus "Quick add row" button). Rows are now added through inline table editing.
+- **Duplicate 192px favicon declaration** from the document head.
+- **Duplicate clipboard helper** that was silently overriding the earlier declaration and producing repeated success messages.
+
+### Maintenance
+- **Added a dependency-free project verifier** for JavaScript/JSON syntax, embedded stencil data, duplicate named functions, local asset references, and consistent version markers.
+- **Deployment now runs verification first** and excludes repository documentation, source stencil files, and maintenance scripts from Firebase Hosting.
+- **Firebase Hosting is now the sole documented deployment target;** obsolete legacy-host references were removed.
+
+### Files
+- `index.html` — Main app (v5.17.7)
+- `sw.js` — cache bumped to `pdp-v5.17.7`
+- `manifest.json` — version query strings bumped to 5.17.7
+- `CHANGELOG.md` — this file
+- `.gitattributes` — NEW: normalizes line endings to LF in the repo
+- `README.md` — NEW: project overview and release checklist
+- `scripts/verify-project.mjs` — NEW: local and CI validation
+- `firebase.json` — excludes non-runtime project files from Hosting
+- `.github/workflows/firebase-hosting-merge.yml` — verifies before deploy
 
 ---
 
@@ -21,7 +44,35 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
-## [5.21.0] — 2026-07-01
+## [5.17.5] — 2026-07-15
+
+### Fixed
+- **Google sign-in persistence** — sessions no longer drop between app launches.
+
+### Changed
+- New circular PDP logo icon.
+
+---
+
+## [5.17.4] — 2026-07-15
+
+### Fixed
+- **Added missing PWA icons**, resolving install/home-screen icon failures.
+- **Sales Items added to Firestore rules**, fixing the scan save path; removed a silent `catch` that was swallowing write errors.
+
+### Added
+- Scheduled-today stat on the Home tab; shared API key system.
+
+---
+
+## [5.17.3] — 2026-07-01
+
+### Fixed
+- Removed `zoom: 1.22` from global body style — UI was rendering 22% too large vs baseline.
+
+---
+
+## [5.17.0] — 2026-07-01
 
 ### Changed
 - **OpenRouter is now the default AI provider.** PDP’s scan/settings AI path now defaults to OpenRouter instead of Anthropic, while still allowing Anthropic to be selected manually.
@@ -34,6 +85,12 @@ All notable changes to the Produce Department Portal are documented here.
 - `sw.js` — cache bumped to `pdp-v5.17.0`
 - `CHANGELOG.md` — this file
 - `manifest.json`, icons — unchanged
+
+> **Correction — this entry does not reflect shipped code.**
+>
+> It was previously mislabeled `5.21.0`; renumbered to `5.17.0` to match the `pdp-v5.17.0` cache name in its own Files list.
+>
+> More importantly, **the OpenRouter provider switch described above was never implemented.** No OpenRouter code exists in `index.html`, and `git log -S openrouter --all` returns no commit that added any. The text was introduced by commit `fc4424b`, whose actual change was adding the Sales Items document type. PDP calls the Anthropic API directly using `claude-sonnet-4-6`. Entry retained for history; treat as not shipped.
 
 ---
 
@@ -85,24 +142,6 @@ All notable changes to the Produce Department Portal are documented here.
 - `pdp-old-v5_9_3.html` — archived previous version
 - `CHANGELOG.md` — this file
 - `manifest.json`, icons — unchanged
-
----
-
-## [4.9.0] — 2026-06-14
-
-### Changed
-- **Netlify proxy for API calls**: All Claude AI scan requests now route through a Netlify serverless function (`netlify/functions/scan.js`) instead of calling Anthropic directly from the browser. The API key lives in Netlify's environment variables — never in GitHub source code or the browser.
-- **API key UI removed**: No more "Enter API key" prompt or "Change API key" button. Scans just work for all coworkers with no setup required.
-
-### Added
-- `netlify/functions/scan.js` — Serverless proxy function. Reads `ANTHROPIC_API_KEY` from Netlify environment and forwards requests to Anthropic.
-
-### Files
-- `index.html` — Main app (v4.9.0)
-- `pdp-old-v4_8_0.html` — Archived v4.8.0
-- `sw.js` — Service worker (cache v4.9.0)
-- `netlify/functions/scan.js` — NEW: API proxy function
-- `CHANGELOG.md` — This file
 
 ---
 
@@ -350,7 +389,6 @@ All notable changes to the Produce Department Portal are documented here.
 - Version bumped to v3.6.0
 
 ---
-
 
 ## [2.9.0] — 2026-06-09
 

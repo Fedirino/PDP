@@ -8,12 +8,11 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#135c2c">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.17.6">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.17.6">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.17.6">
+<link rel="apple-touch-icon" href="icon192.png?v=5.17.7">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.17.7">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.17.7">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.17.6">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -2731,7 +2730,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.17.6</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.17.7</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -3192,20 +3191,13 @@ function entryText(entry){
   });
   return txt;
 }
-async function copyText(txt){
-  try{ await navigator.clipboard.writeText(txt); }catch(er){
-    const t=document.createElement("textarea"); t.value=txt; document.body.appendChild(t); t.select();
-    try{document.execCommand("copy");}catch(_){} t.remove();
-  }
-}
 function wireUnfound(){
   /* Per-day copy */
   view.querySelectorAll("[data-copyday]").forEach(btn=>btn.addEventListener("click",async function(e){
     e.preventDefault(); e.stopPropagation();
     const entry=unfound[+btn.dataset.copyday];
     if(!entry) return;
-    await copyText(entryText(entry).trim());
-    toast("Copied "+entry.date);
+    if(await copyText(entryText(entry).trim())) toast("Copied "+entry.date);
   }));
   /* Per-day delete */
   view.querySelectorAll("[data-delday]").forEach(btn=>btn.addEventListener("click",function(e){
@@ -3227,8 +3219,9 @@ function wireUnfound(){
     e.preventDefault(); e.stopPropagation();
     let txt="";
     unfound.forEach(entry=>{ txt+=entryText(entry)+"\n"; });
-    await copyText(txt.trim());
-    cp.innerHTML=I.check+" Copied"; toast("Copied to clipboard"); setTimeout(()=>cp.innerHTML=I.copy+" Copy All",1400);
+    if(await copyText(txt.trim())){
+      cp.innerHTML=I.check+" Copied"; toast("Copied to clipboard"); setTimeout(()=>cp.innerHTML=I.copy+" Copy All",1400);
+    }
   }); }
 }
 
@@ -4806,10 +4799,20 @@ function docToText(doc){
 }
 
 async function copyText(txt,okMsg){
-  try{ await navigator.clipboard.writeText(txt); toast(okMsg||"Copied"); }
+  try{
+    await navigator.clipboard.writeText(txt);
+    if(okMsg) toast(okMsg);
+    return true;
+  }
   catch(e){
-    try{ const ta=document.createElement("textarea"); ta.value=txt; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); toast(okMsg||"Copied"); }
-    catch(e2){ toast("Couldn't copy"); }
+    try{
+      const ta=document.createElement("textarea"); ta.value=txt; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select();
+      const copied=document.execCommand("copy"); ta.remove();
+      if(!copied) throw new Error("Copy command failed");
+      if(okMsg) toast(okMsg);
+      return true;
+    }
+    catch(e2){ toast("Couldn't copy"); return false; }
   }
 }
 
