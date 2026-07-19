@@ -20,6 +20,9 @@ jobs:
         with:
           node-version: 20
 
+      - name: Verify project
+        run: node scripts/verify-project.mjs
+
       - name: Authenticate to Google Cloud
         id: auth
         uses: google-github-actions/auth@v2

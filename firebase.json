@@ -6,6 +6,11 @@
       ".firebaserc",
       "firestore.rules",
       "firestore.indexes.json",
+      "CHANGELOG.md",
+      "README.md",
+      "normalized_stencil.json",
+      "normalized_stencil.md",
+      "scripts/**",
       "**/.*",
       "**/node_modules/**"
     ],
