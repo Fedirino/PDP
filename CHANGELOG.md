@@ -4,6 +4,24 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.19.0] — 2026-07-19
+
+### Added
+- **Pages are turned right side up automatically.** On capture, a 512px copy goes to `google/gemini-3.1-flash-lite` with one question — how many degrees clockwise to make the text read left-to-right — capped at 8 output tokens. Any non-zero answer is baked into the pixels before the real scan runs. Thumbnails show an `auto` badge; the manual rotate button still overrides. Costs roughly $0.0002 a page.
+- Fails open by design: a bad answer, a dead provider, or no API key leaves the page unrotated and the scan proceeds. Orientation is never allowed to block a scan.
+
+### Notes
+- The plan was to gate that call behind a free local check on the pixel-darkness profile, which spots a sideways page by whether the text stripes run vertically. That check cannot tell upright from upside-down, so gating on it would have left 180° pages unfixed — the exact case it was supposed to cover. At a fraction of a cent per page, calling every time is both cheaper and simpler than carrying two mechanisms.
+
+### Files
+- `index.html` — Main app (v5.19.0)
+- `sw.js` — cache bumped to `pdp-v5.19.0`
+- `manifest.json` — version query strings bumped to 5.19.0
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.18.2] — 2026-07-19
 
 ### Fixed

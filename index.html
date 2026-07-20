@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#135c2c">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.18.2">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.18.2">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.18.2">
+<link rel="apple-touch-icon" href="icon192.png?v=5.19.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.19.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.19.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -764,6 +764,8 @@
   .pg-item .pg-r{position:absolute;right:3px;bottom:3px;width:20px;height:20px;border:none;border-radius:50%;
     background:rgba(0,0,0,.62);color:#fff;display:grid;place-items:center;cursor:pointer;font-size:12px;line-height:1;}
   .pg-item .pg-r svg{width:12px;height:12px;}
+  .pg-item .pg-a{position:absolute;left:4px;bottom:4px;font-size:9px;font-weight:700;letter-spacing:.03em;
+    color:#fff;background:rgba(19,92,44,.85);border-radius:5px;padding:1px 4px;}
   /* fullscreen image viewer */
   .img-overlay{position:fixed;inset:0;z-index:60;background:rgba(6,9,7,.94);display:none;
     flex-direction:column;align-items:center;justify-content:center;padding:18px;}
@@ -2761,7 +2763,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.18.2</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.19.0</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -4492,15 +4494,41 @@ async function compressImageFile(file,rot){
   }
   const apiURL=draw(2048,0.92);
   const store=draw(900,0.65);
+  /* Deliberately tiny: the orientation probe only needs to see which way the
+     text runs, and it is billed per image. */
+  const probe=draw(512,0.55);
   if(src.close) try{ src.close(); }catch(e){}
-  return { imgSrc:store, store, b64:apiURL.split(",")[1], file:file, rot:rot };
+  return { imgSrc:store, store, b64:apiURL.split(",")[1], probeB64:probe.split(",")[1], file:file, rot:rot };
+}
+
+/* Ask a cheap model which way is up. Runs on a 512px copy, caps output at a
+   few tokens, and fails open — an orientation hiccup must never block a scan. */
+const ORIENT_MODEL="google/gemini-3.1-flash-lite";
+async function askPageOrientation(probeB64){
+  try{
+    const data=await orFetch({
+      model:ORIENT_MODEL,
+      max_tokens:8,
+      messages:[{role:"user",content:[
+        orImage(probeB64),
+        orText('This is a phone photo of a printed page. How many degrees CLOCKWISE must the image be rotated so the text is upright and reads left-to-right? Answer with exactly one number and nothing else: 0, 90, 180, or 270.')
+      ]}]
+    });
+    const m=(orTextOf(data)||"").match(/\d{1,3}/);
+    const n=m?parseInt(m[0],10):0;
+    return (n===90||n===180||n===270)?n:0;
+  }catch(e){ return 0; }
 }
 
 async function addDocPage(file){
   const strip=document.getElementById("pgStrip");
   if(strip) strip.insertAdjacentHTML("beforeend",`<div class="pg-item" style="display:grid;place-items:center;color:var(--ink-3);font-size:10px">…</div>`);
   try{
-    const p=await compressImageFile(file);
+    let p=await compressImageFile(file);
+    if(getEffectiveKey()){
+      const rot=await askPageOrientation(p.probeB64);
+      if(rot){ p=await compressImageFile(file,rot); p.auto=true; }
+    }
     docPages.push(p);
   }catch(e){ /* ignore */ }
   openDocScanCollect();
@@ -4511,13 +4539,14 @@ async function rotateDocPage(i){
   const p=docPages[i];
   if(!p||!p.file) return;
   try{
+    /* A manual turn is the user overruling auto-orient, so drop the badge. */
     docPages[i]=await compressImageFile(p.file,(p.rot||0)+90);
   }catch(e){ /* keep the existing page on failure */ }
   openDocScanCollect();
 }
 
 function pgItemHTML(p,i){
-  return `<div class="pg-item"><img src="${p.imgSrc}" alt="Page ${i+1}"><span class="pg-n">${i+1}</span><button class="pg-x" data-pgx="${i}">${I.x}</button>${p.file?`<button class="pg-r" data-pgr="${i}" title="Rotate">${I.rotate}</button>`:""}</div>`;
+  return `<div class="pg-item"><img src="${p.imgSrc}" alt="Page ${i+1}"><span class="pg-n">${i+1}</span>${p.auto?'<span class="pg-a" title="Turned upright automatically">auto</span>':""}<button class="pg-x" data-pgx="${i}">${I.x}</button>${p.file?`<button class="pg-r" data-pgr="${i}" title="Rotate">${I.rotate}</button>`:""}</div>`;
 }
 
 function openDocScanCollect(){
