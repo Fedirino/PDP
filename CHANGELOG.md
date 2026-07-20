@@ -4,6 +4,28 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.17.8] — 2026-07-19
+
+### Fixed
+- **Daily Notes, Display Plan, and Sales Items now actually sync to Firestore.** The write path was already wired up, but every save was failing silently: document tables store `rows` as an array of arrays, and Firestore rejects nested arrays outright. All three `cloudSyncCollection` calls threw on every save and the error only ever reached `console.error`. Schedule was unaffected because `sched` contains no nested arrays.
+- Documents now travel to Firestore as a JSON string payload (`docCloudEncode` / `docCloudDecode`), with `id`, `created`, `date`, and `dateLabel` kept as plain fields so the existing `orderBy("created", "desc")` hydrate queries still work.
+- Documents already sitting in Firestore in the old unencoded shape still load — `docCloudDecode` passes through any record without a `payload` field.
+
+### Changed
+- **Document sync is now additive.** `cloudSyncDocCollection` pushes what's on the device and no longer deletes remote records that are missing locally. Local retention (`docPrune`, ~14 days) is a per-device convenience, so the old behavior would have let whichever phone opened the app last silently erase everyone's older documents.
+- **Cloud deletes now happen only on an actual delete.** The Delete button on a document removes it from Firestore via `cloudDeleteDoc`, and choosing "replace" during a scan drops the superseded record — the replacement gets a fresh id, so it would otherwise linger forever.
+
+### Removed
+- **`cloudSyncCollection`** — replaced by `cloudSyncDocCollection`, which encodes before writing. Nothing else referenced it.
+
+### Files
+- `index.html` — Main app (v5.17.8)
+- `sw.js` — cache bumped to `pdp-v5.17.8`
+- `manifest.json` — version query strings bumped to 5.17.8
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.17.7] — 2026-07-19
 
 ### Changed

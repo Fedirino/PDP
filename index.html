@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#135c2c">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.17.7">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.17.7">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.17.7">
+<link rel="apple-touch-icon" href="icon192.png?v=5.17.8">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.17.8">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.17.8">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -1773,14 +1773,41 @@ async function cloudWriteDoc(col, id, data) {
   await firebaseDb.collection(col).doc(id).set(cloudClone(data), { merge: true });
   return true;
 }
-async function cloudSyncCollection(col, items) {
+/* Firestore rejects nested arrays, and every document's tables use
+   rows: [[cell, cell], ...]. So docs travel as a JSON string payload and
+   are rehydrated on the way back. Scalar fields stay on the wire so
+   orderBy("created") keeps working. */
+function docCloudEncode(d) {
+  return {
+    id: d.id,
+    created: d.created || 0,
+    date: d.date || "",
+    dateLabel: d.dateLabel || "",
+    payload: JSON.stringify(d)
+  };
+}
+function docCloudDecode(raw) {
+  if (!raw) return null;
+  if (typeof raw.payload === "string") {
+    try { return JSON.parse(raw.payload); } catch (e) { return null; }
+  }
+  return raw; /* legacy/unencoded document written before v5.17.8 */
+}
+/* Additive on purpose: this pushes what's on this device and never removes
+   anything else. Local retention (docPrune) is a per-device convenience, so
+   letting it delete would make whichever phone opened the app last silently
+   erase everyone's older documents. Removals go through cloudDeleteDoc,
+   which only fires when you actually delete a document. */
+async function cloudSyncDocCollection(col, items) {
   if (!firebaseDb) return false;
   const ref = firebaseDb.collection(col);
-  const snap = await ref.get();
-  const keep = new Set((items || []).map(function (x) { return x.id; }));
-  await Promise.all((items || []).map(function (item) { return ref.doc(item.id).set(cloudClone(item), { merge: true }); }));
-  await Promise.all(snap.docs.map(function (doc) { if (!keep.has(doc.id)) return doc.ref.delete(); }));
+  const list = (items || []).filter(function (x) { return x && x.id; });
+  await Promise.all(list.map(function (item) { return ref.doc(item.id).set(docCloudEncode(item)); }));
   return true;
+}
+function cloudDeleteDoc(col, id) {
+  if (!firebaseDb || !cloudReady || !id) return;
+  firebaseDb.collection(col).doc(id).delete().catch(function (e) { console.error(col + " delete:", e); });
 }
 async function cloudHydrateSchedule() {
   if (!firebaseDb) return;
@@ -1803,9 +1830,9 @@ async function cloudHydrateDocs() {
       firebaseDb.collection("salesplan").orderBy("created", "desc").get(),
       firebaseDb.collection("salesitems").orderBy("created", "desc").get()
     ]);
-    const remoteDN = dnSnap.docs.map(function (d) { return d.data(); }).filter(Boolean);
-    const remoteSP = spSnap.docs.map(function (d) { return d.data(); }).filter(Boolean);
-    const remoteSI = siSnap.docs.map(function (d) { return d.data(); }).filter(Boolean);
+    const remoteDN = dnSnap.docs.map(function (d) { return docCloudDecode(d.data()); }).filter(Boolean);
+    const remoteSP = spSnap.docs.map(function (d) { return docCloudDecode(d.data()); }).filter(Boolean);
+    const remoteSI = siSnap.docs.map(function (d) { return docCloudDecode(d.data()); }).filter(Boolean);
     if (remoteDN.length || remoteSP.length || remoteSI.length) {
       docStore.dailynotes = remoteDN;
       docStore.salesplan = remoteSP;
@@ -1818,9 +1845,9 @@ async function cloudHydrateDocs() {
       return;
     }
     await Promise.all([
-      cloudSyncCollection("dailynotes", docStore.dailynotes),
-      cloudSyncCollection("salesplan", docStore.salesplan),
-      cloudSyncCollection("salesitems", docStore.salesitems)
+      cloudSyncDocCollection("dailynotes", docStore.dailynotes),
+      cloudSyncDocCollection("salesplan", docStore.salesplan),
+      cloudSyncDocCollection("salesitems", docStore.salesitems)
     ]);
   } catch (e) { console.error("cloudHydrateDocs:",e); }
 }
@@ -2230,7 +2257,7 @@ function docPrune(){
   docPrune();
   DOC_TYPES.forEach(t=>{ if(docStore[t].length) docActiveId[t]=docStore[t][0].id; });
 })();
-function saveDocs(){ const ok=writeK(DOCS_KEY,JSON.stringify(docStore)); if(firebaseDb&&cloudReady){ cloudSyncCollection("dailynotes",docStore.dailynotes).catch(function(e){ console.error("dailynotes sync:",e); }); cloudSyncCollection("salesplan",docStore.salesplan).catch(function(e){ console.error("salesplan sync:",e); }); cloudSyncCollection("salesitems",docStore.salesitems).catch(function(e){ console.error("salesitems sync:",e); }); } return ok; }
+function saveDocs(){ const ok=writeK(DOCS_KEY,JSON.stringify(docStore)); if(firebaseDb&&cloudReady){ cloudSyncDocCollection("dailynotes",docStore.dailynotes).catch(function(e){ console.error("dailynotes sync:",e); }); cloudSyncDocCollection("salesplan",docStore.salesplan).catch(function(e){ console.error("salesplan sync:",e); }); cloudSyncDocCollection("salesitems",docStore.salesitems).catch(function(e){ console.error("salesitems sync:",e); }); } return ok; }
 function sortDocs(t){ docStore[t].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.created||0)-(a.created||0)); }
 function activeDoc(t){ return docStore[t].find(d=>d.id===docActiveId[t])||docStore[t][0]||null; }
 /* one-time seed: example Display Plan from the printed plan (pages 8 & 10) */
@@ -2730,7 +2757,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.17.7</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.17.8</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -4642,8 +4669,11 @@ async function applyDocScan(){
       toast(ok1?scanParsed.sections.length+" section"+(scanParsed.sections.length>1?"s":"")+" added":"Saved (storage may be full)");
       return;
     }
-    /* result === "replace" — remove existing, fall through to create new */
+    /* result === "replace" — remove existing, fall through to create new.
+       The replacement gets a fresh id, so the old record has to be dropped
+       from the cloud explicitly or it would linger under additive sync. */
     docStore[type]=arr.filter(function(d){ return d.id!==existing.id; });
+    cloudDeleteDoc(type,existing.id);
   }
 
   var doc={ id:"doc_"+Date.now(), date:date, dateLabel:scanParsed.dateLabel||scanParsed.date||date||"", created:Date.now(), images:[], sections:scanParsed.sections };
@@ -4914,6 +4944,7 @@ function renderDocSection(type){
     if(!confirm(`Delete "${d.dateLabel||d.date}" from ${lbl}?`)) return;
     docStore[type]=arr.filter(x=>x.id!==d.id);
     docActiveId[type]=docStore[type].length?docStore[type][0].id:null;
+    cloudDeleteDoc(type,d.id);
     saveDocs(); render(); toast("Deleted");
   };
 }
