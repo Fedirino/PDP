@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.18.1] — 2026-07-19
+
+### Fixed
+- **Scanning was broken outright in 5.18.0** — every scan threw `Failed to execute 'fetch' on 'Window'` before a request ever left the browser. The `X-Title` header sent to OpenRouter carried the app's real title, em dash and all, and HTTP header values must be Latin-1. Now plain ASCII.
+
+### Files
+- `index.html` — Main app (v5.18.1)
+- `sw.js` — cache bumped to `pdp-v5.18.1`
+- `manifest.json` — version query strings bumped to 5.18.1
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.18.0] — 2026-07-19
 
 ### Changed

@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#135c2c">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.18.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.18.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.18.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.18.1">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.18.1">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.18.1">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2757,7 +2757,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.18.0</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.18.1</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -4096,7 +4096,9 @@ async function orFetch(body){
       "Content-Type":"application/json",
       "Authorization":"Bearer "+key,
       "HTTP-Referer":location.origin,
-      "X-Title":"PDP — Produce Department Portal"
+      /* ASCII only. Header values must be Latin-1, and the em dash in the app's
+         real title made fetch() throw before the request ever left the browser. */
+      "X-Title":"PDP - Produce Department Portal"
     },
     body:JSON.stringify(body)
   });
