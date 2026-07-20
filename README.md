@@ -1,6 +1,6 @@
 # PDP — Produce Department Portal
 
-**Current version: v5.18.1**
+**Current version: v5.18.2**
 
 So here's the thing: I work in a produce department, not a software company. I didn't set out to "build an app." I set out to stop rewriting the same pull list on a crumpled piece of paper every morning. One thing led to another, and now my phone runs the whole department.
 

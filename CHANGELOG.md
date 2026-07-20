@@ -4,6 +4,24 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.18.2] — 2026-07-19
+
+### Fixed
+- **Corrected the wings rule in the Display Plan prompt — 5.18.0 described the wrong geometry and made things worse.** It told the model a wing "hangs off the far LEFT or far RIGHT EDGE, outside the shelf/well block," and gave it a test asserting nothing sits below a wing. On the actual printed sheet neither is true: the block is one bordered table with a narrow **label column** down its left edge, and the wings are **full-width rows** in that column — `Power Wing` stacked above `Shelf`, `Inside Wing` (or a bare `Wing`) below `Well`. The Shelf row sits directly under the Power Wing, which is exactly what the old rule said meant "not a wing."
+- The prompt now describes the label column, states that wing rows span the full width and are never columns, and replaces the bogus alignment test with a **row test**: a row split into side-by-side cells is a Shelf or Well and gets one output row per column; a row that is one cell across is a wing and gets exactly one. Column counting is anchored to the Shelf row alone. A bare `Wing` label is handled alongside `Power Wing` / `Inside Wing`.
+
+### Added
+- **Rotate button on each captured page** in the Display Plan / Daily Notes / Sales Items scan strip. These sheets get photographed sideways, and making the model infer a whole fixture's geometry through a 90° turn costs real accuracy. Rotation is baked into the pixels before upload, and each press re-derives from the original file so repeated rotations don't compound JPEG loss.
+
+### Files
+- `index.html` — Main app (v5.18.2)
+- `sw.js` — cache bumped to `pdp-v5.18.2`
+- `manifest.json` — version query strings bumped to 5.18.2
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.18.1] — 2026-07-19
 
 ### Fixed
