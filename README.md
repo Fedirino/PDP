@@ -1,6 +1,6 @@
 # PDP — Produce Department Portal
 
-**Current version: v5.17.8**
+**Current version: v5.18.0**
 
 So here's the thing: I work in a produce department, not a software company. I didn't set out to "build an app." I set out to stop rewriting the same pull list on a crumpled piece of paper every morning. One thing led to another, and now my phone runs the whole department.
 
@@ -26,7 +26,7 @@ One HTML file. Plain CSS and JavaScript. No frameworks, no build tools, no bundl
 | **Offline** | Service worker (`sw.js`), cache name `pdp-v{version}` |
 | **Hosting** | Firebase Hosting — project `producedepartmentportal` |
 | **Sync / auth** | Firebase Firestore + Google sign-in (`signInWithPopup`) |
-| **AI scanning** | Anthropic API, model `claude-sonnet-4-6` |
+| **AI scanning** | OpenRouter, model selectable in Settings (default `google/gemini-3.1-pro-preview`) |
 | **Deploy** | GitHub Actions → `.github/workflows/firebase-hosting-merge.yml`, fires on push to `main` |
 
 Firestore access is governed by `firestore.rules`. Hosting config, including the `no-cache` headers that keep stale builds from sticking, lives in `firebase.json`.

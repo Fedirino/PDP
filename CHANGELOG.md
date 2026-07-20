@@ -4,6 +4,30 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.18.0] — 2026-07-19
+
+### Changed
+- **Scanning now runs through OpenRouter instead of calling Anthropic directly.** One key, any model. `anthropicFetch` became `orFetch`, images ride as OpenAI-style `image_url` data URIs rather than Anthropic `source.base64` blocks, and replies are read off `choices[0].message`.
+- **The key lives under a new storage key (`pdp_or_key`).** An existing `sk-ant-` value in `pdp_api_key` is deliberately *not* reused — shipping it to a different vendor would just 401 confusingly. Saving a key that starts with `sk-ant-` now warns you specifically.
+- **Shared Access holds an OpenRouter key now.** The Google-sign-in flow is untouched, but the shared key needs re-entering as `sk-or-` before coworkers can scan again.
+- **Doc scan output cap raised from 8,192 to 32,768 tokens.** A full multi-page display plan could exceed the old ceiling and truncate the JSON mid-table, silently dropping trailing blocks.
+
+### Added
+- **Scan Model picker in Settings** — Gemini 3.1 Pro (default), Claude Opus 4.8, GPT-5.6 Sol, Claude Sonnet 5. Scan the same sheet with a few and keep whichever reads the fixture correctly.
+- **Handling for OpenRouter's 402 (out of credits)** and for the case where it returns HTTP 200 with an error body because an upstream provider failed.
+
+### Fixed
+- **Wings were being absorbed into shelf rows on the Display Plan.** A wing is drawn in the same horizontal band as the shelf, so the model kept counting it as one more shelf column. The prompt now sets wings aside *before* counting, gives an alignment test (a real shelf column has a well cell beneath it; a wing does not), and asks the model to commit to a `columns` count per block before writing rows — with a mismatch between Shelf and Well row counts flagged as the signature of an absorbed wing.
+
+### Files
+- `index.html` — Main app (v5.18.0)
+- `sw.js` — cache bumped to `pdp-v5.18.0`
+- `manifest.json` — version query strings bumped to 5.18.0
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.17.8] — 2026-07-19
 
 ### Fixed

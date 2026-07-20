@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#135c2c">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.17.8">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.17.8">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.17.8">
+<link rel="apple-touch-icon" href="icon192.png?v=5.18.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.18.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.18.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2216,7 +2216,7 @@ function docPrune(){
       var emailsHtml = esc((shared.allowedEmails||[]).join('\n'));
       var keyHtml = esc(shared.key);
       var statusHtml = shared.key ? ' Your key is saved.' : ' No key set yet.';
-      sb.innerHTML = '<div class="field"><label>Shared Anthropic Key</label><input id="sharedKeyInput" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-..." value="'+keyHtml+'" style="font-family:monospace;font-size:13px"></div>'+'<div class="field"><label>Allowed emails (one per line)</label><textarea id="sharedEmails" rows="3" style="resize:vertical;font-size:13px">'+emailsHtml+'</textarea></div>'+'<div style="display:flex;gap:10px;margin-top:10px"><button class="btn" id="saveSharedKey" style="flex:1">Save</button><button class="btn ghost danger" id="disableShared">Disable</button></div>'+'<div style="font-size:12px;color:var(--ink-2);margin-top:10px;line-height:1.5">Sharing is <b style="color:var(--brand)">enabled</b>.'+statusHtml+'<br>'+shared.allowedEmails.length+' email'+(shared.allowedEmails.length===1?'':'s')+' on the allowlist.</div>';
+      sb.innerHTML = '<div class="field"><label>Shared OpenRouter Key</label><input id="sharedKeyInput" type="password" autocomplete="off" spellcheck="false" placeholder="sk-or-v1-..." value="'+keyHtml+'" style="font-family:monospace;font-size:13px"></div>'+'<div class="field"><label>Allowed emails (one per line)</label><textarea id="sharedEmails" rows="3" style="resize:vertical;font-size:13px">'+emailsHtml+'</textarea></div>'+'<div style="display:flex;gap:10px;margin-top:10px"><button class="btn" id="saveSharedKey" style="flex:1">Save</button><button class="btn ghost danger" id="disableShared">Disable</button></div>'+'<div style="font-size:12px;color:var(--ink-2);margin-top:10px;line-height:1.5">Sharing is <b style="color:var(--brand)">enabled</b>.'+statusHtml+'<br>'+shared.allowedEmails.length+' email'+(shared.allowedEmails.length===1?'':'s')+' on the allowlist.</div>';
       var keyInput=document.getElementById('sharedKeyInput');
       if(keyInput) keyInput.addEventListener('input',function(){ this.type='text'; });
       var saveBtn=document.getElementById('saveSharedKey');
@@ -2757,7 +2757,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.17.8</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.18.0</div>`;
   view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -3566,17 +3566,19 @@ function renderGEV(){
 /* ================= TOOLS ================= */
 function renderSettings(){
   var hasKey=!!getApiKey();
-  var masked=hasKey?"sk-ant-…"+getApiKey().slice(-4):"Not set";
+  var masked=hasKey?"sk-or-…"+getApiKey().slice(-4):"Not set";
+  var curModel=getScanModel();
   view.innerHTML=`
-    <div class="lbl" style="margin-top:6px">Anthropic API Key</div>
+    <div class="lbl" style="margin-top:6px">OpenRouter API Key</div>
     <div class="panel" style="margin-bottom:0">
       <p style="font-size:13px;color:var(--ink-2);line-height:1.55;margin:0 0 14px">
         Required for scanning (Schedule, GEV, Daily Notes, Display Plan).
-        The key is stored only on this device. Get one at <b>console.anthropic.com</b>.
+        The key is stored only on this device. Get one at <b>openrouter.ai/keys</b> —
+        set a spend limit on it, since one key bills every model.
       </p>
       <div class="field"><label>API Key</label>
         <input id="apiKeyInput" type="password" autocomplete="off" autocorrect="off" spellcheck="false"
-          placeholder="sk-ant-api03-…" value="${esc(getApiKey())}"
+          placeholder="sk-or-v1-…" value="${esc(getApiKey())}"
           style="font-family:monospace;font-size:13px;letter-spacing:.02em">
       </div>
       <div style="display:flex;gap:10px;margin-top:12px">
@@ -3586,6 +3588,21 @@ function renderSettings(){
             <div style="font-size:12px;color:var(--ink-3);margin-top:10px">
               Current: <span style="font-family:monospace">${esc(masked)}</span>
             </div>
+          </div>
+          <div class="lbl" style="margin-top:18px">Scan Model</div>
+          <div class="panel">
+            <p style="font-size:13px;color:var(--ink-2);line-height:1.55;margin:0 0 14px">
+              Which model reads your photos. Scan the same sheet with a couple of these
+              and keep whichever gets the shelves and wings right.
+            </p>
+            <div class="field"><label>Model</label>
+              <select id="scanModelSel" style="font-size:14px">
+                ${SCAN_MODELS.map(function(m){
+                  return '<option value="'+esc(m.id)+'"'+(m.id===curModel?" selected":"")+'>'+esc(m.label)+'</option>';
+                }).join("")}
+              </select>
+            </div>
+            <div style="font-size:12px;color:var(--ink-3);margin-top:10px" id="scanModelNote"></div>
           </div>
           <div class="lbl" style="margin-top:18px">Shared Access</div>
           <div class="panel" id="sharedPanel">
@@ -3601,13 +3618,28 @@ function renderSettings(){
   document.getElementById("saveApiKey").addEventListener("click",async function(){
     var v=document.getElementById("apiKeyInput").value.trim();
     if(!v){ toast("Enter a key"); return; }
-    if(!v.startsWith("sk-ant-")){
-      if(!await askConfirm("Key format",{msg:'Anthropic keys usually start with "sk-ant-". Save anyway?',okText:"Save anyway"})){ return; }
+    if(!v.startsWith("sk-or-")){
+      var m=v.startsWith("sk-ant-")
+        ? 'That looks like an Anthropic key. PDP now scans through OpenRouter, which needs an "sk-or-" key. Save anyway?'
+        : 'OpenRouter keys usually start with "sk-or-". Save anyway?';
+      if(!await askConfirm("Key format",{msg:m,okText:"Save anyway"})){ return; }
     }
     setApiKey(v); toast("API key saved");
     document.getElementById("apiKeyInput").type="password";
     render();
   });
+  var modelSel=document.getElementById("scanModelSel");
+  var modelNote=document.getElementById("scanModelNote");
+  function showModelNote(){
+    var m=SCAN_MODELS.find(function(x){ return x.id===(modelSel?modelSel.value:""); });
+    if(modelNote) modelNote.textContent=m?m.note:"";
+  }
+  if(modelSel){
+    showModelNote();
+    modelSel.addEventListener("change",function(){
+      setScanModel(this.value); showModelNote(); toast(scanModelLabel(this.value)+" selected");
+    });
+  }
   var clrBtn=document.getElementById("clearApiKey");
   if(clrBtn) clrBtn.addEventListener("click",async function(){
     if(!await askConfirm("Clear API key?",{msg:"Scanning will stop working until a new key is entered.",okText:"Clear",danger:true})){ return; }
@@ -4012,9 +4044,31 @@ function renderChecklist(){
 const scanOverlay=document.getElementById("scanOverlay");
 const scanBody=document.getElementById("scanBody");
 const scanFileInput=document.getElementById("scanFileInput");
-/* Direct browser → Anthropic. Key in localStorage (pdp_api_key). No server proxy = no timeout. */
-function getApiKey(){ try{ return localStorage.getItem("pdp_api_key")||""; }catch(e){ return ""; } }
-function setApiKey(k){ try{ localStorage.setItem("pdp_api_key",k); }catch(e){} }
+/* Direct browser → OpenRouter. Key in localStorage (pdp_or_key). No server proxy = no timeout.
+   Deliberately a NEW storage key: an old sk-ant- value left in pdp_api_key would
+   otherwise be shipped straight to a different vendor and just 401 confusingly. */
+const SCAN_MODELS=[
+  {id:"google/gemini-3.1-pro-preview",label:"Gemini 3.1 Pro",note:"Best at page layout — start here"},
+  {id:"anthropic/claude-opus-4.8",    label:"Claude Opus 4.8",note:"Strongest reasoning, priciest"},
+  {id:"openai/gpt-5.6-sol",           label:"GPT-5.6 Sol",   note:"Third opinion when the others disagree"},
+  {id:"anthropic/claude-sonnet-5",    label:"Claude Sonnet 5",note:"Cheap baseline"}
+];
+const SCAN_MODEL_KEY="pdp_scan_model";
+const DEFAULT_SCAN_MODEL="google/gemini-3.1-pro-preview";
+function getScanModel(){
+  try{
+    const m=localStorage.getItem(SCAN_MODEL_KEY);
+    if(m&&SCAN_MODELS.some(function(x){ return x.id===m; })) return m;
+  }catch(e){}
+  return DEFAULT_SCAN_MODEL;
+}
+function setScanModel(m){ try{ localStorage.setItem(SCAN_MODEL_KEY,m); }catch(e){} }
+function scanModelLabel(id){
+  const m=SCAN_MODELS.find(function(x){ return x.id===id; });
+  return m?m.label:id;
+}
+function getApiKey(){ try{ return localStorage.getItem("pdp_or_key")||""; }catch(e){ return ""; } }
+function setApiKey(k){ try{ localStorage.setItem("pdp_or_key",k); }catch(e){} }
 function getEffectiveKey(){
   const own=getApiKey();
   if(own) return own;
@@ -4022,27 +4076,41 @@ function getEffectiveKey(){
   catch(e){}
   return '';
 }
-async function anthropicFetch(body){
+/* OpenRouter is OpenAI-shaped: images ride as image_url data URIs rather than
+   Anthropic's source.base64 blocks, and text comes back on choices[0].message. */
+function orImage(b64){ return {type:"image_url",image_url:{url:"data:image/jpeg;base64,"+b64}}; }
+function orText(t){ return {type:"text",text:t}; }
+function orTextOf(data){
+  const msg=data&&data.choices&&data.choices[0]&&data.choices[0].message;
+  if(!msg) return "";
+  if(typeof msg.content==="string") return msg.content;
+  if(Array.isArray(msg.content)) return msg.content.map(function(b){ return (b&&b.text)||""; }).join("");
+  return "";
+}
+async function orFetch(body){
   const key=getEffectiveKey();
-  if(!key) throw Object.assign(new Error("No API key set. Go to Tools → Settings and enter your Anthropic API key."),{status:401});
-  const resp=await fetch("https://api.anthropic.com/v1/messages",{
+  if(!key) throw Object.assign(new Error("No API key set. Go to Tools → Settings and enter your OpenRouter API key."),{status:401});
+  const resp=await fetch("https://openrouter.ai/api/v1/chat/completions",{
     method:"POST",
     headers:{
       "Content-Type":"application/json",
-      "x-api-key":key,
-      "anthropic-version":"2023-06-01",
-      "anthropic-dangerous-direct-browser-access":"true"
+      "Authorization":"Bearer "+key,
+      "HTTP-Referer":location.origin,
+      "X-Title":"PDP — Produce Department Portal"
     },
     body:JSON.stringify(body)
   });
   if(!resp.ok){
     const err=await resp.json().catch(()=>({}));
     const msg=(err.error&&err.error.message)||"Unknown error";
-    const type=(err.error&&err.error.type)||"";
     if(resp.status===401) throw Object.assign(new Error("Invalid API key. Update it in Tools → Settings."),{status:401});
-    throw Object.assign(new Error("API "+resp.status+": "+(type?type+" — ":"")+msg),{status:resp.status});
+    if(resp.status===402) throw Object.assign(new Error("OpenRouter credits exhausted. Top up at openrouter.ai/credits."),{status:402});
+    throw Object.assign(new Error("API "+resp.status+": "+msg),{status:resp.status});
   }
-  return resp.json();
+  const data=await resp.json();
+  /* OpenRouter can return 200 with an error body when an upstream provider fails. */
+  if(data&&data.error) throw Object.assign(new Error("API: "+(data.error.message||"upstream error")),{status:data.error.code||500});
+  return data;
 }
 let scanParsed=null;
 let scanMode="schedule"; /* "schedule" or "gev" */
@@ -4183,15 +4251,15 @@ RULES:
       /* Up to 2 attempts: transient API errors and malformed JSON get one
          automatic retry (with a stricter instruction) before failing. */
       async function scanAttempt(extraInstruction){
-        const data=await anthropicFetch({
-          model:"claude-sonnet-4-6",
-          max_tokens:4096,
+        const data=await orFetch({
+          model:getScanModel(),
+          max_tokens:8192,
           messages:[{role:"user",content:[
-            {type:"image",source:{type:"base64",media_type:"image/jpeg",data:b64}},
-            {type:"text",text:promptText+(extraInstruction||"")}
+            orImage(b64),
+            orText(promptText+(extraInstruction||""))
           ]}]
         });
-        let jsonText=data.content.map(b=>b.text||"").join("");
+        let jsonText=orTextOf(data);
         jsonText=jsonText.replace(/```json\s*/g,"").replace(/```\s*/g,"").trim();
         /* Salvage JSON embedded in prose */
         if(jsonText&&jsonText[0]!=="{"){
@@ -4508,8 +4576,11 @@ const salesPlanPrompt=`You are transcribing a Stop & Shop produce "Display Plan"
 OUTPUT — ONLY valid JSON (no markdown, no backticks, no commentary):
 {"sections":[
   {"category":"<block title, verbatim>","subject":"","contact":"","bullets":["<any printed note / LOCATION banner / instruction, one string each>"],
+   "columns":<for a shelf/well grid block: how many columns it has, wings EXCLUDED; otherwise 0>,
    "tables":[{"title":"","headers":["Position","Item"],"rows":[["<position label>","<item(s) for that position>"]]}]}
 ]}
+
+Fill in "columns" BEFORE writing that block's rows — committing to the count first is what keeps the shelf and well columns lined up.
 
 GOLDEN RULES
 - ORDER AND POSITION ARE THE WHOLE POINT. An item in the wrong column or wrong order is a failure. Read every shelf/row strictly LEFT to RIGHT, and stacked positions TOP to BOTTOM.
@@ -4521,11 +4592,14 @@ GOLDEN RULES
 HOW TO READ EACH BLOCK TYPE
 
 1) PROMO TABLES and HERO PODS (Refrigerated Promo Table, Refrigerated Veg Promo Table, Dry Promo Table, Refrigerated Hero Pod, etc.) — these are a 2-D GRID:
-   - A SHELF (upper deck) sits directly ABOVE a WELL (lower deck). The Shelf and the Well have the SAME number of COLUMNS, and Well column N is directly BELOW Shelf column N — they are vertically aligned. First COUNT the columns, then read column by column, left to right.
+   - WINGS ARE NOT COLUMNS. This is the single most common mistake — read it twice. A wing ("Power Wing" / "Inside Wing") is a separate narrow panel hanging off the far LEFT or far RIGHT EDGE of the fixture, OUTSIDE the shelf/well block. It is drawn in the same horizontal band as the shelf, so it LOOKS like one more shelf column. It is not one. Identify and set aside the wings FIRST, before you count anything.
+   - A SHELF (upper deck) sits directly ABOVE a WELL (lower deck). The Shelf and the Well have the SAME number of COLUMNS, and Well column N is directly BELOW Shelf column N — they are vertically aligned. First COUNT the columns — counting ONLY the columns BETWEEN the wings, never a wing itself — then read column by column, left to right.
+   - THE ALIGNMENT TEST: a real shelf column has a well cell directly beneath it. A wing does not — nothing sits below a wing, because a wing spans the full height on its own. If a column has no partner beneath it, it is a wing, not a shelf column.
+   - Report your count in "columns" for the block. If your "Shelf" row count and your "Well" row count come out different, you have absorbed a wing into the shelf — go back, pull the wing out, and recount.
    - Output ONE ROW PER COLUMN. Use label exactly "Shelf" for each shelf column (left→right), then label exactly "Well" for each well column (left→right). Output the SAME number of "Shelf" rows as "Well" rows so the columns line up.
    - A single column cell often STACKS several items vertically, plus its size/flag tags underneath. Put everything for that one column into that one row's item string, top to bottom, separated by " / ". Example cell: "Strawberries 11x14 / TPR" or "Family Pack Mixed Berries / Family Pack Cut Watermelon".
-   - WINGS ("Power Wing" / "Inside Wing"): one row each, label = the wing name.
-   Worked example — a refrigerated promo table whose Shelf has 3 columns and Well has 3 aligned columns:
+   - WINGS: one row each, label = the wing name exactly ("Power Wing" / "Inside Wing"). Put the wing FIRST if it hangs off the left edge and LAST if it hangs off the right edge. A wing's item belongs ONLY in its own wing row — never merged into a Shelf or Well row.
+   Worked example — a refrigerated promo table with a wing at each edge and, between them, a Shelf of 3 columns above a Well of 3 aligned columns. Note "columns":3 — the two wings are NOT counted, and Lemons/Limes stay in their own wing rows instead of being folded into the Shelf:
      ["Power Wing","Lemons"]
      ["Shelf","Blackberries 6oz"]
      ["Shelf","Northwest Cherries"]
@@ -4553,10 +4627,12 @@ HOW TO READ EACH BLOCK TYPE
 Set "date":"" and "dateLabel":"" — the app assigns the display week itself; do not guess a date from the sheet (any printed range like "6/12-7/16" is a promo period, not the display week).`;
 
       const promptText=scanMode==="salesplan"?salesPlanPrompt:(scanMode==="salesitems"?salesItemsPrompt:dailyNotesPrompt);
-      const content=docPages.map(p=>({type:"image",source:{type:"base64",media_type:"image/jpeg",data:p.b64}}));
-      content.push({type:"text",text:promptText+(extra||"")});
-      const data=await anthropicFetch({model:"claude-sonnet-4-6",max_tokens:8192,messages:[{role:"user",content}]});
-      let t=data.content.map(b=>b.text||"").join("");
+      const content=docPages.map(p=>orImage(p.b64));
+      content.push(orText(promptText+(extra||"")));
+      /* A full multi-page display plan transcribes long; the old 8192 cap could
+         truncate the JSON mid-table and lose trailing blocks entirely. */
+      const data=await orFetch({model:getScanModel(),max_tokens:32768,messages:[{role:"user",content}]});
+      let t=orTextOf(data);
       t=t.replace(/```json\s*/g,"").replace(/```\s*/g,"").trim();
       if(t&&t[0]!=="{"){ const i=t.indexOf("{"),j=t.lastIndexOf("}"); if(i>-1&&j>i) t=t.slice(i,j+1); }
       return JSON.parse(t);
