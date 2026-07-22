@@ -122,6 +122,18 @@
   .hstat .hv{font-size:21px;font-weight:800;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;}
   .hstat .hv small{font-size:12px;font-weight:700;opacity:.66;letter-spacing:0;}
   .hstat .hl{font-size:9.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;opacity:.68;margin-top:5px;}
+  #pluQuickPanel{overflow:hidden;transition:max-height .25s cubic-bezier(.2,.8,.3,1);max-height:0;}
+  #pluQuickPanel.open{max-height:400px;}
+  #pluQuickPanel input{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid rgba(255,255,255,.16);border-radius:10px;background:rgba(0,0,0,.22);color:#ecf7ef;font:inherit;font-size:14px;outline:none;margin-bottom:8px;}
+  #pluQuickPanel input::placeholder{color:rgba(236,247,239,.45);}
+  #pluQuickPanel .plu-results{display:flex;flex-direction:column;gap:4px;max-height:240px;overflow-y:auto;}
+  #pluQuickPanel .plu-res{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(0,0,0,.12);cursor:pointer;color:#ecf7ef;font-size:13px;transition:background .1s;border:none;text-align:left;width:100%;font-family:inherit;}
+  #pluQuickPanel .plu-res:active{background:rgba(0,0,0,.28);}
+  #pluQuickPanel .plu-res .plu-code{font-size:11px;font-weight:700;opacity:.7;font-variant-numeric:tabular-nums;flex:none;}
+  #pluQuickPanel .plu-res .plu-name{flex:1;min-width:0;}
+  #pluQuickPanel .plu-res .plu-name mark{background:rgba(255,255,255,.2);color:#fff;border-radius:3px;padding:0 2px;font-weight:700;}
+  #pluQuickPanel .plu-res .plu-meta{font-size:10px;opacity:.55;}
+  #pluQuickPanel .plu-close{position:absolute;top:6px;right:6px;background:none;border:none;color:rgba(236,247,239,.5);font-size:18px;cursor:pointer;padding:2px 6px;line-height:1;}
   .hstat.zero .hv{opacity:.55;}
   .hstat.wide{flex:1;text-align:left;padding:11px 14px 10px;display:flex;flex-direction:column;gap:5px;}
   .hstat.wide .hv{font-size:17px;letter-spacing:-.02em;}
@@ -2707,7 +2719,6 @@ function renderHome(){
   const h=now.getHours();
   const greet=h<4?"Closing it out":h<12?"Good morning":h<17?"Good afternoon":"Good evening";
   let ni=null; try{ ni=nextEmployeeIn(); }catch(e){}
-  const stCount=countTodayScheduled();
   const tiles=[
     {tab:"stencil",ic:I.search,cls:"",t:"Stencil"},
     {tab:"loadlist",ic:I.clip,cls:"citrus",t:"Holes"},
@@ -2731,11 +2742,18 @@ function renderHome(){
            <div class="hl">Next in${ni&&ni.label?" · "+ni.label:""}</div>
            <div class="hv">${ni?`${esc(ni.name)} · <span class="tnum">${esc(ni.time)}</span>`:"\u2014"}</div>
          </button>
-                 <button class="hstat${stCount===0?" zero":""}" data-go="schedule">
-                   <div class="hl">Scheduled today</div>
-                   <div class="hv">${stCount}<small>  people</small></div>
-                 </button>
-               </div>
+                 <button class="hstat" id="pluQuickBtn">
+                           <div class="hl">PLU Lookup</div>
+                           <div class="hv">${STENCIL.length}<small>  items</small></div>
+                         </button>
+                               </div>
+                       <div id="pluQuickPanel">
+                         <div style="display:flex;gap:6px;align-items:center;margin-bottom:0;position:relative">
+                           <input id="pluQuickInput" placeholder="Search PLU code or name..." style="margin-bottom:0;padding-right:36px">
+                           <button id="pluQuickClose" class="plu-close" style="position:absolute;right:4px;top:50%;transform:translateY(-50%)">&times;</button>
+                         </div>
+                         <div id="pluQuickResults" class="plu-results"></div>
+                       </div>
      </div>
      <div class="lbl">Today</div>
      <button class="home-checklist-btn" id="homeGoChecklist">
@@ -2764,7 +2782,44 @@ function renderHome(){
          </button>`).join("")}
      </div>
      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.19.0</div>`;
-  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
+  // Quick PLU
+ const pluBtn=document.getElementById("pluQuickBtn");
+ const pluPanel=document.getElementById("pluQuickPanel");
+ const pluInput=document.getElementById("pluQuickInput");
+ const pluRes=document.getElementById("pluQuickResults");
+ const pluClose=document.getElementById("pluQuickClose");
+ if(pluBtn&&pluPanel){
+   pluBtn.onclick=()=>{
+     const open=pluPanel.classList.toggle("open");
+     if(open) setTimeout(()=>pluInput.focus(),260);
+   };
+   pluClose.onclick=()=>pluPanel.classList.remove("open");
+   pluInput.addEventListener("input",()=>{
+     const q=pluInput.value.trim();
+     if(q.length<2){ pluRes.innerHTML=""; return; }
+     const hits=searchStencil(q).slice(0,8);
+     pluRes.innerHTML=hits.map(it=>{
+       const meta=metaStr(it.p,it.u);
+       const name=normDesc(it);
+       return `<button class="plu-res" data-code="${esc(it.c||"")}"><span class="plu-code">#${esc(it.c||"")}</span><span class="plu-name">${highlight(name,q)}</span>${meta?`<span class="plu-meta">${esc(meta)}</span>`:""}</button>`;
+     }).join("");
+     pluRes.querySelectorAll(".plu-res").forEach(b=>{
+       b.onclick=()=>{
+         const code=b.dataset.code;
+         if(code){ navigator.clipboard.writeText(code).catch(()=>{}); }
+         const t=document.getElementById("toast");
+         if(t){
+           const o=t.textContent;
+           t.textContent="Copied #"+code+"!";
+           t.style.opacity="1";
+           clearTimeout(t._hide);
+           t._hide=setTimeout(()=>{ t.style.opacity="0"; t.textContent=o; },1800);
+         }
+       };
+     });
+   });
+ }
+ view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
   if(hclBtn){
