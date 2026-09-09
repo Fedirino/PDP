@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#135c2c">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.21.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.21.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.21.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.21.1">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.21.1">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.21.1">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -1833,6 +1833,20 @@ async function cloudWriteDoc(col, id, data) {
   await firebaseDb.collection(col).doc(id).set(cloudClone(data), { merge: true });
   return true;
 }
+function scheduleHasData(s) {
+  return !!(s && Array.isArray(s.weeks) && s.weeks.some(function (w) {
+    return (w && w.startDate) || (w && Array.isArray(w.employees) && w.employees.length);
+  }));
+}
+function scheduleStamp(s) {
+  const t = s && (s.updated || s.updatedAt || s.savedAt);
+  if (typeof t === "number") return t;
+  if (typeof t === "string") {
+    const n = Date.parse(t);
+    if (!isNaN(n)) return n;
+  }
+  return 0;
+}
 /* Firestore rejects nested arrays, and every document's tables use
    rows: [[cell, cell], ...]. So docs travel as a JSON string payload and
    are rehydrated on the way back. Scalar fields stay on the wire so
@@ -1841,6 +1855,7 @@ function docCloudEncode(d) {
   return {
     id: d.id,
     created: d.created || 0,
+    updated: d.updated || d.created || 0,
     date: d.date || "",
     dateLabel: d.dateLabel || "",
     payload: JSON.stringify(d)
@@ -1853,11 +1868,19 @@ function docCloudDecode(raw) {
   }
   return raw; /* legacy/unencoded document written before v5.17.8 */
 }
-/* Additive on purpose: this pushes what's on this device and never removes
-   anything else. Local retention (docPrune) is a per-device convenience, so
-   letting it delete would make whichever phone opened the app last silently
-   erase everyone's older documents. Removals go through cloudDeleteDoc,
-   which only fires when you actually delete a document. */
+function docStamp(d) { return (d && (d.updated || d.created)) || 0; }
+function mergeDocLists(local, remote) {
+  const byId = {};
+  (remote || []).concat(local || []).forEach(function (d) {
+    if (!d || !d.id) return;
+    const prev = byId[d.id];
+    if (!prev || docStamp(d) >= docStamp(prev)) byId[d.id] = d;
+  });
+  return Object.keys(byId).map(function (id) { return byId[id]; });
+}
+/* Push the durable copy of each live document. Actual removals are explicit:
+   Delete / Replace call cloudDeleteDoc for the exact ids they remove, so
+   cache resets cannot silently erase good phone data. */
 async function cloudSyncDocCollection(col, items) {
   if (!firebaseDb) return false;
   const ref = firebaseDb.collection(col);
@@ -1873,7 +1896,7 @@ async function cloudHydrateSchedule() {
   if (!firebaseDb) return;
   try {
     const remote = await cloudLoadDoc("meta", "schedule");
-    if (remote && remote.weeks) {
+    if (remote && remote.weeks && (!scheduleHasData(sched) || scheduleStamp(remote) >= scheduleStamp(sched))) {
       sched = remote;
       writeK(SCHKEY, JSON.stringify(sched));
       render();
@@ -1894,13 +1917,18 @@ async function cloudHydrateDocs() {
     const remoteSP = spSnap.docs.map(function (d) { return docCloudDecode(d.data()); }).filter(Boolean);
     const remoteSI = siSnap.docs.map(function (d) { return docCloudDecode(d.data()); }).filter(Boolean);
     if (remoteDN.length || remoteSP.length || remoteSI.length) {
-      docStore.dailynotes = remoteDN;
-      docStore.salesplan = remoteSP;
-      docStore.salesitems = remoteSI;
+      docStore.dailynotes = mergeDocLists(docStore.dailynotes, remoteDN);
+      docStore.salesplan = mergeDocLists(docStore.salesplan, remoteSP);
+      docStore.salesitems = mergeDocLists(docStore.salesitems, remoteSI);
       DOC_TYPES.forEach(function (t) { if (!Array.isArray(docStore[t])) docStore[t] = []; });
       docPrune();
       DOC_TYPES.forEach(function (t) { if (docStore[t].length) docActiveId[t] = docStore[t][0].id; });
       writeK(DOCS_KEY, JSON.stringify(docStore));
+      await Promise.all([
+        cloudSyncDocCollection("dailynotes", docStore.dailynotes),
+        cloudSyncDocCollection("salesplan", docStore.salesplan),
+        cloudSyncDocCollection("salesitems", docStore.salesitems)
+      ]);
       render();
       return;
     }
@@ -2185,7 +2213,7 @@ let sched;
   if(raw){ try{ sched=JSON.parse(raw); }catch(e){ sched=null; } }
   if(!sched||!sched.weeks) sched=seedSched();
 })();
-function saveSched(){ const ok=writeK(SCHKEY,JSON.stringify(sched)); if(firebaseDb&&cloudReady) cloudWriteDoc("meta","schedule",sched).catch(function(){}); return ok; }
+function saveSched(){ sched.updated=Date.now(); const ok=writeK(SCHKEY,JSON.stringify(sched)); if(firebaseDb&&cloudReady) cloudWriteDoc("meta","schedule",sched).catch(function(){}); return ok; }
 let schWeek=0;
 let schOpen={};
 let schEdit=false;
@@ -2322,11 +2350,12 @@ function docPrune(){
     /* migrate from v1 (a plain array of daily-notes docs) */
     try{ const old=JSON.parse(readK("pdp_documents_v1")); if(Array.isArray(old)) docStore.dailynotes=old; }catch(e){}
   }
-  DOC_TYPES.forEach(t=>{ if(!Array.isArray(docStore[t])) docStore[t]=[]; });
+  DOC_TYPES.forEach(t=>{ if(!Array.isArray(docStore[t])) docStore[t]=[]; docStore[t].forEach(d=>{ if(d&&!d.updated) d.updated=d.created||Date.now(); }); });
   docPrune();
   DOC_TYPES.forEach(t=>{ if(docStore[t].length) docActiveId[t]=docStore[t][0].id; });
 })();
-function saveDocs(){ const ok=writeK(DOCS_KEY,JSON.stringify(docStore)); if(firebaseDb&&cloudReady){ cloudSyncDocCollection("dailynotes",docStore.dailynotes).catch(function(e){ console.error("dailynotes sync:",e); }); cloudSyncDocCollection("salesplan",docStore.salesplan).catch(function(e){ console.error("salesplan sync:",e); }); cloudSyncDocCollection("salesitems",docStore.salesitems).catch(function(e){ console.error("salesitems sync:",e); }); } return ok; }
+function touchDoc(d){ if(d) d.updated=Date.now(); return d; }
+function saveDocs(){ DOC_TYPES.forEach(t=>{ (docStore[t]||[]).forEach(d=>{ if(d&&!d.updated) d.updated=d.created||Date.now(); }); }); const ok=writeK(DOCS_KEY,JSON.stringify(docStore)); if(firebaseDb&&cloudReady){ cloudSyncDocCollection("dailynotes",docStore.dailynotes).catch(function(e){ console.error("dailynotes sync:",e); }); cloudSyncDocCollection("salesplan",docStore.salesplan).catch(function(e){ console.error("salesplan sync:",e); }); cloudSyncDocCollection("salesitems",docStore.salesitems).catch(function(e){ console.error("salesitems sync:",e); }); } return ok; }
 function sortDocs(t){ docStore[t].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.created||0)-(a.created||0)); }
 function activeDoc(t){ return docStore[t].find(d=>d.id===docActiveId[t])||docStore[t][0]||null; }
 /* one-time seed: example Display Plan from the printed plan (pages 8 & 10) */
@@ -2627,8 +2656,8 @@ function renderTopbar(){
   const ssa=document.getElementById("schScanAct"); if(ssa) ssa.onclick=()=>openScanOverlay("schedule");
   const gsa=document.getElementById("gevScanAct"); if(gsa) gsa.onclick=()=>openScanOverlay("gev");
   const dsa=document.getElementById("docScanAct"); if(dsa) dsa.onclick=()=>{ const target=docView==="salesitems"?"salesitems":(docView==="salesplan"?"salesplan":"dailynotes"); openScanOverlay(target); };
-  const dea=document.getElementById("docEditAct"); if(dea) dea.onclick=()=>{ if(docEdit){ saveDocs(); } docEdit=!docEdit; render(); };
-  const dba=document.getElementById("docBack"); if(dba) dba.onclick=()=>{ if(docEdit){ saveDocs(); docEdit=false; } docView="hub"; render(); window.scrollTo(0,0); };
+  const dea=document.getElementById("docEditAct"); if(dea) dea.onclick=()=>{ if(docEdit){ touchDoc(activeDoc(docView)); saveDocs(); } docEdit=!docEdit; render(); };
+  const dba=document.getElementById("docBack"); if(dba) dba.onclick=()=>{ if(docEdit){ touchDoc(activeDoc(docView)); saveDocs(); docEdit=false; } docView="hub"; render(); window.scrollTo(0,0); };
 
   const tba=document.getElementById("toolBack"); if(tba) tba.onclick=()=>{ toolView="hub"; clEdit=false; render(); };
   const clea=document.getElementById("clEditAct"); if(clea) clea.onclick=()=>{ clEdit=!clEdit; render(); };
@@ -2865,7 +2894,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.21.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.21.1</div>`;
   // Quick PLU
  const pluBtn=document.getElementById("pluQuickBtn");
  const pluPanel=document.getElementById("pluQuickPanel");
@@ -4947,6 +4976,7 @@ async function applyDocScan(){
     if(result==="add"){
       /* Merge new sections into existing doc */
       existing.sections=existing.sections.concat(scanParsed.sections);
+      touchDoc(existing);
       docActiveId[type]=existing.id;
       sortDocs(type); docPrune();
       var ok1=saveDocs();
@@ -4962,7 +4992,7 @@ async function applyDocScan(){
     cloudDeleteDoc(type,existing.id);
   }
 
-  var doc={ id:"doc_"+Date.now(), date:date, dateLabel:scanParsed.dateLabel||scanParsed.date||date||"", created:Date.now(), images:[], sections:scanParsed.sections };
+  var doc={ id:"doc_"+Date.now(), date:date, dateLabel:scanParsed.dateLabel||scanParsed.date||date||"", created:Date.now(), updated:Date.now(), images:[], sections:scanParsed.sections };
   docStore[type].unshift(doc);
   sortDocs(type);
   docPrune();

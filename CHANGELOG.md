@@ -4,6 +4,22 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.21.1] — 2026-09-09
+
+### Fixed
+- **Schedule and scanned documents are harder to lose after phone cache resets.** Schedule saves now carry an update timestamp, and cloud hydration only replaces the phone copy when the cloud copy is newer or the phone has no schedule data.
+- **Documents now merge phone and cloud copies instead of letting one side wipe the other.** When the app reconnects to Firestore, it keeps the newest version of each saved Daily Note, Display Plan, and Sales Items document, then syncs that durable merged set back up.
+- **Deleted documents still clean up Firestore.** Manual Delete and Replace continue removing the old cloud document by id so intentionally removed docs do not build up in storage.
+
+### Files
+- `index.html` — durable schedule/doc merge logic, document update timestamps, and v5.21.1 markers
+- `sw.js` — cache bumped to `pdp-v5.21.1`
+- `manifest.json` — version query strings bumped to 5.21.1
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.21.0] — 2026-09-09
 
 ### Improved
