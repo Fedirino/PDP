@@ -4,6 +4,22 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.21.0] — 2026-09-09
+
+### Improved
+- **Mobile navigation is clearer and easier to tap.** The crowded seven-item tab bar is now a focused five-item bar with Home, Stencil, Holes, Documents, and More. GEV List, Schedule, and Tools remain one tap away in a purpose-built More sheet with descriptions that make each destination easier to understand.
+- **Navigation context is preserved.** More stays highlighted while viewing GEV List, Schedule, or Tools, and the sheet marks the current destination when reopened.
+- **The More sheet is keyboard and assistive-technology friendly.** It moves focus to a dedicated close button, dismisses with Escape or a backdrop tap, locks background scrolling while open, and becomes inert after closing.
+
+### Files
+- `index.html` — focused navigation bar, More sheet, accessibility behavior, and v5.21.0 markers
+- `sw.js` — cache bumped to `pdp-v5.21.0`
+- `manifest.json` — version query strings bumped to 5.21.0
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.20.0] — 2026-09-09
 
 ### Added

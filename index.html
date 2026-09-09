@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#135c2c">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.20.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.20.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.20.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.21.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.21.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.21.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -443,6 +443,38 @@
   .sheet-btn.primary{background:var(--brand);color:#06210f;border-color:var(--brand);}
   .sheet-btn.danger{background:var(--danger);color:#fff;border-color:var(--danger);}
 
+  /* ======= More navigation sheet ======= */
+  .more-backdrop{position:fixed;inset:0;z-index:69;display:flex;align-items:flex-end;justify-content:center;
+    background:rgba(0,0,0,.58);opacity:0;pointer-events:none;transition:opacity .2s ease;
+    padding:0 0 env(safe-area-inset-bottom);}
+  .more-backdrop.open{opacity:1;pointer-events:auto;}
+  .more-sheet{width:100%;max-width:600px;background:var(--surface);border:1px solid var(--line-2);
+    border-bottom:none;border-radius:22px 22px 0 0;padding:9px 16px calc(18px + env(safe-area-inset-bottom));
+    box-shadow:0 -12px 44px rgba(0,0,0,.55);transform:translateY(100%);
+    transition:transform .26s cubic-bezier(.2,.85,.3,1);}
+  .more-backdrop.open .more-sheet{transform:translateY(0);}
+  .more-handle{width:38px;height:4px;border-radius:999px;background:var(--line-2);margin:0 auto 13px;}
+  .more-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:0 2px 13px;}
+  .more-title{font-size:19px;font-weight:800;letter-spacing:-.025em;color:var(--ink);}
+  .more-sub{font-size:12.5px;line-height:1.45;color:var(--ink-3);margin-top:3px;}
+  .more-close{appearance:none;border:1px solid var(--line);background:var(--surface-2);color:var(--ink-2);
+    width:36px;height:36px;border-radius:11px;display:grid;place-items:center;cursor:pointer;flex:none;}
+  .more-close svg{width:17px;height:17px;}
+  .more-grid{display:grid;gap:9px;}
+  .more-dest{appearance:none;width:100%;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);
+    border-radius:var(--r);padding:13px 14px;display:flex;align-items:center;gap:13px;text-align:left;
+    font:inherit;cursor:pointer;transition:background .15s ease,border-color .15s ease,transform .08s ease;}
+  .more-dest:active{transform:scale(.985);background:var(--surface-3);}
+  .more-dest.current{border-color:rgba(61,220,110,.42);background:var(--brand-tint);}
+  .more-dest .mdi{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex:none;
+    color:var(--brand-ink);background:rgba(61,220,110,.1);}
+  .more-dest .mdi svg{width:20px;height:20px;}
+  .more-dest>span:nth-child(2){display:block;flex:1;min-width:0;}
+  .more-dest .mdt{display:block;font-size:14.5px;font-weight:750;letter-spacing:-.01em;}
+  .more-dest .mds{display:block;font-size:11.5px;line-height:1.35;color:var(--ink-3);margin-top:2px;}
+  .more-dest .mdgo{margin-left:auto;color:var(--ink-3);display:grid;place-items:center;}
+  .more-dest .mdgo svg{width:17px;height:17px;}
+
   /* ======= Polish: Micro-interactions ======= */
   .tile{transition:transform .12s cubic-bezier(.2,.8,.3,1),box-shadow .2s ease,border-color .2s ease;}
   .tile:active{transform:scale(.97);box-shadow:none;}
@@ -846,6 +878,17 @@
       <button class="sheet-btn ghost" id="sheetCancel">Cancel</button>
       <button class="sheet-btn primary" id="sheetOk">OK</button>
     </div>
+  </div>
+</div>
+
+<div class="more-backdrop" id="moreBackdrop" aria-hidden="true" inert>
+  <div class="more-sheet" role="dialog" aria-modal="true" aria-labelledby="moreTitle">
+    <div class="more-handle"></div>
+    <div class="more-head">
+      <div><div class="more-title" id="moreTitle">More</div><div class="more-sub">Department planning and utilities</div></div>
+      <button class="more-close" id="moreClose" aria-label="Close more menu"></button>
+    </div>
+    <div class="more-grid" id="moreGrid"></div>
   </div>
 </div>
 
@@ -2530,6 +2573,7 @@ const view=document.getElementById("view");
 const tabbar=document.getElementById("tabbar");
 
 function setTab(t){ tab=t;
+  closeMoreMenu();
   if(t==="loadlist"&&ll.screen==="section"&&!sectionById(ll.sectionId)) ll.screen="sections";
   if(t!=="tools") toolView="hub";
   if(t!=="docs"){ docView="hub"; docEdit=false; }
@@ -2592,11 +2636,43 @@ function renderTopbar(){
 
 /* ---- Tab bar ---- */
 function renderTabbar(){
-  const tabs=[["home","Home",I.home],["stencil","Stencil",I.search],["loadlist","Holes",I.clip],["gev","GEV",I.gev],["schedule","Schedule",I.cal],["docs","Docs",I.folder],["tools","Tools",I.tools]];
+  const moreActive=["gev","schedule","tools"].includes(tab);
+  const tabs=[["home","Home",I.home],["stencil","Stencil",I.search],["loadlist","Holes",I.clip],["docs","Docs",I.folder],["more","More",I.tools]];
   tabbar.innerHTML=tabs.map(([id,label,ic])=>
-    `<button class="tab${tab===id?" active":""}" data-tab="${id}"><span class="ic">${ic}</span><span>${label}</span></button>`).join("");
-  tabbar.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+    `<button class="tab${tab===id||(id==="more"&&moreActive)?" active":""}" data-tab="${id}"${id==="more"?' aria-haspopup="dialog" aria-controls="moreBackdrop"':''}><span class="ic">${ic}</span><span>${label}</span></button>`).join("");
+  tabbar.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>b.dataset.tab==="more"?openMoreMenu():setTab(b.dataset.tab));
 }
+
+const moreBackdrop=document.getElementById("moreBackdrop");
+const moreGrid=document.getElementById("moreGrid");
+const moreClose=document.getElementById("moreClose");
+moreClose.innerHTML=I.x;
+function openMoreMenu(){
+  const destinations=[
+    ["gev","GEV List","Track priority items and completion",I.gev],
+    ["schedule","Schedule","View shifts and plan the week",I.cal],
+    ["tools","Tools","Checklist, notes, reminders, and calculator",I.tools]
+  ];
+  moreGrid.innerHTML=destinations.map(([id,label,sub,ic])=>
+    `<button class="more-dest${tab===id?" current":""}" data-more-tab="${id}"><span class="mdi">${ic}</span><span><span class="mdt">${label}</span><span class="mds">${sub}</span></span><span class="mdgo">${I.chev}</span></button>`).join("");
+  moreGrid.querySelectorAll("[data-more-tab]").forEach(b=>b.onclick=()=>setTab(b.dataset.moreTab));
+  moreBackdrop.classList.add("open");
+  moreBackdrop.setAttribute("aria-hidden","false");
+  moreBackdrop.removeAttribute("inert");
+  document.body.style.overflow="hidden";
+  setTimeout(()=>moreClose.focus(),50);
+}
+function closeMoreMenu(){
+  if(!moreBackdrop) return;
+  if(moreBackdrop.contains(document.activeElement)) document.activeElement.blur();
+  moreBackdrop.classList.remove("open");
+  moreBackdrop.setAttribute("aria-hidden","true");
+  moreBackdrop.setAttribute("inert","");
+  document.body.style.overflow="";
+}
+moreClose.onclick=closeMoreMenu;
+moreBackdrop.onclick=e=>{ if(e.target===moreBackdrop) closeMoreMenu(); };
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&moreBackdrop.classList.contains("open")) closeMoreMenu(); });
 
 /* ---- Home ---- */
 const HOME_REM_KEY="pdp_home_reminders_v1";
@@ -2789,7 +2865,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.20.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.21.0</div>`;
   // Quick PLU
  const pluBtn=document.getElementById("pluQuickBtn");
  const pluPanel=document.getElementById("pluQuickPanel");
