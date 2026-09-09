@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.25.0] — 2026-09-09
+
+### Improved
+- **“Did you know?” now sits directly on the Home hero background.** The nested glass card, border, fill, and rounded box have been removed. A quiet divider and intentional spacing preserve readability without making the fact feel like a separate panel.
+
+### Files
+- `index.html` — flattened hero fact treatment and v5.25.0 markers
+- `manifest.json` — version URLs bumped to 5.25.0
+- `sw.js` — cache bumped to `pdp-v5.25.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.24.0] — 2026-09-09
 
 ### Improved

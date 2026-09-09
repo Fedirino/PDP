@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.24.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.24.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.24.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.25.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.25.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.25.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -144,8 +144,8 @@
   .hero-greeting{padding:5px 2px 2px;display:flex;flex-direction:column;justify-content:center;}
   .hero-brandline{display:flex;align-items:center;gap:12px;}
   .hero-logo{width:52px;height:52px;object-fit:contain;filter:drop-shadow(0 3px 7px rgba(0,0,0,.28));}
-  .hero-fact{background:rgba(8,18,20,.3);border:1px solid rgba(255,255,255,.13);border-radius:17px;
-    padding:14px 15px;display:flex;flex-direction:column;justify-content:space-between;backdrop-filter:blur(8px);}
+  .hero-fact{padding:7px 4px 5px 15px;display:flex;flex-direction:column;justify-content:center;
+    border-left:1px solid rgba(255,255,255,.16);}
   .hero-fact-label{font-size:9px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--brand-ink);}
   .hero-fact-text{font-size:12.5px;line-height:1.45;color:rgba(241,248,246,.83);margin-top:11px;}
   .hero-next{position:relative;margin-top:14px;width:100%;appearance:none;border:1px solid rgba(255,255,255,.14);
@@ -163,7 +163,7 @@
     .hero h2{font-size:25px;}
     .hero .ey{font-size:9px;letter-spacing:.15em;}
     .hero .date{font-size:11px;}
-    .hero-fact{padding:12px;}
+    .hero-fact{padding:5px 0 4px 11px;}
     .hero-fact-text{font-size:10.5px;line-height:1.4;margin-top:8px;}
   }
   .hero-stats{position:relative;display:flex;gap:8px;margin-top:18px;}
@@ -2852,7 +2852,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.24.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.25.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
