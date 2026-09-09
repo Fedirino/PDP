@@ -4,6 +4,17 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.27.0] — 2026-09-09
+
+### Fixed
+- **Firebase now revalidates the root app shell.** Explicit `/` and `/index.html` hosting rules prevent the browser/CDN response from retaining the entry page for an hour, completing the active service-worker update flow introduced in v5.26.0.
+
+### Files
+- `firebase.json` — explicit no-cache headers for the root shell
+- Version markers — bumped to v5.27.0 to force a clean installed-app refresh
+
+---
+
 ## [5.26.0] — 2026-09-09
 
 ### Fixed
