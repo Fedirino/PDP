@@ -4,6 +4,24 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.20.0] — 2026-09-09
+
+### Added
+- **Stencil name display: switch between Normalized and Standard.** A segmented toggle at the top of the Stencil tab flips the shown item name between the cleaned-up normalized name ("3lb Bagged Gala") and the raw as-scanned-in shelf-label text ("GALA 3LB"). It re-renders in place — one tap, no reload — and applies to both the browse list and search results. Your choice is remembered per device (`pdp_stencil_names_mode_v1`); defaults to Normalized. Items without a normalized match simply show the raw text.
+> Why: stencils come from real shelf-tag photos and the normalized names were auto-formatted from them, so the two don't always line up with what's literally printed on a tag in the store. This lets a worker match what's on screen to the tag in front of them.
+
+### Fixed
+- **Version markers were out of sync (v5.19.1 shipped labeled as 5.19.0).** The previous feature commit (Quick PLU search) bumped neither the version strings nor the changelog. This release bumps everything to 5.20.0 — the first time every marker matches since then.
+
+### Files
+- `index.html` — Main app (v5.20.0)
+- `sw.js` — cache bumped to `pdp-v5.20.0`
+- `manifest.json` — version query strings bumped to 5.20.0
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.19.0] — 2026-07-19
 
 ### Added

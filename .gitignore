@@ -1,0 +1,5 @@
+# Codex remote attachments (image artifacts from Codex runs)
+.codex-remote-attachments/
+
+# Node / build
+node_modules/

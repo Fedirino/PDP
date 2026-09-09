@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#135c2c">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.19.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.19.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.19.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.20.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.20.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.20.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -1943,6 +1943,14 @@ let STENCIL=buildStencil();
 function refreshStencil(){ STENCIL=buildStencil(); }
 let stencilEdit=false;
 
+/* Stencil name display mode: "norm" (cleaned-up) or "raw" (as scanned in) */
+const STENCIL_NAMEMODE_KEY="pdp_stencil_names_mode_v1";
+let stencilNameMode="norm";
+function loadStencilNameMode(){ try{ const v=localStorage.getItem(STENCIL_NAMEMODE_KEY); if(v==="raw"||v==="norm") stencilNameMode=v; }catch(e){} }
+function setStencilNameMode(m){ stencilNameMode=(m==="raw"?"raw":"norm"); try{ localStorage.setItem(STENCIL_NAMEMODE_KEY,stencilNameMode); }catch(e){} }
+function stencilName(it){ return stencilNameMode==="raw" ? (it.d||"") : (normDesc(it)||""); }
+loadStencilNameMode();
+
 /* ======= Category inference ======= */
 
 /* ======= GEV List Data ======= */
@@ -2781,7 +2789,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.19.0</div>`;
+     <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.20.0</div>`;
   // Quick PLU
  const pluBtn=document.getElementById("pluQuickBtn");
  const pluPanel=document.getElementById("pluQuickPanel");
@@ -2921,7 +2929,19 @@ function renderStencil(){
       <input id="sq" type="search" inputmode="search" autocomplete="off" autocorrect="off" autocapitalize="off"
         placeholder="Filter stencil — name, code, keyword…" value="${esc(q)}">
       <button class="clr${q?" show":""}" id="sclr" aria-label="Clear">${I.x}</button>
+    </div>
+    <div class="seg" style="margin-top:8px" id="stencilNameMode">
+      <button class="${stencilNameMode==="norm"?"on":""}" data-smode="norm">Normalized</button>
+      <button class="${stencilNameMode==="raw"?"on":""}" data-smode="raw">Standard</button>
     </div>${body}`;
+
+  /* Wire name display toggle */
+  const smseg=document.getElementById("stencilNameMode");
+  if(smseg) smseg.querySelectorAll("[data-smode]").forEach(b=>b.onclick=()=>{
+    setStencilNameMode(b.dataset.smode);
+    renderStencil();
+    const f=document.getElementById("sq"); if(f){ f.focus(); }
+  });
 
   /* Wire search */
   const inp=document.getElementById("sq"), clr=document.getElementById("sclr");
@@ -2973,8 +2993,8 @@ function renderStencil(){
 
 function stencilRow(it,q,useHighlight){
   const meta=metaStr(it.p,it.u);
-  const displayName=normDesc(it);
-  const nameHtml=useHighlight&&q?highlight(displayName,q):esc(displayName);
+    const displayName=stencilName(it);
+    const nameHtml=useHighlight&&q?highlight(displayName,q):esc(displayName);
   if(stencilEdit){
     return `<div class="sr" style="cursor:default;display:flex;align-items:center;gap:8px;">
       <div class="bd" style="flex:1"><div class="nm">${nameHtml}${it._custom?'<span style="color:var(--brand);font-size:10px;font-weight:700;margin-left:6px">CUSTOM</span>':""}</div>
