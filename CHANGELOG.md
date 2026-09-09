@@ -4,6 +4,23 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.26.0] — 2026-09-09
+
+### Fixed
+- **Installed PWAs no longer remain stranded on an old app shell.** Navigation requests now use a network-first strategy, refreshing the cached `index.html` whenever the network is available while retaining the cached shell for offline use.
+- **Updates are actively detected like LoomRP.** PDP checks its service worker at startup, once per hour, and whenever the app returns to the foreground. Waiting workers are promoted immediately and the page reloads once the new worker controls it.
+- **In-progress work is protected.** Automatic reload is deferred while scanning or editing Stencil, Holes, Schedule, GEV, or Documents, then applied when the app safely resumes.
+- **External requests are no longer intercepted.** The worker limits caching to same-origin GET requests, leaving Firebase and scanning-provider traffic untouched.
+
+### Files
+- `sw.js` — network-first app shell, same-origin routing, immediate worker promotion, and v5.26.0 cache
+- `index.html` — active/resume update checks, safe reload deferral, and v5.26.0 markers
+- `manifest.json` — version URLs bumped to 5.26.0
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.25.0] — 2026-09-09
 
 ### Improved

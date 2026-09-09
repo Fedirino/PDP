@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.25.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.25.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.25.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.26.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.26.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.26.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2852,7 +2852,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.25.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.26.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -5231,7 +5231,44 @@ initFirebase();
 cloudHydrateAll().catch(function(){});
 render();
 scheduleReminderNotifs();
-if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+/* Auto-update installed PWAs. Navigations are network-first in sw.js; this also
+   checks for a new worker when a long-lived app resumes instead of waiting for
+   the next cold start. Active editing/scanning is never interrupted. */
+if('serviceWorker' in navigator){
+  let swReloading=false, swUpdatePending=false;
+  const updateBlocked=()=>{
+    const scan=document.getElementById('scanOverlay');
+    return !!((scan&&scan.classList.contains('open'))||docEdit||schEdit||gevEdit||ll.edit||stencilEdit);
+  };
+  const applySwUpdate=()=>{
+    if(swReloading) return;
+    if(updateBlocked()){ swUpdatePending=true; return; }
+    swReloading=true;
+    location.reload();
+  };
+  navigator.serviceWorker.addEventListener('controllerchange',applySwUpdate);
+  window.addEventListener('load',async()=>{
+    try{
+      const reg=await navigator.serviceWorker.register('sw.js',{updateViaCache:'none'});
+      const check=()=>reg.update().catch(()=>{});
+      const promote=()=>{ if(reg.waiting) reg.waiting.postMessage('skip-waiting'); };
+      reg.addEventListener('updatefound',()=>{
+        const incoming=reg.installing;
+        if(!incoming) return;
+        incoming.addEventListener('statechange',()=>{
+          if(incoming.state==='installed'&&navigator.serviceWorker.controller) promote();
+        });
+      });
+      check(); promote();
+      setInterval(check,60*60*1000);
+      document.addEventListener('visibilitychange',()=>{
+        if(document.visibilityState!=='visible') return;
+        if(swUpdatePending){ swUpdatePending=false; applySwUpdate(); return; }
+        check(); promote();
+      });
+    }catch(e){}
+  });
+}
 </script>
 </body>
 </html>
