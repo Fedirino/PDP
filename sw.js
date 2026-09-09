@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pdp-v5.23.0';
+const CACHE_NAME = 'pdp-v5.24.0';
 const ASSETS = [
   './',
   './index.html',

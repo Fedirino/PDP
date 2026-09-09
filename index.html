@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.23.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.23.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.23.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.24.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.24.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.24.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -68,6 +68,22 @@
     border:1px solid var(--line-2);transition:background .15s ease;}
   .tb-act:active{background:var(--surface-2);}
   .tb-act.danger{color:var(--danger);border-color:var(--danger-line);}
+  .topbar-actions{display:flex;align-items:center;gap:7px;flex:none;}
+  .account-btn{position:relative;width:38px;height:38px;padding:0;border-radius:50%;border:1px solid var(--line-2);
+    background:var(--surface-2);color:var(--ink-2);display:grid;place-items:center;overflow:visible;cursor:pointer;
+    box-shadow:0 2px 9px rgba(0,0,0,.2);transition:transform .12s ease,border-color .15s ease;}
+  .account-btn:active{transform:scale(.94);}
+  .account-btn.signed-in{border-color:rgba(85,217,173,.55);}
+  .account-avatar{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;}
+  .account-initials{font-size:12px;font-weight:800;letter-spacing:.02em;color:var(--brand-ink);}
+  .account-guest svg{width:18px;height:18px;}
+  .account-dot{position:absolute;right:-1px;bottom:-1px;width:10px;height:10px;border-radius:50%;
+    background:var(--brand);border:2px solid var(--bg);box-shadow:0 0 0 1px rgba(85,217,173,.2);}
+  @media(max-width:430px){
+    .topbar-actions{gap:5px;}
+    .tb-act{padding-left:10px;padding-right:10px;}
+    .account-btn{width:36px;height:36px;}
+  }
 
   main{flex:1;padding:18px 16px calc(var(--tabh) + env(safe-area-inset-bottom) + 26px);}
 
@@ -2636,7 +2652,13 @@ function renderTopbar(){
     if(toolView!=="hub") right=`<button class="tb-act" id="toolBack">${I.back} Back</button>`;
     if(toolView==="checklist") right=`<button class="tb-act" id="clEditAct">${clEdit?"Done":"Edit"}</button>`+right;
   }
-  topbar.innerHTML=`<div class="brand"><img src="${LOGO_SM}" alt="PDP"></div><div class="tb-tt"><h1>${title}</h1></div>${right}`;
+  const u=shared.user;
+  const signedIn=!!(u&&!u.isAnonymous);
+  let avatar=`<span class="account-guest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/></svg></span>`;
+  if(signedIn&&u.photoURL) avatar=`<img class="account-avatar" src="${esc(u.photoURL)}" alt="">`;
+  else if(signedIn){ const initials=(u.displayName||u.email||"A").split(/[\s@]+/).filter(Boolean).slice(0,2).map(x=>x[0]).join("").toUpperCase(); avatar=`<span class="account-initials">${esc(initials)}</span>`; }
+  const account=`<button class="account-btn${signedIn?" signed-in":""}" id="accountBtn" aria-label="${signedIn?"Account: "+esc(u.displayName||u.email||"signed in"):"Sign in with Google"}" title="${signedIn?esc(u.email||u.displayName||"Account"):"Sign in with Google"}">${avatar}${signedIn&&shared.isAllowed?'<span class="account-dot"></span>':''}</button>`;
+  topbar.innerHTML=`<div class="brand"><img src="${LOGO_SM}" alt="PDP"></div><div class="tb-tt"><h1>${title}</h1></div><div class="topbar-actions">${right}${account}</div>`;
   const ea=document.getElementById("editAct"); if(ea) ea.onclick=()=>{ ll.edit=!ll.edit; render(); };
   const stea=document.getElementById("stencilEditAct"); if(stea) stea.onclick=()=>{ stencilEdit=!stencilEdit; render(); };
   const sea=document.getElementById("schEditAct"); if(sea) sea.onclick=()=>{ schEdit=!schEdit; render(); };
@@ -2648,6 +2670,11 @@ function renderTopbar(){
 
   const tba=document.getElementById("toolBack"); if(tba) tba.onclick=()=>{ toolView="hub"; clEdit=false; render(); };
   const clea=document.getElementById("clEditAct"); if(clea) clea.onclick=()=>{ clEdit=!clEdit; render(); };
+  const accountBtn=document.getElementById("accountBtn");
+  if(accountBtn) accountBtn.onclick=async()=>{
+    if(signedIn){ if(await askConfirm("Sign out of PDP?",{msg:u.email||u.displayName||"Your Google account is currently connected.",okText:"Sign out"})) signOut(); }
+    else signInGoogle();
+  };
 }
 
 /* ---- Tab bar ---- */
@@ -2817,14 +2844,7 @@ function renderHome(){
        </div>
        <div class="hcl-arrow">${I.chevron||'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>'}</div>
      </button>
-     <div class="lbl" style="margin-top:18px">Account</div>
-    <div id="authSection" class="panel" style="padding:12px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <div style="flex:1;min-width:0;font-size:13px;color:var(--ink-2)">
-        <span id="authStatus">Sign in to use a shared scanning key</span>
-      </div>
-      <button class="btn" id="authBtn" style="flex:none;font-size:12px;padding:7px 14px">Sign in with Google</button>
-    </div>
-     <div class="lbl" style="margin-top:18px">Quick access</div>
+      <div class="lbl" style="margin-top:18px">Quick access</div>
      <div class="tilegrid">
        ${tiles.map((x,i)=>`
          <button class="tile compact" data-go="${x.tab}" style="animation-delay:${0.05+i*0.05}s">
@@ -2832,7 +2852,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.23.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.24.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -2850,25 +2870,6 @@ function renderHome(){
       setTab("tools");
       setTimeout(()=>{ toolView="checklist"; render(); window.scrollTo(0,0); },50);
     });
-  }
-
-  /* Auth button */
-  var authBtn=document.getElementById('authBtn');
-  var authStatus=document.getElementById('authStatus');
-  if(authBtn&&authStatus){
-    var u=shared.user;
-    if(u&&!u.isAnonymous){
-      var st='<b>'+esc(u.email||u.uid)+'</b>';
-      if(shared.isAllowed) st+=' <span style="color:var(--brand)">Shared key</span>';
-      else st+=' <span style="color:var(--ink-3)">No shared access</span>';
-      authStatus.innerHTML='Signed in as '+st;
-      authBtn.textContent='Sign Out';
-      authBtn.onclick=signOut;
-    } else {
-      authStatus.textContent='Sign in to use a shared scanning key';
-      authBtn.textContent='Sign in with Google';
-      authBtn.onclick=signInGoogle;
-    }
   }
 
   startHomeClock();

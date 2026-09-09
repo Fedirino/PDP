@@ -4,6 +4,22 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.24.0] — 2026-09-09
+
+### Improved
+- **Google account moved to the persistent top-right corner.** Authentication is no longer a full Home section. A familiar circular account control now appears on every screen and uses the signed-in Google profile photo when available, with initials as a fallback.
+- **Account state stays compact but clear.** A mint status dot indicates shared-key access. Signed-out users see a neutral profile icon, and tapping a signed-in avatar opens a safe sign-out confirmation.
+- **Home is cleaner and faster to scan.** Removing the old account panel shortens the page and keeps attention on Today and Quick Access.
+
+### Files
+- `index.html` — persistent profile control, sign-in/sign-out behavior, cleaner Home layout, and v5.24.0 markers
+- `manifest.json` — version URLs bumped to 5.24.0
+- `sw.js` — cache bumped to `pdp-v5.24.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.23.0] — 2026-09-09
 
 ### Redesigned
