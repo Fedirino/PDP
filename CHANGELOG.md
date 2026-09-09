@@ -4,6 +4,22 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.22.0] — 2026-09-09
+
+### Improved
+- **Fast access is back where it belongs.** Home, Stencil, Holes, Schedule, Documents, and Tools are all directly available in the bottom bar. The extra More step has been removed.
+- **GEV now lives inside Tools.** It is the first destination in the redesigned Department Tools hub, keeping the primary navigation focused without hiding everyday schedule or document workflows.
+- **The visual system is sleeker and more professional.** Deeper neutral-green surfaces, restrained ambient depth, cleaner glass navigation, refined active indicators, improved typography, desktop hover feedback, and consistent keyboard focus rings sharpen the app without changing its established identity.
+
+### Files
+- `index.html` — navigation hierarchy, Tools hub, visual polish, and v5.22.0 markers
+- `sw.js` — cache bumped to `pdp-v5.22.0`
+- `manifest.json` — version query strings bumped to 5.22.0
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.21.1] — 2026-09-09
 
 ### Fixed
