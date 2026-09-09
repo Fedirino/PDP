@@ -4,6 +4,22 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.23.0] — 2026-09-09
+
+### Redesigned
+- **A visibly new Studio Market interface.** The app now uses a graphite workspace with crisp mint signals, cooler layered surfaces, sharper typography, and a more restrained professional visual language across navigation, cards, panels, and controls.
+- **The Home hero has been rebuilt.** Greeting and date occupy a strong left column while the rotating “Did you know?” fact sits beside them in its own glass panel. The next scheduled employee is now a clear full-width status row below both.
+- **PLU Lookup has been removed from Home.** It no longer competes with schedule status in the hero; Stencil remains directly available from the persistent bottom navigation.
+
+### Files
+- `index.html` — new visual system, rebuilt Home hero, removed Home PLU widget, and v5.23.0 markers
+- `manifest.json` — matching graphite PWA theme and v5.23.0 URLs
+- `sw.js` — cache bumped to `pdp-v5.23.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.22.0] — 2026-09-09
 
 ### Improved
