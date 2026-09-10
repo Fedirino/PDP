@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.42.0] — 2026-09-10
+
+### Improved
+- **Display Plan scans now preserve page and box boundaries.** Each uploaded page is explicitly labeled in the model request, and the display-plan instructions now require independent box headings, page order, and per-page rotation handling. This targets the multi-sheet landscape layout shown in the provided examples without hard-coding their contents.
+
+### Files
+- `index.html` — ordered page markers and display-plan layout guidance
+- `manifest.json` — version URLs bumped to 5.42.0
+- `sw.js` — cache bumped to `pdp-v5.42.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.41.0] — 2026-09-10
 
 ### Improved

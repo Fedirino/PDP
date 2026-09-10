@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.41.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.41.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.41.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.42.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.42.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.42.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2883,7 +2883,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.41.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.42.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -5030,7 +5030,7 @@ async function readDocPages(){
   const status=document.getElementById("scanStatus");
   try{
     async function attempt(extra){
-const salesPlanPrompt=`You are transcribing a Stop & Shop produce "Display Plan" (weekly merchandising plan), photographed across ONE OR MORE pages in order. The sheet may be rotated — mentally rotate so it reads left-to-right, then read.
+const salesPlanPrompt=`You are transcribing a Stop & Shop produce "Display Plan" (weekly merchandising plan), photographed across ONE OR MORE pages in order. The pages are often landscape sheets photographed rotated 90 degrees. Mentally rotate EACH page so its printed text reads left-to-right before reading. Treat each page as its own layout, then combine the results in page order.
 
 Transcribe EXACTLY what is printed, block by block, in printed order. Do not summarize, invent, or reorder. Keep item text (brand, size, count) verbatim. Blank slots stay blank.
 
@@ -5041,6 +5041,8 @@ Return ONLY valid JSON, no markdown, no backticks:
    "tables":[{"title":"","headers":["Position","Item"],"rows":[["<position>","<item(s)>"]]}]}]}
 
 Rules:
+- The user-provided page markers identify the exact page sequence. Never move a block from one page into another page's position.
+- These sheets contain many independent boxes. Use each box's printed heading as the section category; do not merge neighboring boxes just because they are on the same sheet.
 - Read every shelf/well block strictly LEFT to RIGHT, and stacked positions TOP to BOTTOM.
 - Output each printed row as one table row; a blank slot is a row with "".
 - Keep size codes (2lb, 3ct, 6oz, 11x14) and flags like (DEAL LOCK), (SPOT BUY), (TPR) with the item/column where printed.
@@ -5048,7 +5050,11 @@ Rules:
 - Set "date":"" and "dateLabel":"" — the app assigns the display week itself.`;
 
       const promptText=scanMode==="salesplan"?salesPlanPrompt:(scanMode==="salesitems"?salesItemsPrompt:dailyNotesPrompt);
-      const content=docPages.map(p=>orImage(p.b64));
+      const content=[];
+      docPages.forEach(function(p,i){
+        content.push(orText("DOCUMENT PAGE "+(i+1)+" OF "+docPages.length+" — process this page in its entirety before moving to the next."));
+        content.push(orImage(p.b64));
+      });
       content.push(orText(promptText+(extra||"")));
       /* A full multi-page display plan transcribes long; the old 8192 cap could
          truncate the JSON mid-table and lose trailing blocks entirely. */
