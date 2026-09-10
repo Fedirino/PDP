@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.44.0] — 2026-09-10
+
+### Fixed
+- **Sales Items scans now retain UOM.** Order Code List pages with NE, NY, and UOM columns now keep the selected NE price plus the printed unit (EA/LB/etc.), with one aligned row per item instead of silently dropping the unit column.
+
+### Files
+- `index.html` — Sales Items schema/prompt strengthened for UOM and row alignment
+- `manifest.json` — version URLs bumped to 5.44.0
+- `sw.js` — cache bumped to `pdp-v5.44.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.43.0] — 2026-09-10
 
 ### Fixed

@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.43.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.43.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.43.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.44.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.44.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.44.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2883,7 +2883,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.43.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.44.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -5010,15 +5010,17 @@ Return ONLY valid JSON. No markdown, no backticks, no commentary.
 
 {"date":"","dateLabel":"Week 28 2026","sections":[
   {"category":"Week 28 2026 Order Code List","subject":"","contact":"","bullets":[],
-   "tables":[{"title":"","headers":["Item Number","Description","Price"],"rows":[["133206","RED SALSA MEDIUM 12 OZ","$4.49"]]}]}
+   "tables":[{"title":"","headers":["Item Number","Description","Price","UOM"],"rows":[["133206","RED SALSA MEDIUM 12 OZ","$4.49","EA"]]}]}
    ]}
 
    RULES:
    - date: leave as "" unless the page clearly shows a real calendar date. dateLabel: the printed week/title label exactly as shown, e.g. "Week 28 2026", "Week 28 2026 Order Code List", or "e 6 Deal Lock Program".
    - Capture EVERY page in order. If a sheet spans multiple pages, keep the rows in printed order across all pages.
-   - Transcribe item code, description, and price exactly as printed.
+   - Transcribe item code, description, price, and unit of measure exactly as printed. Return one row for each printed item-code row.
    - PRICE RULE: if BOTH NE and NY prices are present, use the NE price in "Price" and ignore the NY price. If only one price is present, use it. If the page only shows one price column like "Retail", use that value for "Price".
-   - If the printed table includes only code/description/Retail, map them to Item Number / Description / Price.
+   - UOM RULE: preserve the printed UOM in a fourth "UOM" column, such as EA or LB. Never attach UOM text to the description or price.
+   - If the printed table includes only code/description/Retail, map them to Item Number / Description / Price and use "" for UOM.
+   - Keep every row aligned across columns. Do not shift a price or UOM into a neighboring item when a cell is faint or blank; use "" for that cell.
    - Do NOT invent, reorder, round, or summarize. Accuracy matters more than anything.`;
 
 async function readDocPages(){
