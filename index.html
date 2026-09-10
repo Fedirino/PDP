@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.47.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.47.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.47.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.48.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.48.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.48.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2892,7 +2892,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.47.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.48.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -4281,6 +4281,21 @@ function getEffectiveKey(){
    Anthropic's source.base64 blocks, and text comes back on choices[0].message. */
 function orImage(b64){ return {type:"image_url",image_url:{url:"data:image/jpeg;base64,"+b64}}; }
 function orText(t){ return {type:"text",text:t}; }
+async function scanDetailTiles(b64){
+  try{
+    const img=await new Promise((ok,fail)=>{ const im=new Image(); im.onload=()=>ok(im); im.onerror=fail; im.src="data:image/jpeg;base64,"+b64; });
+    const w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
+    const tiles=[]; const overlap=.12,halfW=w/2,halfH=h/2;
+    for(let row=0;row<2;row++) for(let col=0;col<2;col++){
+      const x=Math.max(0,Math.round(col*halfW-overlap*halfW)),y=Math.max(0,Math.round(row*halfH-overlap*halfH));
+      const x2=Math.min(w,Math.round((col+1)*halfW+overlap*halfW)),y2=Math.min(h,Math.round((row+1)*halfH+overlap*halfH));
+      const cv=document.createElement("canvas"); cv.width=x2-x; cv.height=y2-y;
+      cv.getContext("2d").drawImage(img,x,y,cv.width,cv.height,0,0,cv.width,cv.height);
+      tiles.push(cv.toDataURL("image/jpeg",.92).split(",")[1]);
+    }
+    return tiles;
+  }catch(e){ return []; }
+}
 function orTextOf(data){
   const msg=data&&data.choices&&data.choices[0]&&data.choices[0].message;
   if(!msg) return "";
@@ -5054,6 +5069,7 @@ Return ONLY valid JSON, no markdown, no backticks:
 Rules:
 - The user-provided page markers identify the exact page sequence. Never move a block from one page into another page's position.
 - These sheets contain many independent boxes. Use each box's printed heading as the section category; do not merge neighboring boxes just because they are on the same sheet.
+- The full page image defines layout and box boundaries. Detail tiles are zoomed references only: use them to verify faint item text, but never duplicate a box or change its position because it appears in more than one overlapping tile.
 - For every box, include page (the numbered document page) and boxOrder (top-to-bottom, then left-to-right reading order on that page). If uncertain, keep the box in its observed position and use the next integer rather than guessing a different box.
 - Preserve the printed layout inside each box as rows: keep the exact row label in column 1 and the exact item/cell text in the remaining columns. Do not turn a blank cell into a placement or combine separate rows.
 - Read every shelf/well block strictly LEFT to RIGHT, and stacked positions TOP to BOTTOM.
@@ -5068,6 +5084,15 @@ Rules:
         content.push(orText("DOCUMENT PAGE "+(i+1)+" OF "+docPages.length+" — process this page in its entirety before moving to the next."));
         content.push(orImage(p.b64));
       });
+      if(scanMode==="salesplan"){
+        for(let i=0;i<docPages.length;i++){
+          const tiles=await scanDetailTiles(docPages[i].b64);
+          tiles.forEach(function(tile,j){
+            content.push(orText("PAGE "+(i+1)+" DETAIL TILE "+(j+1)+" OF 4 — use only to verify small text inside the corresponding full page; never create a second box from a tile."));
+            content.push(orImage(tile));
+          });
+        }
+      }
       content.push(orText(promptText+(extra||"")));
       /* A full multi-page display plan transcribes long; the old 8192 cap could
          truncate the JSON mid-table and lose trailing blocks entirely. */

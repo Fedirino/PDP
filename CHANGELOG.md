@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.48.0] — 2026-09-10
+
+### Improved
+- **Display Plan OCR now gets zoomed detail references.** Each full page remains the source of layout and box boundaries, while four overlapping detail tiles give the model more resolution for small item text. Tile instructions explicitly prevent duplicate boxes or cross-box mixing.
+
+### Files
+- `index.html` — Display Plan detail-tile generation and scan guidance
+- `manifest.json` — version URLs bumped to 5.48.0
+- `sw.js` — cache bumped to `pdp-v5.48.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.47.0] — 2026-09-10
 
 ### Improved
