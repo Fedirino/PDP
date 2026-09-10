@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.44.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.44.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.44.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.46.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.46.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.46.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -815,6 +815,12 @@
   .sp-plain td.empty{color:var(--ink-3);}
   .sp-plain .ln{display:block;}
   .sp-plain .ln+.ln{margin-top:3px;}
+  .sp-raw-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .sp-raw{min-width:100%;width:max-content;border-collapse:collapse;}
+  .sp-raw th{background:var(--surface-2);color:var(--brand);font-size:9px;font-weight:800;
+    letter-spacing:.06em;text-transform:uppercase;padding:7px 8px;text-align:left;border-bottom:1px solid var(--line-2);}
+  .sp-raw td{border-top:1px dashed var(--line);padding:7px 8px;vertical-align:top;font-size:12px;color:var(--ink);line-height:1.35;}
+  .sp-raw td.blank{color:var(--ink-3);}
   /* description chip (sizes/sign cards like 11x14) */
   .sp-desc{display:inline-block;font-size:8.5px;font-weight:800;letter-spacing:.04em;
     padding:1.5px 6px;border-radius:999px;background:var(--surface-3);border:1px solid var(--line-2);
@@ -1951,6 +1957,7 @@ async function cloudHydrateDocs() {
     if (remoteDN.length || remoteSP.length || remoteSI.length) {
       docStore.dailynotes = mergeDocLists(docStore.dailynotes, remoteDN);
       docStore.salesplan = mergeDocLists(docStore.salesplan, remoteSP);
+      docStore.salesplan.forEach(markScannedSalesPlan);
       docStore.salesitems = mergeDocLists(docStore.salesitems, remoteSI);
       DOC_TYPES.forEach(function (t) { if (!Array.isArray(docStore[t])) docStore[t] = []; });
       docPrune();
@@ -2383,9 +2390,11 @@ function docPrune(){
     try{ const old=JSON.parse(readK("pdp_documents_v1")); if(Array.isArray(old)) docStore.dailynotes=old; }catch(e){}
   }
   DOC_TYPES.forEach(t=>{ if(!Array.isArray(docStore[t])) docStore[t]=[]; docStore[t].forEach(d=>{ if(d&&!d.updated) d.updated=d.created||Date.now(); }); });
+  docStore.salesplan.forEach(markScannedSalesPlan);
   docPrune();
   DOC_TYPES.forEach(t=>{ if(docStore[t].length) docActiveId[t]=docStore[t][0].id; });
 })();
+function markScannedSalesPlan(doc){ if(doc&&doc.id!=="seed_salesplan_v1") doc.preserveOrder=true; return doc; }
 function touchDoc(d){ if(d) d.updated=Date.now(); return d; }
 function saveDocs(){ DOC_TYPES.forEach(t=>{ (docStore[t]||[]).forEach(d=>{ if(d&&!d.updated) d.updated=d.created||Date.now(); }); }); const ok=writeK(DOCS_KEY,JSON.stringify(docStore)); if(firebaseDb&&cloudReady){ cloudSyncDocCollection("dailynotes",docStore.dailynotes).catch(function(e){ console.error("dailynotes sync:",e); }); cloudSyncDocCollection("salesplan",docStore.salesplan).catch(function(e){ console.error("salesplan sync:",e); }); cloudSyncDocCollection("salesitems",docStore.salesitems).catch(function(e){ console.error("salesitems sync:",e); }); } return ok; }
 function sortDocs(t){ docStore[t].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.created||0)-(a.created||0)); }
@@ -2883,7 +2892,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.44.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.46.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -5314,6 +5323,17 @@ function spPlainHTML(rows){
   }).join("");
   return '<table class="sp-plain"><tbody>'+body+'</tbody></table>';
 }
+function spRawHTML(table){
+  const headers=Array.isArray(table&&table.headers)?table.headers:[];
+  const rows=Array.isArray(table&&table.rows)?table.rows:[];
+  const width=Math.max(headers.length,...rows.map(r=>Array.isArray(r)?r.length:0),1);
+  const th=Array.from({length:width},(_,i)=>'<th>'+esc(headers[i]||("Column "+(i+1)))+'</th>').join("");
+  const body=rows.map(function(row){
+    const cells=Array.from({length:width},(_,i)=>String(Array.isArray(row)?(row[i]??"") : (i===0?row:"")));
+    return '<tr>'+cells.map(c=>'<td class="'+(c.trim()?"":"blank")+'">'+(c.trim()?esc(c):"&nbsp;")+'</td>').join("")+'</tr>';
+  }).join("");
+  return '<div class="sp-raw-wrap"><table class="sp-raw"><thead><tr>'+th+'</tr></thead><tbody>'+body+'</tbody></table></div>';
+}
 function spSectionsHTML(doc){
   const sections=doc&&doc.preserveOrder?((doc&&doc.sections)||[]):spOrder(doc&&doc.sections);
   return sections.map(function(s){
@@ -5321,7 +5341,7 @@ function spSectionsHTML(doc){
       .map(function(b){ return '<div class="sp-note">'+esc(String(b).replace(/^>>\s?/,""))+'</div>'; }).join("");
     var tbls=(s.tables||[]).map(function(t){
       var rows=t.rows||[];
-      var inner=spTableIsFixture(s.category,rows)?spFixtureHTML(rows):spPlainHTML(rows);
+      var inner=doc&&doc.preserveOrder?spRawHTML(t):(spTableIsFixture(s.category,rows)?spFixtureHTML(rows):spPlainHTML(rows));
       return (t.title?'<div class="sp-tbl-title">'+esc(t.title)+'</div>':'')+inner;
     }).join("");
     return '<div class="sp-block">'+

@@ -4,6 +4,34 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.46.0] — 2026-09-10
+
+### Fixed
+- **Existing scanned Display Plans receive the faithful review fix.** A migration marks prior user-created plans, including cloud-hydrated plans, for raw row/column rendering automatically; only PDP’s built-in sample retains its curated fixture layout.
+
+### Files
+- `index.html` — scanned-plan migration and v5.46.0 markers
+- `manifest.json` — version URLs bumped to 5.46.0
+- `sw.js` — cache bumped to `pdp-v5.46.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
+## [5.45.0] — 2026-09-10
+
+### Fixed
+- **Scanned Display Plans now show a faithful raw table review.** The app no longer converts scanned rows into inferred Shelf/Well/Deck fixture layouts, which could make a model mistake look like a PDP mistake. Every extracted column and row remains visible, horizontally scrollable on mobile; curated legacy plans keep their designed layout.
+
+### Files
+- `index.html` — raw scanned-plan table renderer and v5.45.0 markers
+- `manifest.json` — version URLs bumped to 5.45.0
+- `sw.js` — cache bumped to `pdp-v5.45.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.44.0] — 2026-09-10
 
 ### Fixed
