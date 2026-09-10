@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.27.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.27.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.27.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.28.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.28.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.28.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -715,6 +715,14 @@
     background:var(--surface-2);border-radius:5px;padding:4px 1px;}
   .scan-actions{display:flex;gap:8px;flex:none;padding-bottom:env(safe-area-inset-bottom);}
   .scan-actions .btn{flex:1;}
+  /* cross-model verification findings */
+  .scan-verify{background:var(--amber-tint);border:1px solid var(--amber);border-radius:var(--r);padding:12px;margin-bottom:6px;}
+  .scan-verify-t{font-size:13px;font-weight:700;color:var(--amber);display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+  .scan-verify-t svg{width:15px;height:15px;flex:none;}
+  .scan-issue{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:12px;color:var(--ink);line-height:1.5;}
+  .scan-issue:last-child{margin-bottom:8px;}
+  .scan-issue .iv{color:var(--amber);font-weight:700;text-transform:uppercase;}
+  .scan-issue .iv-note{font-size:11px;color:var(--ink-3);}
 
   /* ===== Documents / Daily Notes ===== */
   .doc-top{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
@@ -2852,7 +2860,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.27.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.28.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -3779,7 +3787,7 @@ function renderToolsHub(){
     </button>
     <button class="tool-card" id="goSettings">
       <div class="chip" style="background:var(--surface-2);color:var(--ink-2)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
-      <div class="tx"><div class="tt">Settings</div><div class="sub">${getApiKey()?"API key set \u2713":"Set your Anthropic API key"}</div></div>
+      <div class="tx"><div class="tt">Settings</div><div class="sub">${getApiKey()?"API key set \u2713":"Set your OpenRouter API key"}</div></div>
       <div class="go">${I.chev}</div>
     </button>
     <div class="lbl">Quick Calc</div>
@@ -4149,6 +4157,10 @@ const SCAN_MODELS=[
 ];
 const SCAN_MODEL_KEY="pdp_scan_model";
 const DEFAULT_SCAN_MODEL="google/gemini-3.1-pro-preview";
+/* Cross-model verification: a DIFFERENT family from the extractor so its
+   failure modes don't overlap. GPT-5.6 Sol audits the candidate schedule
+   against the photo and reports only discrepancies (cheap, directed). */
+const VERIFY_MODEL="openai/gpt-5.6-sol";
 function getScanModel(){
   try{
     const m=localStorage.getItem(SCAN_MODEL_KEY);
@@ -4434,8 +4446,26 @@ RULES:
       });
       scanWeekStart=weekStart;
 
+      /* Cross-model verification: have a different model family audit the
+         candidate against the photo. Advisory only — never blocks Apply. */
+      let issues=[];
+      if(getEffectiveKey()){
+        const statusEl=document.getElementById("scanStatus");
+        if(statusEl) statusEl.textContent="Verifying with a second model…";
+        issues=await verifyScheduleScan(b64, scanParsed);
+      }
+
       /* Show results */
       let preview="";
+      let verifyHTML="";
+      if(issues&&issues.length){
+        const issueRows=issues.map(i=>`<div class="scan-issue"><b>${esc(i.emp||"")}</b> <span class="iv">${esc(i.day||"")}</span> — ${esc(i.got||"")} <span class="iv">→</span> ${esc(i.should||"")}<div class="iv-note">${esc(i.note||"")}</div></div>`).join("");
+        verifyHTML=`<div class="scan-verify">
+          <div class="scan-verify-t">${I.bell} ${issues.length} possible ${issues.length!==1?"discrepancies":"discrepancy"} flagged by second check</div>
+          ${issueRows}
+          <div style="font-size:11px;color:var(--ink-3);line-height:1.5;">The extractor (Gemini) and a second model (GPT) disagree on these. Review before applying — you can still Apply as-is.</div>
+        </div>`;
+      }
       scanParsed.forEach(emp=>{
         preview+=`<div class="scan-emp"><div class="scan-emp-name">${esc(emp.name)}</div>
           <div class="scan-emp-shifts">
@@ -4449,6 +4479,7 @@ RULES:
         <img src="${imgSrc}" class="scan-preview" alt="Schedule photo">
         <div class="scan-step"><div class="num">2</div>Done — ${scanParsed.length} employee${scanParsed.length!==1?"s":""} found</div>
         <div class="scan-result">${preview}</div>
+        ${verifyHTML}
         <div class="scan-step"><div class="num">3</div>Apply to ${sched.weeks[schWeek].label}</div>
         <div style="font-size:11px;color:var(--ink-3);text-align:center;line-height:1.5;padding:0 8px;">⚠️ AI models can make mistakes. Always double-check accuracy — adjust shifts or retry if needed.</div>
         <div class="scan-actions">
@@ -4491,6 +4522,43 @@ scanFileInput.onchange=function(){
   }
   scanFileInput.value="";
 };
+
+/* Cross-model verification: hand the photo + the candidate schedule to a
+   DIFFERENT model family (GPT-5.6 Sol) and ask it to audit, not re-extract.
+   Returns an array of {emp, day, got, should, note}. Fails open — a
+   verification hiccup must never block a scan. */
+async function verifyScheduleScan(b64, empArr){
+  try{
+    const candidate=empArr.map(e=>({name:e.name,shifts:e.shifts,meals:e.meals}));
+    const data=await orFetch({
+      model:VERIFY_MODEL,
+      max_tokens:2048,
+      messages:[{role:"user",content:[
+        orImage(b64),
+        orText(`You are auditing a grocery store "Wall Schedule" photo against a schedule that another AI already extracted. Your job is ONLY to find mistakes — do not re-extract the whole thing.
+
+The extracted schedule (candidate) is this JSON:
+${JSON.stringify(candidate)}
+
+Compare each employee's shift times and meal minutes against the printed photo. The photo may be rotated/tilted — mentally orient it first.
+
+Only flag a cell if you are CONFIDENT the photo disagrees with the candidate. Ignore: employee order, name spelling (as long as it's clearly the same person), the leftmost/hatched Saturday, and any non-produce (loaned-out) roles.
+
+Return ONLY a JSON object, no markdown, no backticks:
+{"issues":[{"emp":"Employee Name","day":"sun","got":"7:00A-3:30P","should":"8:00A-4:30P","note":"short reason"}]}
+If everything matches, return {"issues":[]}. Empty array = the candidate is correct. Do not invent issues.`)
+      ]}]
+    });
+    let jsonText=orTextOf(data);
+    jsonText=jsonText.replace(/```json\s*/g,"").replace(/```\s*/g,"").trim();
+    if(jsonText&&jsonText[0]!=="{"){
+      const i=jsonText.indexOf("{"), j=jsonText.lastIndexOf("}");
+      if(i>-1&&j>i) jsonText=jsonText.slice(i,j+1);
+    }
+    const parsed=JSON.parse(jsonText);
+    return Array.isArray(parsed.issues)?parsed.issues:[];
+  }catch(e){ return []; }
+}
 
 function applyScanResults(){
   if(!scanParsed) return;

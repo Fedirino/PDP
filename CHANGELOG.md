@@ -4,6 +4,24 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.28.0] — 2026-09-09
+
+### Added
+- **Cross-model schedule verification.** Schedule scans are now audited by a **second model from a different family** (`openai/gpt-5.6-sol`) against the original photo. Unlike the extractor's self-check, an independent model catches what the first model can't self-correct (different training, different failure modes). It flags discrepancies — employee, day, extracted value vs. what the photo shows — before you Apply.
+- **Verification fails open.** A verification hiccup or failed audit never blocks a scan — the schedule still applies with the pre-existing "Always double-check accuracy" warning.
+
+### Fixed
+- **Settings subtitle typo.** "Set your Anthropic API key" → "Set your OpenRouter API key" (the app has been on OpenRouter, not Anthropic).
+
+### Files
+- `index.html` — `verifyScheduleScan()` + `VERIFY_MODEL`, verification status + discrepancy panel, and v5.28.0 markers
+- `manifest.json` — version URLs bumped to 5.28.0
+- `sw.js` — cache bumped to `pdp-v5.28.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.27.0] — 2026-09-09
 
 ### Fixed
