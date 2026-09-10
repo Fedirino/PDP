@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.37.0] — 2026-09-10
+
+### Fixed
+- **Document capture no longer accepts overlapping uploads.** While multi-page images are being prepared, a second selection is rejected with a clear wait message instead of racing the active queue.
+
+### Files
+- `index.html` — document upload busy guard and v5.37.0 markers
+- `manifest.json` — version URLs bumped to 5.37.0
+- `sw.js` — cache bumped to `pdp-v5.37.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.36.0] — 2026-09-10
 
 ### Fixed
