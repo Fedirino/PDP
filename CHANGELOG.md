@@ -4,6 +4,15 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.49.0] — 2026-09-10
+
+### Fixed
+- Display Plan scan previews now use the same table renderer as saved scans, retaining all extracted columns and blank cells instead of inferring fixture positions.
+- Appending scans preserves section sequence; repeated page numbers from separate uploads no longer interleave the boxes.
+- Added executable regression checks for preview selection, retained columns, blank cells, escaping, and append order. OCR accuracy and reproduction of merged-cell layouts are not established by these tests.
+
+---
+
 ## [5.48.0] — 2026-09-10
 
 ### Improved

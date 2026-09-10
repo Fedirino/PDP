@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.48.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.48.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.48.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.49.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.49.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.49.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2892,7 +2892,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.48.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.49.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -5118,7 +5118,7 @@ Rules:
     })):[];
     if(!sections.length) throw new Error("No sections found in the notes.");
 
-    scanParsed={ date:parsed.date||"", dateLabel:parsed.dateLabel||"", sections, images:docPages.map(p=>p.store) };
+    scanParsed={ date:parsed.date||"", dateLabel:parsed.dateLabel||"", sections, images:docPages.map(p=>p.store), preserveOrder:scanMode==="salesplan" };
 
     /* Display Plan: the doc is a one-week (Fri–Thu) plan — set the week ourselves, ignore any promo date on the sheet. */
     if(scanMode==="salesplan"){
@@ -5364,13 +5364,7 @@ function spRawHTML(table){
 }
 function spSectionsHTML(doc){
   const sections=doc&&doc.preserveOrder
-    ?(doc.sections||[]).map((s,i)=>({s,i})).sort((a,b)=>{
-      const ap=Number(a.s.page)||0,bp=Number(b.s.page)||0;
-      if(ap&&bp&&ap!==bp) return ap-bp;
-      if(ap!==bp) return ap? -1:1;
-      const ao=Number(a.s.boxOrder)||a.i+1,bo=Number(b.s.boxOrder)||b.i+1;
-      return ao!==bo?ao-bo:a.i-b.i;
-    }).map(x=>x.s)
+    ?(doc.sections||[])
     :spOrder(doc&&doc.sections);
   return sections.map(function(s){
     var notes=(s.bullets||[]).filter(function(b){ return String(b).trim()!==""; })
