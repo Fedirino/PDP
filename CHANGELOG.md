@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.36.0] — 2026-09-10
+
+### Fixed
+- **Multi-page document uploads preserve selection order.** Pages are now oriented and prepared sequentially, preventing a slower orientation check from moving a later page ahead of an earlier one.
+
+### Files
+- `index.html` — sequential document upload queue and v5.36.0 markers
+- `manifest.json` — version URLs bumped to 5.36.0
+- `sw.js` — cache bumped to `pdp-v5.36.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.35.0] — 2026-09-10
 
 ### Improved
