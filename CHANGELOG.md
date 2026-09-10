@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.30.0] — 2026-09-09
+
+### Fixed
+- **Scans no longer fail on slightly-malformed model JSON.** The schedule/GEV/doc extractor now parses the model's response leniently — it strips code fences, salvages JSON from prose, and cleans trailing commas like `{"sun":"7:00A-3:30P",}` — instead of throwing the raw `Expected ',' or ')' after property value` error once on a single glitched character. A fully-invalid response still fails (with a clear message) and retries as before.
+
+### Files
+- `index.html` — `parseJsonTolerant()` helper, both scan/verification parse paths routed through it, and v5.30.0 markers
+- `manifest.json` — version URLs bumped to 5.30.0
+- `sw.js` — cache bumped to `pdp-v5.30.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.29.0] — 2026-09-09
 
 ### Added

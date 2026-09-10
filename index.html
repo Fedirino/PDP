@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.29.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.29.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.29.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.30.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.30.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.30.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2878,7 +2878,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.29.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.30.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -4394,6 +4394,21 @@ RULES:
 
       /* Up to 2 attempts: transient API errors and malformed JSON get one
          automatic retry (with a stricter instruction) before failing. */
+      function parseJsonTolerant(text){
+        let t=(text==null?"":String(text)).replace(/```json\s*/g,"").replace(/```\s*/g,"").trim();
+        if(t&&t[0]!=="{"){
+          const a=t.indexOf("{"), b=t.lastIndexOf("}");
+          if(a>-1&&b>a) t=t.slice(a,b+1);
+        }
+        if(!t) throw new Error("Empty model response.");
+        for(let pass=0;pass<3;pass++){
+          try{ return JSON.parse(t); }catch(e){}
+          const fixed=t.replace(/,\s*([\]}])/g,"$1");
+          if(fixed===t) break;
+          t=fixed;
+        }
+        throw new Error("Model returned malformed JSON.");
+      }
       async function scanAttempt(extraInstruction){
         const data=await orFetch({
           model:getScanModel(),
@@ -4410,7 +4425,7 @@ RULES:
           const i=jsonText.indexOf("{"), j=jsonText.lastIndexOf("}");
           if(i>-1&&j>i) jsonText=jsonText.slice(i,j+1);
         }
-        return JSON.parse(jsonText);
+        return parseJsonTolerant(jsonText);
       }
 
       let parsed;
@@ -4606,7 +4621,7 @@ If everything matches, return {"issues":[]}. Empty array = the candidate is corr
       const i=jsonText.indexOf("{"), j=jsonText.lastIndexOf("}");
       if(i>-1&&j>i) jsonText=jsonText.slice(i,j+1);
     }
-    const parsed=JSON.parse(jsonText);
+    const parsed=parseJsonTolerant(jsonText);
     return Array.isArray(parsed.issues)?parsed.issues:[];
   }catch(e){ return []; }
 }
