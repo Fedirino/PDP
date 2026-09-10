@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.33.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.33.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.33.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.34.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.34.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.34.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2883,7 +2883,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.33.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.34.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -4833,7 +4833,13 @@ async function addDocPage(file){
       if(rot){ p=await compressImageFile(file,rot); p.auto=true; }
     }
     docPages.push(p);
-  }catch(e){ /* ignore */ }
+  }catch(e){
+    /* Keep the collection usable, but never make a failed page disappear
+       without explanation. The user can retry the same file or choose a
+       different image while already in the capture screen. */
+    const detail=e&&e.message?e.message:"The image could not be prepared.";
+    toast("Page not added — "+detail);
+  }
   openDocScanCollect();
 }
 

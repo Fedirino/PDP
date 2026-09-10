@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.34.0] — 2026-09-10
+
+### Improved
+- **Document scan failures are no longer silent.** If a page cannot be decoded, oriented, or compressed, PDP keeps the capture screen open and shows a clear toast so the user can retry or choose another image.
+
+### Files
+- `index.html` — document page error feedback and v5.34.0 markers
+- `manifest.json` — version URLs bumped to 5.34.0
+- `sw.js` — cache bumped to `pdp-v5.34.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.33.0] — 2026-09-09
 
 ### Added
