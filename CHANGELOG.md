@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.31.0] — 2026-09-09
+
+### Fixed
+- **Multi-photo scans now keep every source photo.** Storing a single `photo` per week meant the last image in a queued scan silently overwrote earlier ones. Each week now keeps a `photos` array, so scanning several pages (e.g. a dense weekly sheet as 2–3 close-ups) shows a gallery of zoomable photos instead of only the last. Clearing a week removes all of its photos.
+
+### Files
+- `index.html` — `w.photos` array storage, photo gallery in the week header, and v5.31.0 markers
+- `manifest.json` — version URLs bumped to 5.31.0
+- `sw.js` — cache bumped to `pdp-v5.31.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.30.0] — 2026-09-09
 
 ### Fixed
