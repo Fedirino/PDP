@@ -4,6 +4,23 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.33.0] — 2026-09-09
+
+### Added
+- **Documents keep their source photos, like the schedule.** Saved Daily Notes, Display Plan, and Sales Items now store the scan page image(s) with the document and show a zoomable photo strip under the doc, so you can verify against the original print. Adding more pages to a doc appends their photos; replacing a doc updates them.
+
+### Improved
+- **Display Plan scan prompt stripped down.** Removed the long block-by-block reading guide; the extractor now does a clean, exact-match transcription of what's printed (same structured output, verbatim items and tables), so dense plans land more reliably instead of getting tangled in rules.
+
+### Files
+- `index.html` — doc photos saved (create + add-to-existing), docs-view photo strip, leaner sales-plan prompt, and v5.33.0 markers
+- `manifest.json` — version URLs bumped to 5.33.0
+- `sw.js` — cache bumped to `pdp-v5.33.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.32.0] — 2026-09-09
 
 ### Added

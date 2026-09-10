@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.32.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.32.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.32.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.33.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.33.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.33.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2883,7 +2883,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.32.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.33.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -4932,61 +4932,22 @@ async function readDocPages(){
   const status=document.getElementById("scanStatus");
   try{
     async function attempt(extra){
-const salesPlanPrompt=`You are transcribing a Stop & Shop produce "Display Plan" (the weekly merchandising plan), photographed across ONE OR MORE pages/photos given in order. The sheet may be rotated 90°/180° or be a close-up of part of a page — mentally rotate so titles read left-to-right, then read. The plan is made of titled BLOCKS — refrigerated/dry promo tables, hero pods, end caps / islands, value bins, authorized displays, etc. Transcribe EVERY block EXACTLY. Do not summarize, invent, or reorder.
+const salesPlanPrompt=`You are transcribing a Stop & Shop produce "Display Plan" (weekly merchandising plan), photographed across ONE OR MORE pages in order. The sheet may be rotated — mentally rotate so it reads left-to-right, then read.
 
-OUTPUT — ONLY valid JSON (no markdown, no backticks, no commentary):
-{"sections":[
-  {"category":"<block title, verbatim>","subject":"","contact":"","bullets":["<any printed note / LOCATION banner / instruction, one string each>"],
-   "columns":<for a shelf/well grid block: how many columns it has, wings EXCLUDED; otherwise 0>,
-   "tables":[{"title":"","headers":["Position","Item"],"rows":[["<position label>","<item(s) for that position>"]]}]}
-]}
+Transcribe EXACTLY what is printed, block by block, in printed order. Do not summarize, invent, or reorder. Keep item text (brand, size, count) verbatim. Blank slots stay blank.
 
-Fill in "columns" BEFORE writing that block's rows — committing to the count first is what keeps the shelf and well columns lined up.
+Return ONLY valid JSON, no markdown, no backticks:
+{"date":"","dateLabel":"","sections":[
+  {"category":"<block title, verbatim>","subject":"","contact":"","bullets":["<any printed note, one string each>"],
+   "columns":0,
+   "tables":[{"title":"","headers":["Position","Item"],"rows":[["<position>","<item(s)>"]]}]}]}
 
-GOLDEN RULES
-- ORDER AND POSITION ARE THE WHOLE POINT. An item in the wrong column or wrong order is a failure. Read every shelf/row strictly LEFT to RIGHT, and stacked positions TOP to BOTTOM.
-- VERBATIM item text: keep brand, size, count (2lb, 3ct, 6oz) and any sign-size code such as "11x14" exactly as written.
-- DESCRIPTIONS / TAGS belong to the cell they are printed in: keep size codes like "11x14" and the promo flags (DEAL LOCK), (SPOT BUY), (TPR) with the item/column where they appear.
-- A blank slot is a row with "" as the item, so the shape/count is preserved.
-- Capture EVERY block on EVERY page, in printed order.
-
-HOW TO READ EACH BLOCK TYPE
-
-1) PROMO TABLES and HERO PODS (Refrigerated Promo Table, Refrigerated Veg Promo Table, Dry Promo Table, Refrigerated Hero Pod, etc.) — these are a 2-D GRID:
-   - HOW THE BLOCK IS DRAWN ON PAPER. It is one bordered table. Down its LEFT EDGE runs a narrow LABEL COLUMN containing the row names, stacked top to bottom — some subset of "Power Wing", "Shelf", "Well", "Inside Wing", "Wing". The label column holds NAMES ONLY. A label is never an item and never belongs in an item string. Read the label column first, top to bottom, and write down the row names you find before reading any produce.
-   - WING ROWS SPAN THE FULL WIDTH. "Power Wing", "Inside Wing" and a bare "Wing" are each ONE row holding ONE cell that runs the entire width of the block. They are NOT part of the column grid and they are NOT columns. "Power Wing" sits ABOVE the "Shelf" row; "Inside Wing" or "Wing" sits BELOW the "Well" row. A block may have one wing, two wings, or none.
-   - ONLY the "Shelf" row and the "Well" row are split into multiple columns. A SHELF (upper deck) sits directly ABOVE a WELL (lower deck). They have the SAME number of COLUMNS, and Well column N is directly BELOW Shelf column N — vertically aligned. COUNT the columns by looking at the "Shelf" row alone, ignoring the label column, then read column by column, left to right.
-   - THE ROW TEST, applied before you write anything: for each row in the label column, is it split into several side-by-side cells, or is it one cell across? Split into cells → it is Shelf or Well, output one row per column. One cell across → it is a wing, output exactly ONE row for it.
-   - Report your column count in "columns". If your "Shelf" row count and your "Well" row count come out different, you have miscounted the grid — recount from the Shelf row.
-   - Output ONE ROW PER COLUMN for the decks. Use label exactly "Shelf" for each shelf column (left→right), then label exactly "Well" for each well column (left→right). Output the SAME number of "Shelf" rows as "Well" rows so the columns line up.
-   - A single column cell often STACKS several items vertically, plus its size/flag tags underneath. Put everything for that one column into that one row's item string, top to bottom, separated by " / ". Example cell: "Strawberries 11x14 / TPR" or "Family Pack Mixed Berries / Family Pack Cut Watermelon".
-   - WINGS: one row each, label = the wing name exactly as printed ("Power Wing" / "Inside Wing" / "Wing"). Emit them in printed order — a "Power Wing" row comes FIRST, before the Shelf rows; an "Inside Wing" or "Wing" row comes LAST, after the Well rows. A wing's item belongs ONLY in its own wing row — never merged into a Shelf or Well row, and no Shelf or Well item ever leaks into a wing row.
-   Worked example — a refrigerated promo table whose label column reads, top to bottom: Power Wing, Shelf, Well, Inside Wing. The Power Wing and Inside Wing rows are each one full-width cell; the Shelf row is split into 3 columns and the Well row into 3 aligned columns beneath it. Note "columns":3 — the two wing rows are NOT counted, and Lemons/Limes stay in their own wing rows instead of being folded into the Shelf:
-     ["Power Wing","Lemons"]
-     ["Shelf","Blackberries 6oz"]
-     ["Shelf","Northwest Cherries"]
-     ["Shelf","Northwest Cherries"]
-     ["Well","Strawberries 11x14 / TPR"]
-     ["Well","Family Pack Mixed Berries / Family Pack Cut Watermelon"]
-     ["Well","Pint Blueberries 11x14 / DEAL LOCK"]
-     ["Inside Wing","Limes"]
-
-2) END CAPS and ISLANDS (Stone Fruit End, Berry End, Grape End, Back of Berry Island, Potato End, Avocado End, Tomato End, …) — a vertical Priority/Item list:
-   Output rows in printed order: "Front Wing" first (if present); then the MAIN positions — either "Left","Center","Right", OR the numbered positions "1","2","3","4"(…) where the top number is the FRONT of the island and the bottom is the BACK; then "Back Wing" last (if present). One position per row; if a position holds two items put both with " / ". The numbered front-to-back order and ESPECIALLY the Back Wing must be exact.
-
-3) 4 BLOCK / VALUE BIN / AUTHORIZED DISPLAYS / ADDITIONAL PROGRAMS / location-option lists:
-   Transcribe with the natural labels shown (Top Left/Top Right/Bottom Left/Bottom Right, 1..15, etc.), one item per row, blanks as "".
-
-4) SALE ITEMS / ORDER CODE LIST / DEAL LOCK TABLES:
-   Some pages include a separate item-code pricing table or right-margin sale list. Include these too — they matter.
-   - Transcribe every visible row exactly as printed.
-   - Use a table with headers ["Item Code","Description","NE Price"].
-   - If the printed page only shows one price column (e.g. "Retail"), use that as the NE Price value.
-   - If a row also shows NY/UOM, you may use them to help read the row, but do not output them unless the page specifically requires them.
-   - Keep the row order exactly as printed.
-   - If the page has multiple sale-item tables, make one section per table or page and preserve the printed title when there is one.
-
-Set "date":"" and "dateLabel":"" — the app assigns the display week itself; do not guess a date from the sheet (any printed range like "6/12-7/16" is a promo period, not the display week).`;
+Rules:
+- Read every shelf/well block strictly LEFT to RIGHT, and stacked positions TOP to BOTTOM.
+- Output each printed row as one table row; a blank slot is a row with "".
+- Keep size codes (2lb, 3ct, 6oz, 11x14) and flags like (DEAL LOCK), (SPOT BUY), (TPR) with the item/column where printed.
+- Include any separate sale-item/order-code/deal-lock tables on the page, verbatim.
+- Set "date":"" and "dateLabel":"" — the app assigns the display week itself.`;
 
       const promptText=scanMode==="salesplan"?salesPlanPrompt:(scanMode==="salesitems"?salesItemsPrompt:dailyNotesPrompt);
       const content=docPages.map(p=>orImage(p.b64));
@@ -5107,7 +5068,8 @@ async function applyDocScan(){
     if(result==="cancel"){ return; }
     if(result==="add"){
       /* Merge new sections into existing doc */
-      existing.sections=existing.sections.concat(scanParsed.sections);
+            existing.sections=existing.sections.concat(scanParsed.sections);
+            if(scanParsed.images&&scanParsed.images.length) existing.images=(existing.images||[]).concat(scanParsed.images);
       touchDoc(existing);
       docActiveId[type]=existing.id;
       sortDocs(type); docPrune();
@@ -5124,7 +5086,7 @@ async function applyDocScan(){
     cloudDeleteDoc(type,existing.id);
   }
 
-  var doc={ id:"doc_"+Date.now(), date:date, dateLabel:scanParsed.dateLabel||scanParsed.date||date||"", created:Date.now(), updated:Date.now(), images:[], sections:scanParsed.sections };
+  var doc={ id:"doc_"+Date.now(), date:date, dateLabel:scanParsed.dateLabel||scanParsed.date||date||"", created:Date.now(), updated:Date.now(), images:scanParsed.images||[], sections:scanParsed.sections };
   docStore[type].unshift(doc);
   sortDocs(type);
   docPrune();
@@ -5407,7 +5369,11 @@ function renderDocSection(type){
       <button class="btn ghost danger-txt" id="docDel">${I.trash} Delete</button>
     </div>
     <div class="doc-meta">Saved ${esc(savedStr)} · ${d.sections.length} section${d.sections.length===1?"":"s"}</div>
-    ${docSectionsHTML(d,type)}`;
+        ${(d.images&&d.images.length)?`<div class="doc-thumbs" data-docphotos>${d.images.map((src,i)=>`<img src="${src}" class="doc-thumb" data-docphoto="${i}" alt="Source ${i+1}" title="Source photo — zoom to check">`).join("")}</div>`:""}
+        ${docSectionsHTML(d,type)}`;
+
+      const docPhotos=view.querySelectorAll("[data-docphoto]");
+      docPhotos.forEach((img,bi)=>img.onclick=()=>{ openImgViewer(d.images[parseInt(img.dataset.docphoto,10)]||d.images[bi]); });
 
   const sel=document.getElementById("docSel");
   if(sel) sel.onchange=function(){ docActiveId[type]=this.value; render(); window.scrollTo(0,0); };
