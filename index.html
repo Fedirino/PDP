@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.28.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.28.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.28.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.29.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.29.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.29.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -600,6 +600,10 @@
   .sch-table td.unavail{color:#b08600;font-size:9px;}
   .sch-table td.reqoff{color:var(--ink-3);font-size:9px;font-style:italic;}
   .sch-table td.empty{color:var(--ink-3);}
+  /* training shifts shown amber; loaned-out (other-dept) shown ghosted.
+     Neither counts toward produce coverage — see calcWeekHrs. */
+  .sch-table td.train{color:#b08600;font-weight:600;}
+  .sch-table td.other{opacity:.45;font-weight:400;color:var(--ink-2);}
   .sch-table td.hrs{font-size:10px;font-weight:700;color:var(--brand-ink);background:var(--brand-tint);
     cursor:default;min-width:32px;}
   .sch-table tr:last-child td{border-bottom:none;}
@@ -713,6 +717,10 @@
   .scan-emp-shifts .scan-day-hd{font-size:9px;font-weight:700;color:var(--ink-3);text-align:center;text-transform:uppercase;}
   .scan-emp-shifts .scan-shift{font-size:10px;font-weight:600;color:var(--ink);text-align:center;
     background:var(--surface-2);border-radius:5px;padding:4px 1px;}
+  .scan-shift .sv-t,.scan-shift .sv-o{display:inline-block;font-size:8px;font-weight:700;
+    margin-left:2px;border-radius:3px;padding:0 2px;vertical-align:1px;}
+  .scan-shift .sv-t{color:#b08600;background:rgba(176,134,0,.15);}
+  .scan-shift .sv-o{color:var(--ink-3);background:rgba(120,140,130,.15);opacity:.8;}
   .scan-actions{display:flex;gap:8px;flex:none;padding-bottom:env(safe-area-inset-bottom);}
   .scan-actions .btn{flex:1;}
   /* cross-model verification findings */
@@ -835,10 +843,14 @@
     color:#fff;background:rgba(19,92,44,.85);border-radius:5px;padding:1px 4px;}
   /* fullscreen image viewer */
   .img-overlay{position:fixed;inset:0;z-index:60;background:rgba(6,9,7,.94);display:none;
-    flex-direction:column;align-items:center;justify-content:center;padding:18px;}
-  .img-overlay.open{display:flex;}
-  .img-overlay img{max-width:100%;max-height:82vh;object-fit:contain;border-radius:10px;}
-  .img-overlay .iv-bar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:flex-end;gap:8px;padding:14px;}
+      align-items:center;justify-content:center;padding:18px;overflow:hidden;touch-action:none;}
+    .img-overlay.open{display:flex;}
+    .img-overlay #ivImg{max-width:100%;max-height:82vh;object-fit:contain;border-radius:10px;
+      transition:transform .1s ease;cursor:grab;transform-origin:center center;will-change:transform;user-select:none;-webkit-user-drag:none;}
+    .img-overlay #ivImg.iv-drag{cursor:grabbing;}
+    .img-overlay .iv-bar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:flex-end;gap:8px;padding:14px;z-index:2;}
+    .img-overlay .iv-zoom{padding:6px 12px;}
+    .img-overlay .iv-zoom-btn{min-width:58px;}
   .img-overlay .iv-btn{appearance:none;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.1);
     color:#fff;font:inherit;font-weight:600;font-size:13px;border-radius:9px;padding:8px 14px;cursor:pointer;display:flex;align-items:center;gap:6px;}
   .img-overlay .iv-btn svg{width:15px;height:15px;}
@@ -875,6 +887,9 @@
 <input type="file" id="scanFileInput" accept="image/*" style="display:none">
 <div class="img-overlay" id="imgOverlay">
   <div class="iv-bar">
+    <button class="iv-btn iv-zoom" id="ivZoomOut">−</button>
+    <button class="iv-btn iv-zoom-btn" id="ivZoomReset" title="Reset zoom">100%</button>
+    <button class="iv-btn iv-zoom" id="ivZoomIn">+</button>
     <button class="iv-btn" id="ivCopy">Copy</button>
     <button class="iv-btn" id="ivClose">Close</button>
   </div>
@@ -2810,7 +2825,10 @@ function countTodayScheduled(){
     let c=0;
     for(const emp of w.employees){
       const sh=((emp.shifts&&emp.shifts[key])||"").trim();
-      if(sh&&sh!=="—"&&sh!=="OFF") c++;
+      if(sh&&sh!=="—"&&sh!=="OFF"){
+        const kind=(emp.kinds&&emp.kinds[key])||"produce";
+        if(kind==="produce") c++;
+      }
     }
     return c;
   }catch(e){ return 0; }
@@ -2860,7 +2878,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.28.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.29.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -3384,7 +3402,8 @@ function renderSchedule(){
     body+=`<div style="display:flex;align-items:center;gap:8px;margin:0 2px 10px;">
       <span style="font-size:11px;font-weight:600;color:var(--ink-3)">Week of</span>
       <input type="date" id="schDate" value="${w.startDate||""}" style="font:inherit;font-size:13px;font-weight:600;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px;color:var(--ink);flex:1;">
-    </div>`;
+          ${w.photo?`<button class="sch-photo" id="schPhoto" title="Source photo (zoom to check)">${I.scan}</button>`:""}
+</div>`;
     body+=`<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;"><table class="sch-table"><thead><tr>
       <th></th>${SCH_DAYS.map((d,i)=>`<th>${d.substring(0,2)}${dateLine?`<br><span style="font-weight:500;font-size:9px;opacity:.7">${dateLine[i]}</span>`:""}</th>`).join("")}<th>Hrs</th>
     </tr></thead><tbody>`;
@@ -3399,7 +3418,12 @@ function renderSchedule(){
         else if(vl==="off") cls="off";
         else if(vl==="unavail"||vl==="unavailable") { cls="unavail"; display="UNAVL"; }
         else if(vl==="req off"||vl==="request off") { cls="reqoff"; display="REQ"; }
-        else display=shortShift(v);
+        else {
+          display=shortShift(v);
+          const kind=(emp.kinds&&emp.kinds[k])||"produce";
+          if(kind==="training") cls="train";
+          else if(kind==="other") cls="other";
+        }
         body+=`<td class="${cls}" data-schcell="${ei}_${k}">${display}</td>`;
       });
       body+=`<td class="hrs">${hrs||"—"}</td></tr>`;
@@ -3417,8 +3441,10 @@ function renderSchedule(){
   view.querySelectorAll("[data-schw]").forEach(b=>b.onclick=()=>{ schWeek=parseInt(b.dataset.schw); render(); });
   const dateInp=document.getElementById("schDate");
   if(dateInp) dateInp.onchange=()=>{ w.startDate=dateInp.value; saveSched(); render(); };
+  const photoBtn=document.getElementById("schPhoto");
+  if(photoBtn&&w.photo) photoBtn.onclick=()=>{ openImgViewer(w.photo); };
   const clearAll=document.getElementById("schClearAll");
-  if(clearAll) clearAll.onclick=()=>{ if(confirm("Remove all employees from "+w.label+"?")){ w.employees=[]; w.startDate=""; saveSched(); toast("Schedule cleared"); render(); } };
+  if(clearAll) clearAll.onclick=()=>{ if(confirm("Remove all employees from "+w.label+"?")){ w.employees=[]; w.startDate=""; w.photo=null; saveSched(); toast("Schedule cleared"); render(); } };
   /* Wire push-next-week button */
   const schPush=document.getElementById("schPush");
   if(schPush) schPush.onclick=()=>{
@@ -3495,6 +3521,10 @@ function calcWeekHrs(emp){
   for(const k of SCH_KEYS){
     const v=(emp.shifts[k]||"").trim().toLowerCase();
     if(!v||v==="off"||v==="req off"||v==="unavail"||v==="unavailable"||v==="request off") continue;
+    /* Only produce shifts count toward the week total. Training and
+       loaned-out (other-dept) shifts are shown but excluded from coverage. */
+    const kind=(emp.kinds&&emp.kinds[k])||"produce";
+    if(kind!=="produce") continue;
     const m=v.match(/(\d{1,2})(?::(\d{2}))?\s*(a|p)?.*?(\d{1,2})(?::(\d{2}))?\s*(a|p)?/i);
     if(!m) continue;
     let h1=parseInt(m[1]),min1=parseInt(m[2]||0),ap1=(m[3]||"").toLowerCase();
@@ -4223,6 +4253,7 @@ async function orFetch(body){
 let scanParsed=null;
 let scanMode="schedule"; /* "schedule" or "gev" */
 let scanWeekStart="";
+let scanPhoto=null; /* last scan's compressed photo (schedule mode) */
 
 document.getElementById("scanClose").onclick=closeScanOverlay;
 
@@ -4287,6 +4318,7 @@ function handleScanFile(file){
     if(src.close) try{ src.close(); }catch(e){}
     const compressed=cv.toDataURL("image/jpeg",0.88);
     const b64=compressed.split(",")[1];
+    scanPhoto=scanMode==="schedule"?compressed:null;
 
     scanBody.innerHTML=`
       <div class="scan-frame">
@@ -4313,10 +4345,13 @@ STRUCTURE:
 - Left columns: Employee name (ALL CAPS "LASTNAME, FIRSTNAME M" — sometimes a small employee number appears under the name; ignore it), then Total Hours, Weekly Hours, Sun/Hol Hours.
 - There may be TWO Saturday columns — ALWAYS IGNORE THE FIRST/LEFTMOST SATURDAY (usually crosshatched). Only extract: Sun, Mon, Tue, Wed, Thu, Fri, Sat (the rightmost Saturday).
 
-ROLE FILTER — CRITICAL:
-- Only these three roles are produce shifts: CLERK, HEADCLERK, MANAGER.
-- If the role label is ANYTHING ELSE — e.g. "(GROCERY) CLERK", "(DAIRY) CLERK", "GROCERY CLERK", "DAIRY CLERK", or any other department's role — that employee is loaned out and does NOT count. Treat that cell as EMPTY: output "" for the shift and 0 for the meal that day.
-- Never include role text in the output. Shifts are time-only: "7:00A-3:30P".
+ROLE CLASSIFICATION — CRITICAL (keep every shift, classify it):
+- For EVERY worked cell, read the role label and classify it into one of these kinds:
+  - "produce" — role is CLERK, HEADCLERK, or MANAGER (produce shifts)
+  - "training" — the role label contains the word TRAINING (e.g. "CLERK TRAINING", "MANAGER TRAINING", "(TRAINING)"). It is still a worked shift — keep the time — but mark it "training".
+  - "other" — the role is another department's (e.g. "(GROCERY) CLERK", "(DAIRY) CLERK", "GROCERY CLERK", "DAIRY CLERK", DELI, MEAT, BAKERY, SEAFOOD, FLORAL, FRONT END, GM, etc.). The employee is loaned out — still keep the shift time, but mark it "other".
+- Output the shift time in "shifts" and the classification in "kinds" for the SAME day cell. If a cell is blank/hatched, output "" in shifts and "" in kinds.
+- Never include the actual role text in the output. Shift times are time-only: "7:00A-3:30P".
 
 BLANK/EMPTY CELLS — CRITICAL:
 Many cells are blank or show diagonal hatching. These mean the employee does NOT work that day. Use "" (empty string). If a cell has no time written in it, it is EMPTY — never guess or copy from an adjacent cell or row.
@@ -4328,16 +4363,17 @@ SELF-CHECK — the schedule prints the math for you:
 OUTPUT:
 First output exactly one short line: the orientation you determined and the Sunday date (e.g. "Upright, week of 6/14/2026"). Then on a new line output ONLY the JSON object — no markdown, no backticks, nothing after it.
 
-{"weekStart":"2026-06-14","employees":[{"name":"Firstname Lastname","shifts":{"sun":"7:00A-3:30P","mon":"","tue":"","wed":"","thu":"","fri":"8:00A-4:30P","sat":""},"meals":{"sun":30,"mon":0,"tue":0,"wed":0,"thu":0,"fri":30,"sat":0}}]}
+{"weekStart":"2026-06-14","employees":[{"name":"Firstname Lastname","shifts":{"sun":"7:00A-3:30P","mon":"","tue":"","wed":"","thu":"","fri":"8:00A-4:30P","sat":""},"kinds":{"sun":"produce","mon":"","tue":"","wed":"","thu":"","fri":"other","sat":""},"meals":{"sun":30,"mon":0,"tue":0,"wed":0,"thu":0,"fri":30,"sat":0}}]}
 
 RULES:
 - weekStart: the SUNDAY date from the Sun column header, format "YYYY-MM-DD"
 - Convert names: "DUTKIEWICZ, GAVIN S" \u2192 "Gavin Dutkiewicz"
 - Shift format: "7:00A-3:30P" (no spaces around dash)
-- "" (empty string) for ANY cell that is blank, hatched, or worked in another department (role filter above)
+- "" (empty string) for ANY cell that is blank, hatched, or has no time written in it
 - "REQ OFF" for "Request Off"
 - "UNAVAIL" for "UNAVAILABLE"
 - meals: integer minutes (30 or 60). Use 0 if no meal, no shift, or the shift was filtered out.
+- kinds: match "shifts" — one entry per day, value is "produce", "training", or "other". "" when the corresponding shift is "".
 - Read EVERY employee row — do not skip anyone, even rows that are all Request Off`;
 
       const gevPrompt=`You are reading a grocery store GEV (Guaranteed Everyday Variety) checklist. It lists categories of produce items that must always be stocked.
@@ -4423,28 +4459,39 @@ RULES:
         throw new Error("No employees found in the response.");
       }
 
-      /* Normalize the parsed data.
-         Safety net: even if the AI includes a loaned-out shift (other
-         department role like "(Grocery)" or "(Dairy)"), strip it here —
-         only CLERK/HEADCLERK/MANAGER produce shifts belong on the board. */
-      const OTHER_DEPT=/\(|GROCERY|DAIRY|DELI|MEAT|BAKERY|SEAFOOD|FRONT\s?END|FLORAL|GM\b/i;
+      /* Normalize each shift and record its produce classification.
+         Kinds come from the model (produce/training/other); if a cell is
+         missing a kind, fall back to reading any role text defensively.
+         Non-produce shifts (loaned-out, training) are KEPT on the board but
+         flagged so they can be styled and excluded from produce coverage. */
+      const OTHER_DEPT=/(?:\(\s*)?(?:GROCERY|DAIRY|DELI|MEAT|BAKERY|SEAFOOD|FRONT\s?END|FLORAL|GM)\b/i;
       function cleanShift(s){
         s=(s==null?"":String(s)).trim();
         if(!s) return "";
         const u=s.toUpperCase();
         if(u==="REQ OFF"||u==="UNAVAIL") return u;
-        if(OTHER_DEPT.test(s)) return "";
         return s;
       }
+      function classifyKind(shiftText, modelKind){
+        const s=(shiftText==null?"":String(shiftText)).trim();
+        if(!s) return "";
+        const k=(modelKind==null?"":String(modelKind)).trim().toLowerCase();
+        if(k==="produce"||k==="training"||k==="other") return k;
+        const u=s.toUpperCase();
+        if(u.indexOf("TRAIN")>-1) return "training";
+        if(OTHER_DEPT.test(s)) return "other";
+        return "produce";
+      }
       scanParsed=empArr.map(emp=>{
-        const sh={},ml={};
+        const sh={},ml={},kn={};
         SCH_KEYS.forEach(k=>{
           sh[k]=cleanShift(emp.shifts?.[k]);
           ml[k]=sh[k]?(parseInt(emp.meals?.[k])||0):0;
+          kn[k]=classifyKind(sh[k], emp.kinds?.[k]);
         });
-        return { name:emp.name||"Unknown", shifts:sh, meals:ml };
+        return { name:emp.name||"Unknown", shifts:sh, meals:ml, kinds:kn };
       });
-      scanWeekStart=weekStart;
+            scanWeekStart=weekStart;
 
       /* Cross-model verification: have a different model family audit the
          candidate against the photo. Advisory only — never blocks Apply. */
@@ -4470,7 +4517,11 @@ RULES:
         preview+=`<div class="scan-emp"><div class="scan-emp-name">${esc(emp.name)}</div>
           <div class="scan-emp-shifts">
             ${SCH_DAYS.map(d=>`<div class="scan-day-hd">${d.substring(0,2)}</div>`).join("")}
-            ${SCH_KEYS.map(k=>`<div class="scan-shift">${esc(emp.shifts[k]||"—")}</div>`).join("")}
+            ${SCH_KEYS.map(k=>{
+              const kd=(emp.kinds&&emp.kinds[k])||"produce";
+              const mkr=kd==="training"?"<span class='sv-t'>T</span>":kd==="other"?"<span class='sv-o'>O</span>":"";
+              return `<div class="scan-shift">${esc(emp.shifts[k]||"—")}${mkr}</div>`;
+            }).join("")}
           </div></div>`;
       });
 
@@ -4567,11 +4618,16 @@ function applyScanResults(){
   const w=sched.weeks[schWeek];
   const merge=w.employees.length>0 && !confirm("Replace existing employees?\n\nOK = Replace all\nCancel = Add to existing");
   if(!merge) w.employees=[];
-  if(scanWeekStart) w.startDate=scanWeekStart;
-  scanParsed.forEach(emp=>{
-    w.employees.push({name:emp.name,shifts:{...emp.shifts},meals:{...emp.meals}});
-  });
-  saveSched();
+  /* Save the source photo on the week so it can be re-checked/zoomed.
+       A fresh scan replaces the saved photo. The null-handling runs AFTER the
+       push so a replace-scan keeps its new photo (employees are non-empty by then). */
+    if(scanPhoto) w.photo=scanPhoto;
+    if(scanWeekStart) w.startDate=scanWeekStart;
+    scanParsed.forEach(emp=>{
+      w.employees.push({name:emp.name,shifts:{...emp.shifts},meals:{...emp.meals},kinds:{...(emp.kinds||{})}});
+    });
+    if(!w.employees.length) w.photo=null;
+        saveSched();
   const remaining=(window._scanQueue||[]).length;
   if(remaining>0){
     const next=window._scanQueue.shift();
@@ -5157,11 +5213,35 @@ async function copyImageSrc(src){
 
 /* ---- Fullscreen image viewer ---- */
 let ivCurrent="";
-function openImgViewer(src){ ivCurrent=src; const o=document.getElementById("imgOverlay"); document.getElementById("ivImg").src=src; o.classList.add("open"); document.body.style.overflow="hidden"; }
+function openImgViewer(src){ ivCurrent=src; ivScale=1; ivTx=0; ivTy=0; const o=document.getElementById("imgOverlay"); document.getElementById("ivImg").src=src; document.getElementById("ivZoomReset").textContent="100%"; applyIvTransform(); o.classList.add("open"); document.body.style.overflow="hidden"; }
 function closeImgViewer(){ document.getElementById("imgOverlay").classList.remove("open"); document.body.style.overflow=""; }
+let ivScale=1, ivTx=0, ivTy=0;
+function applyIvTransform(){
+  const img=document.getElementById("ivImg");
+  img.style.transform=`translate(${ivTx}px,${ivTy}px) scale(${ivScale})`;
+  document.getElementById("ivZoomReset").textContent=Math.round(ivScale*100)+"%";
+}
+function ivZoomBy(f){
+  const next=Math.min(5,Math.max(1,ivScale+f));
+  ivScale=next; applyIvTransform();
+}
 document.getElementById("ivClose").onclick=closeImgViewer;
 document.getElementById("ivCopy").onclick=()=>{ if(ivCurrent) copyImageSrc(ivCurrent); };
+document.getElementById("ivZoomIn").onclick=()=>ivZoomBy(0.5);
+document.getElementById("ivZoomOut").onclick=()=>ivZoomBy(-0.5);
+document.getElementById("ivZoomReset").onclick=()=>{ ivScale=1; ivTx=0; ivTy=0; applyIvTransform(); };
 document.getElementById("imgOverlay").addEventListener("click",e=>{ if(e.target.id==="imgOverlay") closeImgViewer(); });
+/* drag-to-pan when zoomed */
+const _ivImg=document.getElementById("ivImg");
+_ivImg.addEventListener("pointerdown",function(e){
+  if(ivScale<=1) return;
+  e.preventDefault();
+  const img=this,dragCtx={sx:e.clientX,sy:e.clientY,ox:ivTx,oy:ivTy};
+  img.classList.add("iv-drag"); img.setPointerCapture(e.pointerId);
+  function move(ev){ ivTx=dragCtx.ox+(ev.clientX-dragCtx.sx); ivTy=dragCtx.oy+(ev.clientY-dragCtx.sy); applyIvTransform(); }
+  function up(){ img.classList.remove("iv-drag"); img.removeEventListener("pointermove",move); img.removeEventListener("pointerup",up); img.removeEventListener("pointercancel",up); }
+  img.addEventListener("pointermove",move); img.addEventListener("pointerup",up); img.addEventListener("pointercancel",up);
+});
 
 /* ================= DOCUMENTS TAB ================= */
 function renderDocs(){

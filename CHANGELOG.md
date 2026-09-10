@@ -4,6 +4,22 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.29.0] — 2026-09-09
+
+### Added
+- **Every schedule shift is now kept and classified, not filtered out.** The extractor records a hidden `kinds` tag per day-cell (`produce` / `training` / `other`) instead of deleting loaned-out or training shifts. Role text is still never shown or stored — only the classification is.
+- **Training and loaned-out shifts are displayed but excluded from produce coverage.** On the board, training shifts render amber and loaned-out (other-department) shifts render ghosted. Neither counts toward an employee's weekly Hrs total or the "scheduled today" number — the produce hours you currently track stay identical.
+- **Source photos are saved and zoomable.** Each schedule scan's photo is stored with the week, opened from a small button next to the week-of selector, and zoomable (in/out/reset + drag-to-pan) so you can verify and correct shifts against the source. Photos are cleared when a week's employees are cleared.
+
+### Files
+- `index.html` — role classification + `kinds`, coverage exclusion, amber/ghost styling, scan-preview T/O markers, saved photo + zoomable viewer, and v5.29.0 markers
+- `manifest.json` — version URLs bumped to 5.29.0
+- `sw.js` — cache bumped to `pdp-v5.29.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.28.0] — 2026-09-09
 
 ### Added
