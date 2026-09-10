@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.42.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.42.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.42.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.43.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.43.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.43.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2883,7 +2883,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.42.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.43.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -5173,6 +5173,7 @@ async function applyDocScan(){
     if(result==="add"){
       /* Merge new sections into existing doc */
             existing.sections=existing.sections.concat(scanParsed.sections);
+            if(type==="salesplan") existing.preserveOrder=true;
             if(scanParsed.images&&scanParsed.images.length) existing.images=(existing.images||[]).concat(scanParsed.images);
       touchDoc(existing);
       docActiveId[type]=existing.id;
@@ -5191,7 +5192,7 @@ async function applyDocScan(){
     cloudDeleteDoc(type,existing.id);
   }
 
-  var doc={ id:"doc_"+Date.now(), date:date, dateLabel:scanParsed.dateLabel||scanParsed.date||date||"", created:Date.now(), updated:Date.now(), images:scanParsed.images||[], sections:scanParsed.sections };
+  var doc={ id:"doc_"+Date.now(), date:date, dateLabel:scanParsed.dateLabel||scanParsed.date||date||"", created:Date.now(), updated:Date.now(), images:scanParsed.images||[], sections:scanParsed.sections, preserveOrder:type==="salesplan" };
   docStore[type].unshift(doc);
   sortDocs(type);
   docPrune();
@@ -5312,7 +5313,8 @@ function spPlainHTML(rows){
   return '<table class="sp-plain"><tbody>'+body+'</tbody></table>';
 }
 function spSectionsHTML(doc){
-  return spOrder(doc.sections).map(function(s){
+  const sections=doc&&doc.preserveOrder?((doc&&doc.sections)||[]):spOrder(doc&&doc.sections);
+  return sections.map(function(s){
     var notes=(s.bullets||[]).filter(function(b){ return String(b).trim()!==""; })
       .map(function(b){ return '<div class="sp-note">'+esc(String(b).replace(/^>>\s?/,""))+'</div>'; }).join("");
     var tbls=(s.tables||[]).map(function(t){

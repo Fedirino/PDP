@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.43.0] — 2026-09-10
+
+### Fixed
+- **Scanned Display Plan boxes stay in printed order.** The preview previously re-sorted extracted sections by a category ranking, which could make correctly read boxes appear mixed. Scanned plans now preserve page/extraction order; only legacy seeded plans retain the curated display order.
+
+### Files
+- `index.html` — preserve-order flag for scanned Display Plans and v5.43.0 markers
+- `manifest.json` — version URLs bumped to 5.43.0
+- `sw.js` — cache bumped to `pdp-v5.43.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.42.0] — 2026-09-10
 
 ### Improved
