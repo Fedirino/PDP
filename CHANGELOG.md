@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.35.0] — 2026-09-10
+
+### Improved
+- **Scan progress and failures are accessible.** OCR/document scan status updates now use a live status region, and scan failure cards announce themselves as alerts for screen readers and keyboard users.
+
+### Files
+- `index.html` — live scan status and alert semantics, plus v5.35.0 markers
+- `manifest.json` — version URLs bumped to 5.35.0
+- `sw.js` — cache bumped to `pdp-v5.35.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.34.0] — 2026-09-10
 
 ### Improved

@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.34.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.34.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.34.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.35.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.35.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.35.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2883,7 +2883,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.34.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.35.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -4337,7 +4337,7 @@ function handleScanFile(file){
         <div class="scan-beam"></div>
       </div>
       <div class="scan-progress"><div class="scan-progress-bar indet" id="scanBar"></div></div>
-      <div class="scan-status" id="scanStatus">Reading the ${scanMode==="gev"?"GEV list":"schedule"}…</div>`;
+      <div class="scan-status" id="scanStatus" role="status" aria-live="polite" aria-atomic="true">Reading the ${scanMode==="gev"?"GEV list":"schedule"}…</div>`;
 
     const status=document.getElementById("scanStatus");
 
@@ -4934,7 +4934,7 @@ async function readDocPages(){
   scanBody.innerHTML=`
     <div class="scan-frame"><img src="${docPages[0].imgSrc}" class="scan-preview" alt="Daily notes"><div class="scan-beam"></div></div>
     <div class="scan-progress"><div class="scan-progress-bar indet"></div></div>
-    <div class="scan-status" id="scanStatus">Reading ${docPages.length} page${docPages.length===1?"":"s"}…</div>`;
+    <div class="scan-status" id="scanStatus" role="status" aria-live="polite" aria-atomic="true">Reading ${docPages.length} page${docPages.length===1?"":"s"}…</div>`;
   const status=document.getElementById("scanStatus");
   try{
     async function attempt(extra){
@@ -5027,7 +5027,7 @@ Rules:
   }catch(err){
     scanBody.innerHTML=`
       <div class="scan-frame"><img src="${docPages[0]?docPages[0].imgSrc:""}" class="scan-preview" alt="Daily notes"></div>
-      <div class="scan-fail"><div class="fi">${I.x}</div><div class="ft">Scan failed</div><div class="fm">${esc(err.message)}</div></div>
+      <div class="scan-fail" role="alert"><div class="fi">${I.x}</div><div class="ft">Scan failed</div><div class="fm">${esc(err.message)}</div></div>
       <div class="scan-actions">
         <button class="btn" id="scanRetryBtn">${I.scan} Try Again</button>
         <button class="btn ghost" id="scanCancelBtn">Cancel</button>
