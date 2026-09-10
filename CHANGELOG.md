@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.38.0] — 2026-09-10
+
+### Fixed
+- **Cancel now cancels in-flight document preparation.** Closing the scan overlay invalidates the active capture session, preventing a late orientation/compression callback from reopening the UI or adding pages after cancellation.
+
+### Files
+- `index.html` — document scan session guard and v5.38.0 markers
+- `manifest.json` — version URLs bumped to 5.38.0
+- `sw.js` — cache bumped to `pdp-v5.38.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.37.0] — 2026-09-10
 
 ### Fixed

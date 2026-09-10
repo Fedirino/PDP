@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.37.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.37.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.37.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.38.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.38.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.38.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2883,7 +2883,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.37.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.38.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -4272,6 +4272,7 @@ function openScanOverlay(mode){
   scanParsed=null;
   scanMode=mode||"schedule";
   if(scanMode==="dailynotes"||scanMode==="salesplan"||scanMode==="salesitems"){
+    docScanSession++;
     docPages=[];
     scanOverlay.classList.add("open");
     document.body.style.overflow="hidden";
@@ -4297,6 +4298,7 @@ function openScanOverlay(mode){
   if(uploadBtn) uploadBtn.onclick=()=>{ scanFileInput.removeAttribute("capture"); scanFileInput.setAttribute("multiple",""); scanFileInput.click(); };
 }
 function closeScanOverlay(){
+  docScanSession++;
   scanOverlay.classList.remove("open");
   document.body.style.overflow="";
 }
@@ -4771,6 +4773,7 @@ function applyGevScan(){
 /* ================= DAILY NOTES SCAN (multi-page) ================= */
 let docPages=[]; /* [{imgSrc, store, b64}] */
 let docScanAdding=false;
+let docScanSession=0;
 
 /* ---- Display Plan week = upcoming Friday → next Thursday ---- */
 function pad2(n){ return String(n).padStart(2,"0"); }
@@ -4839,6 +4842,7 @@ async function askPageOrientation(probeB64){
 }
 
 async function addDocPage(file){
+  const session=docScanSession;
   const strip=document.getElementById("pgStrip");
   if(strip) strip.insertAdjacentHTML("beforeend",`<div class="pg-item" style="display:grid;place-items:center;color:var(--ink-3);font-size:10px">…</div>`);
   try{
@@ -4847,14 +4851,16 @@ async function addDocPage(file){
       const rot=await askPageOrientation(p.probeB64);
       if(rot){ p=await compressImageFile(file,rot); p.auto=true; }
     }
+    if(session!==docScanSession) return;
     docPages.push(p);
   }catch(e){
     /* Keep the collection usable, but never make a failed page disappear
        without explanation. The user can retry the same file or choose a
        different image while already in the capture screen. */
     const detail=e&&e.message?e.message:"The image could not be prepared.";
-    toast("Page not added — "+detail);
+    if(session===docScanSession) toast("Page not added — "+detail);
   }
+  if(session!==docScanSession) return;
   openDocScanCollect();
 }
 
