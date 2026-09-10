@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.31.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.31.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.31.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.32.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.32.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.32.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2883,7 +2883,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.31.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.32.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -4455,6 +4455,13 @@ RULES:
         /* GEV mode: expect {categories:[...]} */
         if(!parsed.categories||!parsed.categories.length) throw new Error("No GEV categories found.");
         scanParsed=parsed;
+        let issues=[];
+        if(getEffectiveKey()){
+          const statusEl=document.getElementById("scanStatus");
+          if(statusEl) statusEl.textContent="Verifying with a second model…";
+          issues=await verifyGevScan(b64,{categories:parsed.categories});
+        }
+        const verifyHTML=renderVerifyIssues(issues);
         let preview="";
         parsed.categories.forEach(cat=>{
           preview+=`<div class="scan-emp"><div class="scan-emp-name">${esc(cat.name)} (${cat.items.length})</div>
@@ -4466,6 +4473,7 @@ RULES:
           <img src="${imgSrc}" class="scan-preview" alt="GEV photo">
           <div class="scan-step"><div class="num">2</div>Done — ${parsed.categories.length} categories, ${totalItems} items</div>
           <div class="scan-result">${preview}</div>
+          ${verifyHTML}
           <div class="scan-step"><div class="num">3</div>Apply — this will replace the current GEV list</div>
           <div style="font-size:11px;color:var(--ink-3);text-align:center;line-height:1.5;padding:0 8px;">⚠️ AI models can make mistakes. Always double-check accuracy — adjust items or retry if needed.</div>
           <div class="scan-actions">
@@ -4635,6 +4643,59 @@ If everything matches, return {"issues":[]}. Empty array = the candidate is corr
     const parsed=parseJsonTolerant(jsonText);
     return Array.isArray(parsed.issues)?parsed.issues:[];
   }catch(e){ return []; }
+}
+
+/* Generic cross-model verification for ANY image scan (GEV, doc sections).
+   Hands the photo(s) + the candidate extraction to a different model family
+   and asks it to audit, not re-extract. Returns array of issue strings.
+   Fails open — a verification hiccup must never block a scan. */
+async function verifyScanAgainstPhoto(b64s, mode, payload){
+  try{
+    const imgs=(Array.isArray(b64s)?b64s:[b64s]).map(b=>orImage(b));
+    const kind=mode==="gev"?"GEV checklist":"document";
+    const textPayload=JSON.stringify(payload);
+    const data=await orFetch({
+      model:VERIFY_MODEL,
+      max_tokens:2048,
+      messages:[{role:"user",content:[...imgs, orText(`You are auditing a phone photo of a grocery store ${kind} against a ${kind} that another AI already transcribed.
+
+The transcript (candidate) is this JSON:
+${JSON.stringify(payload)}
+
+Compare it against the photo(s). The photo may be rotated/tilted — mentally orient first.
+
+Your job is ONLY to find mistakes. Flag a discrepancy ONLY if you are CONFIDENT the photo disagrees with the candidate. Specifically check for:
+- ${mode==="gev"?"Every category and every item — a category or item that appears in the photo but is MISSING from the candidate, or is mis-spelled/materially wrong.":"Every section — a section/title/bullet/table value in the photo that is MISSING or materially wrong in the candidate."}
+
+Ignore: ordering, formatting, trivial differences. Do not invent issues.
+
+Return ONLY a JSON object, no markdown, no backticks:
+{"issues":[{"note":"short description of what's wrong or missing"}]}
+If everything matches, return {"issues":[]}. Empty array = the candidate is correct.`)]}]
+    });
+    let jsonText=orTextOf(data);
+    jsonText=jsonText.replace(/```json\s*/g,"").replace(/```\s*/g,"").trim();
+    if(jsonText&&jsonText[0]!=="{"){ const a=jsonText.indexOf("{"),b=jsonText.lastIndexOf("}"); if(a>-1&&b>a) jsonText=jsonText.slice(a,b+1); }
+    const parsed=parseJsonTolerant(jsonText);
+    return Array.isArray(parsed.issues)?parsed.issues:[];
+  }catch(e){ return []; }
+}
+async function verifyGevScan(b64,payload){ return verifyScanAgainstPhoto(b64,"gev",payload); }
+async function verifyDocScan(b64s,payload){ return verifyScanAgainstPhoto(b64s,"doc",payload); }
+
+/* Shared verification issues panel (used by schedule, GEV, and doc modes). */
+function renderVerifyIssues(issues){
+  if(!issues||!issues.length) return "";
+  const lack=!issues||!issues.length;
+  const rows=lack?"":issues.map(function(it){
+    const note=(it&&it.note)?String(it.note):String(it);
+    return `<div class="scan-issue"><span class="iv">!</span> ${esc(note)}</div>`;
+  }).join("");
+  return `<div class="scan-verify">
+    <div class="scan-verify-t">${I.bell} ${issues.length} possible ${issues.length!==1?"discrepancies":"discrepancy"} flagged by second check</div>
+    ${rows}
+    <div style="font-size:11px;color:var(--ink-3);line-height:1.5;">The extractor and a second model (GPT) disagree on these. Review before applying.</div>
+  </div>`;
 }
 
 function applyScanResults(){
@@ -4961,6 +5022,14 @@ Set "date":"" and "dateLabel":"" — the app assigns the display week itself; do
       scanParsed.date=scanParsed.weekFri;
       scanParsed.dateLabel=weekRangeLabel(scanParsed.weekFri);
     }
+    let issues=[];
+    if(getEffectiveKey()){
+      const statusEl=document.getElementById("scanStatus");
+      if(statusEl) statusEl.textContent="Verifying with a second model\u2026";
+      issues=await verifyDocScan(docPages.map(pg=>pg.b64),{date:scanParsed.date||"",sections:scanParsed.sections});
+    }
+    const verifyHTML=renderVerifyIssues(issues);
+
     const weekUI=scanMode==="salesplan"?`
       <div class="sp-week">
         <button id="wkPrev" aria-label="Previous week">‹</button>
@@ -4973,6 +5042,7 @@ Set "date":"" and "dateLabel":"" — the app assigns the display week itself; do
       <div class="doc-thumbs">${scanParsed.images.map(s=>`<img src="${s}" class="doc-thumb">`).join("")}</div>
       <div class="scan-step"><div class="num">2</div>Done — ${sections.length} section${sections.length===1?"":"s"}${(scanMode!=="salesplan"&&scanParsed.dateLabel)?" · "+esc(scanParsed.dateLabel):""}</div>
       ${weekUI}
+      ${verifyHTML}
       <div style="max-height:46vh;overflow:auto;margin:4px 0 2px">${docSectionsHTML(scanParsed,scanMode==="salesplan"?"salesplan":(scanMode==="salesitems"?"salesitems":"dailynotes"))}</div>
       <div class="scan-step"><div class="num">3</div>Save this ${scanMode==="salesplan"?"week":"page"}</div>
       <div style="font-size:11px;color:var(--ink-3);text-align:center;line-height:1.5;padding:0 8px;">${scanMode==="salesplan"?"Saved under this display week. Re-scanning a week you already have lets you add to it or replace it.":(scanMode==="salesitems"?"Saved as Sales Items only — it should never fall through to Daily Notes.":"If a document for this date already exists, you can add these sections to it.")} ⚠️ Check against the printout — AI can make mistakes.</div>

@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.32.0] — 2026-09-09
+
+### Added
+- **Cross-model second check now covers every scan type**, not just the schedule. GEV list scans and document scans (Daily Notes, Display Plan, Sales Items) are now audited by GPT-5.6 Sol against the source photo(s) before you apply, flagging missing/misread categories, items, sections, bullets, or table values. All verification fails open — a hiccup never blocks a scan.
+
+### Files
+- `index.html` — generic `verifyScanAgainstPhoto()` (+ GEV/doc wrappers), shared `renderVerifyIssues()` panel, wired into GEV + document results, and v5.32.0 markers
+- `manifest.json` — version URLs bumped to 5.32.0
+- `sw.js` — cache bumped to `pdp-v5.32.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.31.0] — 2026-09-09
 
 ### Fixed
