@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.46.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.46.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.46.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.47.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.47.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.47.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2892,7 +2892,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.46.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.47.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -5047,13 +5047,15 @@ Transcribe EXACTLY what is printed, block by block, in printed order. Do not sum
 
 Return ONLY valid JSON, no markdown, no backticks:
 {"date":"","dateLabel":"","sections":[
-  {"category":"<block title, verbatim>","subject":"","contact":"","bullets":["<any printed note, one string each>"],
+  {"page":1,"boxOrder":1,"category":"<block title, verbatim>","subject":"","contact":"","bullets":["<any printed note, one string each>"],
    "columns":0,
    "tables":[{"title":"","headers":["Position","Item"],"rows":[["<position>","<item(s)>"]]}]}]}
 
 Rules:
 - The user-provided page markers identify the exact page sequence. Never move a block from one page into another page's position.
 - These sheets contain many independent boxes. Use each box's printed heading as the section category; do not merge neighboring boxes just because they are on the same sheet.
+- For every box, include page (the numbered document page) and boxOrder (top-to-bottom, then left-to-right reading order on that page). If uncertain, keep the box in its observed position and use the next integer rather than guessing a different box.
+- Preserve the printed layout inside each box as rows: keep the exact row label in column 1 and the exact item/cell text in the remaining columns. Do not turn a blank cell into a placement or combine separate rows.
 - Read every shelf/well block strictly LEFT to RIGHT, and stacked positions TOP to BOTTOM.
 - Output each printed row as one table row; a blank slot is a row with "".
 - Keep size codes (2lb, 3ct, 6oz, 11x14) and flags like (DEAL LOCK), (SPOT BUY), (TPR) with the item/column where printed.
@@ -5080,7 +5082,8 @@ Rules:
     catch(e1){ if(e1.status===401||e1.status===403) throw e1; status.textContent="First pass failed — retrying…"; await new Promise(r=>setTimeout(r,1200)); parsed=await attempt("\n\nIMPORTANT: Your previous attempt failed. Return ONLY the valid JSON object, nothing else."); }
     status.textContent="Building document…";
 
-    const sections=Array.isArray(parsed.sections)?parsed.sections.map(s=>({
+    const sections=Array.isArray(parsed.sections)?parsed.sections.map((s,sectionIndex)=>({
+      page:Number.isFinite(Number(s.page))?Number(s.page):0,boxOrder:Number.isFinite(Number(s.boxOrder))?Number(s.boxOrder):sectionIndex+1,
       category:s.category||"",contact:s.contact||"",subject:s.subject||"",
       bullets:Array.isArray(s.bullets)?s.bullets.map(b=>String(b)):[],
       tables:Array.isArray(s.tables)?s.tables.filter(t=>t&&(Array.isArray(t.headers)||Array.isArray(t.rows))).map(t=>({
@@ -5335,7 +5338,15 @@ function spRawHTML(table){
   return '<div class="sp-raw-wrap"><table class="sp-raw"><thead><tr>'+th+'</tr></thead><tbody>'+body+'</tbody></table></div>';
 }
 function spSectionsHTML(doc){
-  const sections=doc&&doc.preserveOrder?((doc&&doc.sections)||[]):spOrder(doc&&doc.sections);
+  const sections=doc&&doc.preserveOrder
+    ?(doc.sections||[]).map((s,i)=>({s,i})).sort((a,b)=>{
+      const ap=Number(a.s.page)||0,bp=Number(b.s.page)||0;
+      if(ap&&bp&&ap!==bp) return ap-bp;
+      if(ap!==bp) return ap? -1:1;
+      const ao=Number(a.s.boxOrder)||a.i+1,bo=Number(b.s.boxOrder)||b.i+1;
+      return ao!==bo?ao-bo:a.i-b.i;
+    }).map(x=>x.s)
+    :spOrder(doc&&doc.sections);
   return sections.map(function(s){
     var notes=(s.bullets||[]).filter(function(b){ return String(b).trim()!==""; })
       .map(function(b){ return '<div class="sp-note">'+esc(String(b).replace(/^>>\s?/,""))+'</div>'; }).join("");

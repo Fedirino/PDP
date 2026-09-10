@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.47.0] — 2026-09-10
+
+### Improved
+- **Display Plan boxes now carry explicit layout order.** Scanned boxes record their source page and reading-order position, then render in that order while preserving the exact table rows and columns for review.
+
+### Files
+- `index.html` — page/box metadata in Display Plan extraction and ordered rendering
+- `manifest.json` — version URLs bumped to 5.47.0
+- `sw.js` — cache bumped to `pdp-v5.47.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.46.0] — 2026-09-10
 
 ### Fixed
