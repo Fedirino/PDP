@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.39.0] — 2026-09-10
+
+### Added
+- **Document scan drafts resume after closing the overlay.** Captured pages remain available while the app stays open, reopening the same document type with a clear “Resuming” state. Draft pages are cleared only after a successful save or when switching document types.
+
+### Files
+- `index.html` — in-session document draft retention and resume messaging
+- `manifest.json` — version URLs bumped to 5.39.0
+- `sw.js` — cache bumped to `pdp-v5.39.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.38.0] — 2026-09-10
 
 ### Fixed
