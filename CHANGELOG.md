@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.40.0] — 2026-09-10
+
+### Added
+- **Workspace Backup in Settings.** Export schedules, documents, GEV lists, notes, reminders, and preferences to a portable JSON backup, then restore it with validation and confirmation. API keys are explicitly excluded and never overwritten.
+
+### Files
+- `index.html` — backup/restore logic and Settings UI
+- `manifest.json` — version URLs bumped to 5.40.0
+- `sw.js` — cache bumped to `pdp-v5.40.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.39.0] — 2026-09-10
 
 ### Added

@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.39.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.39.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.39.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.40.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.40.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.40.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2883,7 +2883,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.39.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.40.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -3741,6 +3741,15 @@ function renderSettings(){
             </div>
             <div style="font-size:12px;color:var(--ink-3);margin-top:10px" id="scanModelNote"></div>
           </div>
+          <div class="lbl" style="margin-top:18px">Workspace Backup</div>
+          <div class="panel">
+            <p style="font-size:13px;color:var(--ink-2);line-height:1.55;margin:0 0 14px">Save schedules, documents, lists, notes, reminders, and preferences as a file. Your OpenRouter API key is never included.</p>
+            <div style="display:flex;gap:10px">
+              <button class="btn ghost" id="pdpExport" style="flex:1">${I.download} Export</button>
+              <button class="btn ghost" id="pdpImport" style="flex:1">${I.upload||I.plus} Restore</button>
+            </div>
+            <input id="pdpImportFile" type="file" accept="application/json,.json" style="display:none">
+          </div>
           <div class="lbl" style="margin-top:18px">Shared Access</div>
           <div class="panel" id="sharedPanel">
             <p style="font-size:13px;color:var(--ink-2);line-height:1.55;margin:0 0 14px">
@@ -3751,6 +3760,9 @@ function renderSettings(){
               <div style="text-align:center;padding:16px 0;color:var(--ink-3);font-size:13px" id="sharedLoading">Loading…</div>
             </div>
           </div>`;
+  document.getElementById("pdpExport").onclick=()=>{ try{ downloadPdpBackup(); }catch(e){ toast(e.message); } };
+  document.getElementById("pdpImport").onclick=()=>document.getElementById("pdpImportFile").click();
+  document.getElementById("pdpImportFile").onchange=function(){ importPdpBackup(this.files&&this.files[0]); this.value=""; };
   document.getElementById("apiKeyInput").addEventListener("input",function(){ this.type="text"; });
   document.getElementById("saveApiKey").addEventListener("click",async function(){
     var v=document.getElementById("apiKeyInput").value.trim();
@@ -4216,6 +4228,39 @@ function scanModelLabel(id){
 }
 function getApiKey(){ try{ return localStorage.getItem("pdp_or_key")||""; }catch(e){ return ""; } }
 function setApiKey(k){ try{ localStorage.setItem("pdp_or_key",k); }catch(e){} }
+const PDP_BACKUP_EXCLUDE=new Set(["pdp_or_key"]);
+function isPdpBackupKey(k){ return (k.startsWith("pdp_")||k==="produce_pull_list_v5")&&!PDP_BACKUP_EXCLUDE.has(k); }
+function makePdpBackup(){
+  const data={};
+  try{
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(k&&isPdpBackupKey(k)) data[k]=localStorage.getItem(k);
+    }
+  }catch(e){ throw new Error("Browser storage could not be read."); }
+  return {format:"pdp-local-backup",version:1,created:new Date().toISOString(),data};
+}
+function downloadPdpBackup(){
+  const backup=makePdpBackup();
+  const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob), a=document.createElement("a");
+  a.href=url; a.download="pdp-backup-"+new Date().toISOString().slice(0,10)+".json";
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+  toast("Backup downloaded");
+}
+async function importPdpBackup(file){
+  if(!file) return;
+  try{
+    const parsed=JSON.parse(await file.text());
+    if(!parsed||parsed.format!=="pdp-local-backup"||parsed.version!==1||!parsed.data||typeof parsed.data!=="object") throw new Error("That file is not a PDP backup.");
+    const entries=Object.entries(parsed.data).filter(([k,v])=>isPdpBackupKey(k)&&typeof v==="string");
+    if(!entries.length) throw new Error("The backup does not contain PDP data.");
+    if(!await askConfirm("Restore workspace backup?",{msg:"This replaces saved PDP data on this device. Your API key is not included or changed.",okText:"Restore",danger:true})) return;
+    entries.forEach(([k,v])=>localStorage.setItem(k,v));
+    toast("Backup restored — reloading");
+    setTimeout(()=>location.reload(),500);
+  }catch(e){ toast(e.message||"Could not restore that backup."); }
+}
 function getEffectiveKey(){
   const own=getApiKey();
   if(own) return own;
