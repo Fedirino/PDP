@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.41.0] — 2026-09-10
+
+### Improved
+- **Document scans send a focused API image.** PDP now performs a conservative content-aware crop on the high-resolution OCR copy, removing large blank margins from phone photos while retaining the full uncropped source image for saved review and verification.
+
+### Files
+- `index.html` — content-aware OCR crop and v5.41.0 markers
+- `manifest.json` — version URLs bumped to 5.41.0
+- `sw.js` — cache bumped to `pdp-v5.41.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.40.0] — 2026-09-10
 
 ### Added

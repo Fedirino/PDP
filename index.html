@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.40.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.40.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.40.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.41.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.41.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.41.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2883,7 +2883,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.40.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.41.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -4859,7 +4859,32 @@ async function compressImageFile(file,rot){
     ctx.drawImage(src,-w/2,-h/2,w,h);
     return cv.toDataURL("image/jpeg",q);
   }
-  const apiURL=draw(2048,0.92);
+  async function contentCrop(dataURL){
+    const probe=await new Promise((ok,fail)=>{ const im=new Image(); im.onload=()=>ok(im); im.onerror=fail; im.src=dataURL; });
+    const pw=probe.width,ph=probe.height;
+    if(!pw||!ph) return dataURL;
+    const pc=document.createElement("canvas"); pc.width=pw; pc.height=ph;
+    const px=pc.getContext("2d"); px.drawImage(probe,0,0);
+    let d; try{ d=px.getImageData(0,0,pw,ph).data; }catch(e){ return dataURL; }
+    const rowHits=new Uint32Array(ph),colHits=new Uint32Array(pw);
+    for(let y=0;y<ph;y+=2) for(let x=0;x<pw;x+=2){
+      const i=(y*pw+x)*4, lum=(d[i]*299+d[i+1]*587+d[i+2]*114)/1000;
+      if(lum<238){ rowHits[y]++; colHits[x]++; }
+    }
+    const rowMin=Math.max(2,Math.floor(pw*.006)),colMin=Math.max(2,Math.floor(ph*.006));
+    let top=ph,bottom=-1,left=pw,right=-1;
+    for(let y=0;y<ph;y+=2) if(rowHits[y]>=rowMin){ top=Math.min(top,y); bottom=Math.max(bottom,y); }
+    for(let x=0;x<pw;x+=2) if(colHits[x]>=colMin){ left=Math.min(left,x); right=Math.max(right,x); }
+    if(bottom<0||right<0) return dataURL;
+    const pad=Math.round(Math.max(pw,ph)*.035);
+    left=Math.max(0,left-pad); top=Math.max(0,top-pad); right=Math.min(pw-1,right+pad); bottom=Math.min(ph-1,bottom+pad);
+    const cw=right-left+1,ch=bottom-top+1;
+    if(cw<pw*.45||ch<ph*.28||cw*ch>pw*ph*.94) return dataURL;
+    const out=document.createElement("canvas"); out.width=cw; out.height=ch;
+    out.getContext("2d").drawImage(pc,left,top,cw,ch,0,0,cw,ch);
+    return out.toDataURL("image/jpeg",.94);
+  }
+  const apiURL=await contentCrop(draw(2048,0.92));
   const store=draw(900,0.65);
   /* Deliberately tiny: the orientation probe only needs to see which way the
      text runs, and it is billed per image. */
