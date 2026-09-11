@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.60.0] — 2026-09-10
+
+### Fixed
+- **Back of Berry Island renders as a Left/Right grid again.** The single-band experiment (merging both sides into one unlabeled row) is reverted — the box shows the original side-by-side Left and Right columns with their own headers. Promo fixture rendering (shelf-on-top/well-below/wings-on-side) is unchanged.
+
+### Files
+- `index.html` — removed the berry-island single-band special case in `spRawHTML`, restored the generic Left/Right grid, and v5.60.0 markers
+- `manifest.json` — version URLs bumped to 5.60.0
+- `sw.js` — cache bumped to `pdp-v5.60.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.59.0] — 2026-09-10
 
 ### Fixed

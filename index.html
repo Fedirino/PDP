@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.59.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.59.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.59.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.60.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.60.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.60.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2909,7 +2909,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.59.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.60.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -5476,11 +5476,11 @@ function spRawHTML(table){
      draw the Shelf deck on top and the Well deck below it, with wings as side bands —
      matching the physical fixture. Zone labels look like: Power Wing, Shelf L, Shelf C,
      Shelf R, Well L, Well C, Well R, Inside Wing (one row per printed line). */
-  const H=headers.map(h=>String(h||"").trim());
-  const wings=H.map((h,i)=>({h,i})).filter(x=>/wing/i.test(x.h));
-  const shelves=H.map((h,i)=>({h,i})).filter(x=>/^shelf/i.test(x.h));
-  const wells=H.map((h,i)=>({h,i})).filter(x=>/^well/i.test(x.h));
-  if((shelves.length||wells.length) && (shelves.length+wells.length)>=2){
+       const H=headers.map(h=>String(h||"").trim());
+              const wings=H.map((h,i)=>({h,i})).filter(x=>/wing/i.test(x.h));
+           const shelves=H.map((h,i)=>({h,i})).filter(x=>/^shelf/i.test(x.h));
+           const wells=H.map((h,i)=>({h,i})).filter(x=>/^well/i.test(x.h));
+    if((shelves.length||wells.length) && (shelves.length+wells.length)>=2){
     // Gather each printed line's value per zone, by taking the first non-empty per column across rows
     function colVals(grp){
       const out=[];
