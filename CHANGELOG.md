@@ -4,6 +4,12 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.61.0] — 2026-09-11
+
+### Changed
+- Refined workspace surfaces, navigation, and interactive feedback for a more professional visual system.
+- Added a responsive desktop workspace while retaining the compact phone-first experience.
+
 ## [5.60.0] — 2026-09-10
 
 ### Fixed
