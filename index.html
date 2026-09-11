@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.64.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.64.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.64.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.65.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.65.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.65.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -765,6 +765,10 @@
   table.doc-tbl th,table.doc-tbl td{border:1px solid var(--line);padding:6px 9px;text-align:left;white-space:nowrap;vertical-align:top;color:var(--ink);}
   table.doc-tbl th{background:var(--surface-2);font-weight:700;color:var(--ink-2);position:sticky;top:0;}
   table.doc-tbl tr:nth-child(even) td{background:var(--surface-2);}
+  .sales-order{width:62px;min-height:34px;padding:6px 7px;border:1px solid var(--line-2);border-radius:7px;
+    background:var(--surface-3);color:var(--brand-ink);font:inherit;font-size:13px;font-weight:700;text-align:center;outline:none;}
+  .sales-order:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-tint);}
+  .sales-order::-webkit-inner-spin-button,.sales-order::-webkit-outer-spin-button{opacity:1;}
   .doc-empty{text-align:center;padding:44px 20px 30px;}
   .doc-empty .ei{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;margin:0 auto 14px;
     background:var(--violet-tint);color:var(--violet);}
@@ -2937,7 +2941,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.64.0</div></section>`;
+      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.65.0</div></section>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -5397,14 +5401,16 @@ function docSectionsHTML(doc,type){
     if(doc&&doc.html) return `<div class="sp-html">${doc.html}</div>`;
     return spSectionsHTML(doc);
   }
-  return (doc.sections||[]).map(s=>{
+  const showOrderColumns=type==="salesitems"&&!!(doc&&doc.id);
+  return (doc.sections||[]).map((s,si)=>{
     const bullets=(s.bullets||[]).filter(b=>String(b).trim()!=="").map(b=>{
       const sub=/^>>\s?/.test(b);
       return `<li class="${sub?"sub":""}">${esc(b.replace(/^>>\s?/,""))}</li>`;
     }).join("");
-    const tables=(s.tables||[]).map(t=>{
-      const head=(t.headers||[]).length?`<thead><tr>${t.headers.map(h=>`<th>${esc(h)}</th>`).join("")}</tr></thead>`:"";
-      const body=`<tbody>${(t.rows||[]).map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody>`;
+    const tables=(s.tables||[]).map((t,ti)=>{
+      const orderHeads=showOrderColumns?"<th>Tuesday</th><th>Thursday</th>":"";
+      const head=(t.headers||[]).length?`<thead><tr>${t.headers.map(h=>`<th>${esc(h)}</th>`).join("")}${orderHeads}</tr></thead>`:"";
+      const body=`<tbody>${(t.rows||[]).map((r,ri)=>{ const order=(t.orders&&t.orders[ri])||{}; const fields=showOrderColumns?`<td><input class="sales-order" data-sales-order="tue" data-si="${si}" data-ti="${ti}" data-ri="${ri}" type="number" min="0" inputmode="numeric" value="${esc(String(order.tue||""))}" aria-label="Tuesday order for ${esc(String(r[1]||r[0]||"item"))}"></td><td><input class="sales-order" data-sales-order="thu" data-si="${si}" data-ti="${ti}" data-ri="${ri}" type="number" min="0" inputmode="numeric" value="${esc(String(order.thu||""))}" aria-label="Thursday order for ${esc(String(r[1]||r[0]||"item"))}"></td>`:""; return `<tr>${r.map(c=>`<td>${esc(c)}</td>`).join("")}${fields}</tr>`; }).join("")}</tbody>`;
       return `${t.title?`<div class="doc-tbl-title">${esc(t.title)}</div>`:""}<div class="doc-tbl-wrap"><table class="doc-tbl">${head}${body}</table></div>`;
     }).join("");
     return `<div class="doc-card">
@@ -5738,6 +5744,16 @@ function renderDocSection(type){
 
       const docPhotos=view.querySelectorAll("[data-docphoto]");
       docPhotos.forEach((img,bi)=>img.onclick=()=>{ openImgViewer(d.images[parseInt(img.dataset.docphoto,10)]||d.images[bi]); });
+  view.querySelectorAll("[data-sales-order]").forEach(inp=>{
+    inp.onchange=()=>{
+      const table=d.sections[+inp.dataset.si].tables[+inp.dataset.ti];
+      table.orders=table.orders||{};
+      const row=table.orders[+inp.dataset.ri]||(table.orders[+inp.dataset.ri]={});
+      row[inp.dataset.salesOrder]=inp.value;
+      touchDoc(d); saveDocs();
+      toast("Order saved");
+    };
+  });
 
   const sel=document.getElementById("docSel");
   if(sel) sel.onchange=function(){ docActiveId[type]=this.value; render(); window.scrollTo(0,0); };

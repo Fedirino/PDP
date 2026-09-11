@@ -4,6 +4,11 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.65.0] — 2026-09-11
+
+### Added
+- **Sales Items order tracking.** Every Sales Items and Deal Lock row now has persistent Tuesday and Thursday quantity fields, so you can record what was ordered without changing the scanned source data.
+
 ## [5.64.0] — 2026-09-11
 
 ### Changed
