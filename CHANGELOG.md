@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.59.0] — 2026-09-10
+
+### Fixed
+- **Display Plan text no longer escapes its box or overlaps neighbors.** Fixture-grid cells (`.sp-grid`), plain end-cap tables (`.sp-plain`), raw tables (`.sp-raw`), shelf/well line items, and wing values all now contain their content — long item text wraps inside the cell (`overflow-wrap:anywhere`), cells clip overflow, and the shelf/well label column ellipsizes instead of spilling over. Promo items next to their DEAL LOCK / size chips stay neatly inside one box.
+
+### Files
+- `index.html` — overflow containment for all display-plan table cells and wing values, and v5.59.0 markers
+- `manifest.json` — version URLs bumped to 5.59.0
+- `sw.js` — cache bumped to `pdp-v5.59.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.58.0] — 2026-09-10
 
 ### Added

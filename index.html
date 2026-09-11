@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.58.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.58.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.58.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.59.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.59.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.59.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -808,24 +808,25 @@
     border:1px dashed var(--line-2);border-radius:8px;padding:6px 10px;margin-bottom:7px;}
   .sp-wing2.bot{margin:7px 0 0;}
   .sp-wing2 .wl{font-size:8.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);flex:none;}
-  .sp-wing2 .wv{font-size:12.5px;color:var(--ink);line-height:1.35;}
+  .sp-wing2 .wv{font-size:12.5px;color:var(--ink);line-height:1.35;overflow-wrap:anywhere;word-break:break-word;min-width:0;}
   .sp-grid{width:100%;border-collapse:collapse;table-layout:fixed;}
-  .sp-grid td{border:1px solid var(--line-2);vertical-align:top;}
-  .sp-grid .dh{background:var(--surface-2);color:var(--brand);font-size:9px;font-weight:800;
-    letter-spacing:.07em;text-transform:uppercase;padding:4px 8px;text-align:center;}
-  .sp-grid .dc{padding:6px 7px;font-size:11.5px;line-height:1.4;color:var(--ink);}
+    .sp-grid td{border:1px solid var(--line-2);vertical-align:top;overflow:hidden;}
+    .sp-grid .dh{background:var(--surface-2);color:var(--brand);font-size:9px;font-weight:800;
+      letter-spacing:.07em;text-transform:uppercase;padding:4px 8px;text-align:center;}
+    .sp-grid .dc{padding:6px 7px;font-size:11.5px;line-height:1.4;color:var(--ink);
+      overflow-wrap:anywhere;word-break:break-word;min-width:0;}
   .sp-grid .dc.empty{color:var(--ink-3);text-align:center;}
   .sp-grid .dc.lab{color:var(--ink-3);font-size:9px;font-weight:800;text-transform:uppercase;
-    letter-spacing:.05em;white-space:nowrap;width:70px;}
+      letter-spacing:.05em;white-space:nowrap;width:70px;max-width:76px;overflow:hidden;text-overflow:ellipsis;}
   .sp-grid th.dz{background:var(--surface-2);color:var(--brand);font-size:9.5px;font-weight:800;
     letter-spacing:.06em;text-transform:uppercase;padding:5px 8px;text-align:left;}
   .sp-grid .dlock{background:var(--brand-tint);color:var(--brand);font-weight:800;
-    letter-spacing:.12em;text-transform:uppercase;text-align:center;padding:6px 8px;font-size:10px;}
-  .sp-grid .cl{display:block;}
-  .sp-grid .cl+.cl{margin-top:2px;}
+      letter-spacing:.12em;text-transform:uppercase;text-align:center;padding:6px 8px;font-size:10px;}
+    .sp-grid .cl{display:block;overflow-wrap:anywhere;word-break:break-word;}
+    .sp-grid .cl+.cl{margin-top:2px;}
   /* Display Plan — plain table (ends, islands, hero pods, lists) */
   .sp-plain{width:100%;border-collapse:collapse;}
-  .sp-plain td{border-top:1px dashed var(--line);padding:8px 12px;vertical-align:top;font-size:13px;color:var(--ink);line-height:1.42;}
+  .sp-plain td{border-top:1px dashed var(--line);padding:8px 12px;vertical-align:top;font-size:13px;color:var(--ink);line-height:1.42;overflow-wrap:anywhere;word-break:break-word;}
   .sp-plain tr:first-child td{border-top:none;}
   .sp-plain td.lab{width:92px;font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);padding-top:10px;white-space:nowrap;}
   .sp-plain td.empty{color:var(--ink-3);}
@@ -835,7 +836,7 @@
   .sp-raw{min-width:100%;width:max-content;border-collapse:collapse;}
   .sp-raw th{background:var(--surface-2);color:var(--brand);font-size:9px;font-weight:800;
     letter-spacing:.06em;text-transform:uppercase;padding:7px 8px;text-align:left;border-bottom:1px solid var(--line-2);}
-  .sp-raw td{border-top:1px dashed var(--line);padding:7px 8px;vertical-align:top;font-size:12px;color:var(--ink);line-height:1.35;}
+  .sp-raw td{border-top:1px dashed var(--line);padding:7px 8px;vertical-align:top;font-size:12px;color:var(--ink);line-height:1.35;overflow-wrap:anywhere;word-break:break-word;}
   .sp-raw td.blank{color:var(--ink-3);}
   /* description chip (sizes/sign cards like 11x14) */
   .sp-desc{display:inline-block;font-size:8.5px;font-weight:800;letter-spacing:.04em;
@@ -2908,7 +2909,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.58.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.59.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
