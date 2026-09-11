@@ -1,8 +1,9 @@
-const CACHE_NAME = 'pdp-v5.49.0';
+const CACHE_NAME = 'pdp-v5.50.0';
 const SHELL = './index.html';
 const ASSETS = [
   './',
   SHELL,
+  './plan-photos.js',
   './icon192.png',
   './icon512.png',
   './manifest.json'

@@ -20,6 +20,7 @@ for (const file of ["manifest.json", "firebase.json", ".firebaserc", "normalized
 }
 
 new vm.Script(serviceWorker, { filename: "sw.js" });
+new vm.Script(read("plan-photos.js"), { filename: "plan-photos.js" });
 
 const inlineScripts = [...index.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)];
 for (const [scriptIndex, match] of inlineScripts.entries()) {

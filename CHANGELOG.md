@@ -4,6 +4,24 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.50.0] — 2026-09-10
+
+### Added
+- New Display Plan imports use original-photo boxes instead of AI transcription: rotate pages, select complete boxes using touch/drag or percentage controls, reorder, and review with an enlarged view.
+- Source pages stay available; crop coordinates reference one stored page rather than duplicating each box image. New photos retain up to 2400 pixels on the long edge.
+- Photo plans can be reopened with Edit. Imports create separate parts without replacing existing weeks. Local storage failures retain the draft; cloud failures allow retry without duplicate documents. Oversized payloads are rejected before writing.
+- No OCR/model calls are made for this path. Photo contents are not searchable, and blur/perspective remain as photographed. Existing transcribed plans and other document types retain their renderers.
+- Preserved the superseded, uncommitted HTML draft in the local-only `backups/pdp-v5.50.0-2026-09-10-html-draft.patch`.
+
+### Files
+- `index.html`, `plan-photos.js` — original-photo editor, viewer, and guarded saves
+- `manifest.json` — version URLs bumped to 5.50.0
+- `sw.js` — cache bumped to `pdp-v5.50.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.49.0] — 2026-09-10
 
 ### Fixed

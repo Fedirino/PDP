@@ -3,3 +3,7 @@
 
 # Node / build
 node_modules/
+
+# Local visual QA contains user document photos; never commit these images.
+backups/*.png
+backups/*.patch

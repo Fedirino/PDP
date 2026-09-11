@@ -1,6 +1,8 @@
 # PDP — Produce Department Portal
 
-**Current version: v5.49.0**
+**Current version: v5.50.0**
+
+Display Plan imports now preserve photographed boxes: upload → Arrange photo boxes → rotate upright → select a complete box → Add selected box → Save photo plan. Select every box you need, including headings and notes; selections are manual, not automatic detection. Edit reopens the box editor. Original pages and zoomable cards are retained, but photographed text is not searchable/editable and perspective is not corrected. Additional uploads are separate parts of the same week. Large plans may need fewer pages per part (850 KB encoded document limit). A failed save keeps the draft; cloud failure reports that the local copy is saved and allows retry.
 
 So here's the thing: I work in a produce department, not a software company. I didn't set out to "build an app." I set out to stop rewriting the same pull list on a crumpled piece of paper every morning. One thing led to another, and now my phone runs the whole department.
 
