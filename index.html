@@ -919,6 +919,8 @@
     .home-view .tile.compact .chip{width:34px;height:34px;border-radius:10px;}
   }
 
+  /* Home is intentionally short: its last card clears the dock, so it does not need list-screen scroll room. */
+  body[data-view="home"] main{padding-bottom:18px;}
   @media (min-width:760px){body[data-view="home"] main{padding-bottom:22px;}}
 </style>
 </head>
