@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.56.0] — 2026-09-10
+
+### Improved
+- **The scan prompt now knows the exact fixture skeletons** instead of guessing. Refrigerated Promo Table = 2 wings + Shelf (Left/Center/Right) + Well (Left/Center/Right); Veg Promo Table = 1 wing + Shelf (L/C/R) + Well (L/C/R); Dry Promo Table = 2 wings + 3 main boxes (left/center/right). The model fills each printed item into its known slot, wings hold one item or none, and the DEAL LOCK annotation stays attached to the items above it.
+
+### Files
+- `index.html` — promo fixture skeletons embedded in the display-plan prompt, and v5.56.0 markers
+- `manifest.json` — version URLs bumped to 5.56.0
+- `sw.js` — cache bumped to `pdp-v5.56.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.55.0] — 2026-09-10
 
 ### Improved
