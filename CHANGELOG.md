@@ -4,6 +4,11 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.66.0] — 2026-09-11
+
+### Fixed
+- **Multiple Sales Items lists can now be saved.** Each scanned list uses its Week label as a durable identity instead of sharing one empty date. Choose or edit the list label after scanning; different weeks save separately, while a re-scan of the same week can still be added or replaced.
+
 ## [5.65.0] — 2026-09-11
 
 ### Added

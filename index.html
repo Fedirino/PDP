@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.65.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.65.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.65.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.66.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.66.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.66.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2941,7 +2941,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.65.0</div></section>`;
+      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.66.0</div></section>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -4943,6 +4943,17 @@ function selectCurrentDisplayPlan(){
   if(current) docActiveId.salesplan=current.id;
   else if(!activeDoc("salesplan")&&docStore.salesplan.length) docActiveId.salesplan=docStore.salesplan[0].id;
 }
+function salesItemsListLabel(value){
+  const raw=String(value||"").trim();
+  const week=raw.match(/week\s*(\d{1,2})\D+(20\d{2})/i);
+  return week?"Week "+Number(week[1])+" "+week[2]:(raw||"Sales Items");
+}
+function salesItemsStorageKey(label){
+  const clean=salesItemsListLabel(label);
+  const week=clean.match(/week\s*(\d{1,2})\D+(20\d{2})/i);
+  if(week) return "sales-items:"+week[2]+"-w"+pad2(week[1]);
+  return "sales-items:"+clean.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+}
 
 
 /* Compress a file: a high-quality copy for the API and a smaller copy for storage.
@@ -5271,6 +5282,10 @@ RULES:
       scanParsed.date=scanParsed.weekFri;
       scanParsed.dateLabel=weekRangeLabel(scanParsed.weekFri);
     }
+    if(scanMode==="salesitems"){
+      scanParsed.dateLabel=salesItemsListLabel(scanParsed.dateLabel||scanParsed.date);
+      scanParsed.date=salesItemsStorageKey(scanParsed.dateLabel);
+    }
     let issues=[];
     if(getEffectiveKey()){
       const statusEl=document.getElementById("scanStatus");
@@ -5286,12 +5301,15 @@ RULES:
         <label class="wk-picker">Week begins Friday<input id="wkDate" type="date" value="${esc(scanParsed.weekFri)}"></label>
         <button id="wkNext" aria-label="Next week">›</button>
       </div>`:"";
+    const listUI=scanMode==="salesitems"?`
+      <label class="field" style="margin:2px 0 0;display:block"><span style="display:block;font-size:11px;font-weight:700;color:var(--ink-2);margin:0 0 6px 2px">Sales Items list</span><input id="salesListLabel" class="sheet-input" style="display:block;margin:0" value="${esc(scanParsed.dateLabel)}" placeholder="Week 38 2026"></label>`:"";
 
     scanBody.innerHTML=`
       <div class="scan-step"><div class="num">1</div>${docPages.length} page${docPages.length===1?"":"s"} captured</div>
       <div class="doc-thumbs">${scanParsed.images.map(s=>`<img src="${s}" class="doc-thumb">`).join("")}</div>
       <div class="scan-step"><div class="num">2</div>Done — ${sections.length} section${sections.length===1?"":"s"}${(scanMode!=="salesplan"&&scanParsed.dateLabel)?" · "+esc(scanParsed.dateLabel):""}</div>
       ${weekUI}
+      ${listUI}
       ${verifyHTML}
       <div style="max-height:46vh;overflow:auto;margin:4px 0 2px">${docSectionsHTML(scanParsed,scanMode==="salesplan"?"salesplan":(scanMode==="salesitems"?"salesitems":"dailynotes"))}</div>
       <div class="scan-step"><div class="num">3</div>Save this ${scanMode==="salesplan"?"week":"page"}</div>
@@ -5306,6 +5324,10 @@ RULES:
       const wp=document.getElementById("wkPrev"); if(wp) wp.onclick=()=>shift(-7);
       const wn=document.getElementById("wkNext"); if(wn) wn.onclick=()=>shift(7);
       const wd=document.getElementById("wkDate"); if(wd) wd.onchange=()=>{ if(wd.value) setWeek(wd.value); };
+    }
+    if(scanMode==="salesitems"){
+      const listLabel=document.getElementById("salesListLabel");
+      if(listLabel) listLabel.onchange=()=>{ scanParsed.dateLabel=salesItemsListLabel(listLabel.value); scanParsed.date=salesItemsStorageKey(scanParsed.dateLabel); listLabel.value=scanParsed.dateLabel; };
     }
     document.getElementById("scanRetry").onclick=()=>openScanOverlay(scanMode);
     document.getElementById("scanApply").onclick=applyDocScan;
@@ -5326,7 +5348,7 @@ async function applyDocScan(){
   if(!scanParsed||!scanParsed.sections) return;
   const type=(scanMode==="salesplan")?"salesplan":(scanMode==="salesitems"?"salesitems":"dailynotes");
   const today=new Date(), pad=function(n){ return String(n).padStart(2,"0"); };
-  const date=scanParsed.date||((type==="salesitems")?"":today.getFullYear()+"-"+pad(today.getMonth()+1)+"-"+pad(today.getDate()));
+  const date=scanParsed.date||((type==="salesitems")?salesItemsStorageKey(scanParsed.dateLabel):today.getFullYear()+"-"+pad(today.getMonth()+1)+"-"+pad(today.getDate()));
 
   const arr=docStore[type];
   const existing=arr.find(function(d){ return d.date===date; });
@@ -5336,7 +5358,7 @@ async function applyDocScan(){
     const result=await new Promise(function(resolve){
       const bd=document.getElementById("sheetBackdrop");
       const sh=document.getElementById("sheet");
-      document.getElementById("sheetTitle").textContent="Page already exists for "+date;
+      document.getElementById("sheetTitle").textContent="Page already exists for "+(scanParsed.dateLabel||date);
       const msg=document.getElementById("sheetMsg");
       msg.textContent="Add these sections to the existing "+DOC_LABEL[type]+", or replace it entirely?";
       msg.style.display="block";
