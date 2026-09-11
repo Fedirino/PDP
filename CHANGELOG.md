@@ -4,6 +4,11 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.67.0] — 2026-09-11
+
+### Changed
+- **Sales Items order fields now fit phone screens.** Sales Items and Deal Lock rows use a compact full-width layout with Tuesday and Thursday quantity boxes on the right, eliminating horizontal table scrolling.
+
 ## [5.66.0] — 2026-09-11
 
 ### Fixed
