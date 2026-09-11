@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.61.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.61.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.61.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.62.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.62.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.62.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -850,6 +850,10 @@
   .sp-week button:active{background:var(--surface-3);}
   .sp-week .wk{flex:1;text-align:center;font-size:12.5px;color:var(--ink-2);line-height:1.3;}
   .sp-week .wk b{display:block;color:var(--brand);font-size:15px;letter-spacing:.01em;margin-top:1px;}
+  .sp-week .wk-picker{display:flex;flex-direction:column;gap:3px;min-width:132px;font-size:9px;font-weight:800;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);}
+  .sp-week input[type="date"]{appearance:none;width:100%;font:inherit;font-size:13px;font-weight:700;letter-spacing:0;
+    text-transform:none;color:var(--brand);background:var(--surface-2);border:1px solid var(--line-2);border-radius:8px;padding:7px 8px;}
   /* edit-mode inputs */
   .doc-edit-line,.doc-edit-area{width:100%;font:inherit;font-size:13px;background:var(--surface-2);
     border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--ink);margin-bottom:7px;}
@@ -2931,7 +2935,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.61.0</div></section>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.62.0</div></section>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -4921,6 +4925,12 @@ function weekRangeLabel(friISO){
   const fri=new Date(friISO+"T00:00:00"); const thu=new Date(fri); thu.setDate(thu.getDate()+6);
   return mdLabel(fri)+"–"+mdLabel(thu);
 }
+function displayWeekFriday(anyISO){
+  const d=new Date(anyISO+"T00:00:00");
+  if(isNaN(d)) return isoDate(upcomingFriday());
+  d.setDate(d.getDate()-((d.getDay()-5+7)%7));
+  return isoDate(d);
+}
 
 
 /* Compress a file: a high-quality copy for the API and a smaller copy for storage.
@@ -5260,6 +5270,7 @@ RULES:
       <div class="sp-week">
         <button id="wkPrev" aria-label="Previous week">‹</button>
         <div class="wk">Display week<b id="wkLabel">${esc(scanParsed.dateLabel)}</b></div>
+        <label class="wk-picker">Week begins Friday<input id="wkDate" type="date" value="${esc(scanParsed.weekFri)}"></label>
         <button id="wkNext" aria-label="Next week">›</button>
       </div>`:"";
 
@@ -5277,9 +5288,11 @@ RULES:
         <button class="btn" id="scanApply">${I.check} Save ${scanMode==="salesplan"?"Week":"Page"}</button>
       </div>`;
     if(scanMode==="salesplan"){
-      const shift=(days)=>{ const d=new Date(scanParsed.weekFri+"T00:00:00"); d.setDate(d.getDate()+days); scanParsed.weekFri=isoDate(d); scanParsed.date=scanParsed.weekFri; scanParsed.dateLabel=weekRangeLabel(scanParsed.weekFri); const wl=document.getElementById("wkLabel"); if(wl) wl.textContent=scanParsed.dateLabel; };
+      const setWeek=(value)=>{ scanParsed.weekFri=displayWeekFriday(value); scanParsed.date=scanParsed.weekFri; scanParsed.dateLabel=weekRangeLabel(scanParsed.weekFri); const wl=document.getElementById("wkLabel"); if(wl) wl.textContent=scanParsed.dateLabel; const wd=document.getElementById("wkDate"); if(wd) wd.value=scanParsed.weekFri; };
+      const shift=(days)=>{ const d=new Date(scanParsed.weekFri+"T00:00:00"); d.setDate(d.getDate()+days); setWeek(isoDate(d)); };
       const wp=document.getElementById("wkPrev"); if(wp) wp.onclick=()=>shift(-7);
       const wn=document.getElementById("wkNext"); if(wn) wn.onclick=()=>shift(7);
+      const wd=document.getElementById("wkDate"); if(wd) wd.onchange=()=>{ if(wd.value) setWeek(wd.value); };
     }
     document.getElementById("scanRetry").onclick=()=>openScanOverlay(scanMode);
     document.getElementById("scanApply").onclick=applyDocScan;

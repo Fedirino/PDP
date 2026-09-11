@@ -4,6 +4,11 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.62.0] — 2026-09-11
+
+### Added
+- **Display Plan week picker.** After a scan finishes, choose any date in the intended Friday–Thursday week from the calendar; PDP files it under that Friday automatically. This makes it practical to scan, retain, and switch among multiple display-plan weeks.
+
 ## [5.61.0] — 2026-09-11
 
 ### Changed
