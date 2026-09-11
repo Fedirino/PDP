@@ -3,3 +3,6 @@
 
 # Node / build
 node_modules/
+
+# Local backups (photo-editor artifacts / saved drafts) — not for tracking
+backups/

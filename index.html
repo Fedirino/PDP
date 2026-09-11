@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.49.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.49.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.49.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.50.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.50.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.50.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -774,6 +774,16 @@
   /* Display Plan — digital plan blocks */
   .sp-block{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
     box-shadow:var(--sh-sm);margin-bottom:11px;overflow:hidden;}
+  /* Faithful HTML rendering of a scanned display plan (sanitized) */
+  .sp-html{overflow-x:auto;-webkit-overflow-scrolling:touch;background:var(--surface);
+    border:1px solid var(--line);border-radius:var(--r);padding:12px;color:var(--ink);font-size:13px;line-height:1.5;}
+  .sp-html table{border-collapse:collapse;min-width:60%;margin:4px 0;font-size:12px;}
+  .sp-html table,.sp-html th,.sp-html td{border:1px solid var(--line);}
+  .sp-html th,.sp-html td{padding:5px 7px;vertical-align:top;}
+  .sp-html th{background:var(--surface-2);font-weight:700;text-align:left;}
+  .sp-html h1,.sp-html h2,.sp-html h3,.sp-html h4{color:var(--ink);margin:10px 0 4px;}
+  .sp-html p,.sp-html li,.sp-html div{color:var(--ink);}
+  .sp-html *{box-sizing:border-box;}
   .sp-head{background:var(--violet-tint);color:var(--violet);font-size:11px;font-weight:800;
     letter-spacing:.06em;text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--line);}
   .sp-body{padding:5px 0 6px;}
@@ -2892,7 +2902,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.49.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.50.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -5047,6 +5057,37 @@ Return ONLY valid JSON. No markdown, no backticks, no commentary.
    - Keep every row aligned across columns. Do not shift a price or UOM into a neighboring item when a cell is faint or blank; use "" for that cell.
    - Do NOT invent, reorder, round, or summarize. Accuracy matters more than anything.`;
 
+function sanitizePlanHTML(raw){
+  if(!raw||typeof raw!=="string") return "";
+  var d=document.createElement("div");
+  try{ d.innerHTML=raw; }catch(e){ return ""; }
+  var allowTags={DIV:1,SPAN:1,P:1,BR:1,TABLE:1,THEAD:1,TBODY:1,TR:1,TD:1,TH:1,
+    H1:1,H2:1,H3:1,H4:1,H5:1,UL:1,OL:1,LI:1,STRONG:1,B:1,EM:1,I:1,SECTION:1,ARTICLE:1,HEADER:1,MAIN:1,FIGCAPTION:1,CAPTION:1};
+  var allowAttrs={rowspan:1,colspan:1};
+  function walk(node){
+    if(node.nodeType===3) return;
+    if(node.nodeType===1){
+      var t=node.tagName.toUpperCase();
+      if(t==="SCRIPT"||t==="STYLE"||t==="IFRAME"||t==="LINK"||t==="META"||t==="OBJECT"||t==="EMBED"||t==="FORM"||t==="INPUT"||t==="BUTTON"||t==="A"){
+        node.remove(); return;
+      }
+      if(!allowTags[t]){
+        while(node.firstChild) node.parentNode.insertBefore(node.firstChild,node);
+        node.remove(); return;
+      }
+      for(var a=node.attributes.length-1;a>=0;a--){
+        var nm=node.attributes[a].name.toLowerCase();
+        if(nm.indexOf("on")===0||nm==="style"||!/^[a-z]+$/.test(nm)||(!allowAttrs[nm]&&nm!=="border"&&nm!=="align"&&nm!=="valign"))
+          node.removeAttribute(node.attributes[a].name);
+      }
+    }
+    var kids=Array.prototype.slice.call(node.childNodes);
+    for(var k=0;k<kids.length;k++) walk(kids[k]);
+  }
+  walk(d);
+  return d.innerHTML;
+}
+
 async function readDocPages(){
   if(!docPages.length) return;
   scanBody.innerHTML=`
@@ -5058,25 +5099,40 @@ async function readDocPages(){
     async function attempt(extra){
 const salesPlanPrompt=`You are transcribing a Stop & Shop produce "Display Plan" (weekly merchandising plan), photographed across ONE OR MORE pages in order. The pages are often landscape sheets photographed rotated 90 degrees. Mentally rotate EACH page so its printed text reads left-to-right before reading. Treat each page as its own layout, then combine the results in page order.
 
-Transcribe EXACTLY what is printed, block by block, in printed order. Do not summarize, invent, or reorder. Keep item text (brand, size, count) verbatim. Blank slots stay blank.
+Return ONE JSON object (no markdown, no backticks) with BOTH a structured record and a faithful HTML rendering:
 
-Return ONLY valid JSON, no markdown, no backticks:
-{"date":"","dateLabel":"","sections":[
-  {"page":1,"boxOrder":1,"category":"<block title, verbatim>","subject":"","contact":"","bullets":["<any printed note, one string each>"],
-   "columns":0,
-   "tables":[{"title":"","headers":["Position","Item"],"rows":[["<position>","<item(s)>"]]}]}]}
+{
+ "date":"","dateLabel":"",
+ "sections":[
+   {"page":1,"boxOrder":1,"category":"<block title, verbatim>","subject":"","contact":"","bullets":["<any printed note>"],
+    "columns":0,"tables":[{"title":"","headers":["Position","Item"],"rows":[["<position>","<item(s)>"]]}]}
+ ],
+ "html":"<ONE self-contained HTML document string, escaped inside JSON>"
+}
 
-Rules:
+STRUCTURED sections RULES (source of truth — used for editing/verification):
 - The user-provided page markers identify the exact page sequence. Never move a block from one page into another page's position.
 - These sheets contain many independent boxes. Use each box's printed heading as the section category; do not merge neighboring boxes just because they are on the same sheet.
 - The full page image defines layout and box boundaries. Detail tiles are zoomed references only: use them to verify faint item text, but never duplicate a box or change its position because it appears in more than one overlapping tile.
-- For every box, include page (the numbered document page) and boxOrder (top-to-bottom, then left-to-right reading order on that page). If uncertain, keep the box in its observed position and use the next integer rather than guessing a different box.
+- For every box, include page and boxOrder (top-to-bottom, then left-to-right on that page). If uncertain, keep the box in its observed position and use the next integer.
 - Preserve the printed layout inside each box as rows: keep the exact row label in column 1 and the exact item/cell text in the remaining columns. Do not turn a blank cell into a placement or combine separate rows.
-- Read every shelf/well block strictly LEFT to RIGHT, and stacked positions TOP to BOTTOM.
+- Read every shelf/well plot strictly LEFT to RIGHT, and stacked positions TOP to BOTTOM.
 - Output each printed row as one table row; a blank slot is a row with "".
 - Keep size codes (2lb, 3ct, 6oz, 11x14) and flags like (DEAL LOCK), (SPOT BUY), (TPR) with the item/column where printed.
 - Include any separate sale-item/order-code/deal-lock tables on the page, verbatim.
-- Set "date":"" and "dateLabel":"" — the app assigns the display week itself.`;
+- Set "date":"" and "dateLabel":"" — the app assigns the display week itself.
+
+HTML "html" field RULES (faithful view - takes priority over styling):
+- Convert the photographed display plan into readable mobile HTML. Accuracy of text and placement takes priority over styling.
+- Orient each page so printed text reads upright. Identify every independently bordered display box and its exact heading.
+- Reproduce each box as a separate card, stacked vertically for a phone. Read each horizontal band left to right, then down.
+- Inside each card preserve the original two-dimensional grid: every row, column, blank cell, and merged cell. Use HTML tables with rowspan/colspan where needed. Keep each item in its original cell.
+- Preserve exact headings, item names, quantities, sizes, dates, promotional flags, and notes. Keep Shelf, Well, Power Wing, Inside Wing, Front Wing, and Back Wing labels attached to the areas they label. Keep repeated items repeated.
+- Do not merge neighboring boxes or move text between them. Do not substitute a familiar product or heading for uncertain text. Mark unreadable text as [unclear].
+- Only the arrangement of whole cards may change to fit a phone; never flatten the grid inside a card.
+- Use selectable text, readable typography, and horizontal scrolling for wide tables. Do not shrink the page into an image; do not output a picture of the document.
+- Before returning, compare every card with its source box: heading match, all items in correct cells, blank/merged cells preserved, notes/flags attached, no boxes missing or duplicated.
+- Return the HTML as a STRING inside the JSON "html" field, with all double-quotes and backslashes properly escaped for JSON (e.g. attribute quotes as \"). No JavaScript, no external assets, no explanatory prose outside the JSON.`;
 
       const promptText=scanMode==="salesplan"?salesPlanPrompt:(scanMode==="salesitems"?salesItemsPrompt:dailyNotesPrompt);
       const content=[];
@@ -5118,7 +5174,7 @@ Rules:
     })):[];
     if(!sections.length) throw new Error("No sections found in the notes.");
 
-    scanParsed={ date:parsed.date||"", dateLabel:parsed.dateLabel||"", sections, images:docPages.map(p=>p.store), preserveOrder:scanMode==="salesplan" };
+    scanParsed={ date:parsed.date||"", dateLabel:parsed.dateLabel||"", sections, images:docPages.map(p=>p.store), preserveOrder:scanMode==="salesplan", html:scanMode==="salesplan"?sanitizePlanHTML(parsed.html):"" };
 
     /* Display Plan: the doc is a one-week (Fri–Thu) plan — set the week ourselves, ignore any promo date on the sheet. */
     if(scanMode==="salesplan"){
@@ -5231,7 +5287,7 @@ async function applyDocScan(){
     cloudDeleteDoc(type,existing.id);
   }
 
-  var doc={ id:"doc_"+Date.now(), date:date, dateLabel:scanParsed.dateLabel||scanParsed.date||date||"", created:Date.now(), updated:Date.now(), images:scanParsed.images||[], sections:scanParsed.sections, preserveOrder:type==="salesplan" };
+  var doc={ id:"doc_"+Date.now(), date:date, dateLabel:scanParsed.dateLabel||scanParsed.date||date||"", created:Date.now(), updated:Date.now(), images:scanParsed.images||[], sections:scanParsed.sections, preserveOrder:type==="salesplan", html:scanParsed.html||"" };
   docStore[type].unshift(doc);
   sortDocs(type);
   docPrune();
@@ -5245,7 +5301,12 @@ async function applyDocScan(){
 
 /* ---- Render document sections (shared by preview + tab) ---- */
 function docSectionsHTML(doc,type){
-  if(type==="salesplan") return spSectionsHTML(doc);
+  if(type==="salesplan"){
+    /* If the scan produced a faithful HTML rendering, show it (sanitized);
+       otherwise fall back to the structured table rebuild. */
+    if(doc&&doc.html) return `<div class="sp-html">${doc.html}</div>`;
+    return spSectionsHTML(doc);
+  }
   return (doc.sections||[]).map(s=>{
     const bullets=(s.bullets||[]).filter(b=>String(b).trim()!=="").map(b=>{
       const sub=/^>>\s?/.test(b);

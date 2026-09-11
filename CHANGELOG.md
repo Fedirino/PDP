@@ -4,7 +4,23 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
-## [5.49.0] — 2026-09-10
+## [5.50.0] — 2026-09-09
+
+### Added
+- **Display plans now keep a faithful HTML rendering alongside the structured data.** The scan prompt asks the model for both: the structured `sections` (source of truth — editing, verification, and copy-text still work) AND a self-contained HTML string that preserves the original 2D grid — every box as a card, exact rows/columns/merged cells, rowspan/colspan, headings, items, sizes, flags, and `[unclear]` for unreadable text.
+- The model's HTML is **sanitized** (scripts, styles, iframes, forms, event handlers, and links stripped; only safe table/card markup + text kept) before it's stored or rendered.
+- Saved display plans render the faithful HTML when a scan produced it (falling back to the reconstructed tables otherwise), with horizontal scrolling for wide tables.
+
+### Files
+- `index.html` — dual-output sales-plan prompt, `sanitizePlanHTML()`, HTML persisted on the doc, `.sp-html` render path, and v5.50.0 markers
+- `manifest.json` — version URLs bumped to 5.50.0
+- `sw.js` — cache bumped to `pdp-v5.50.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
+## [5.49.0] — 2026-09-09
 
 ### Fixed
 - Display Plan scan previews now use the same table renderer as saved scans, retaining all extracted columns and blank cells instead of inferring fixture positions.
