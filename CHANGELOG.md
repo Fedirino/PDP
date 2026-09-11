@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.53.0] — 2026-09-10
+
+### Fixed
+- **Display Plan fixtures no longer overlap.** Promo flags and sign sizes (DEAL LOCK, SPOT BUY, TPR, 11x14) are now treated as guidelines attached to a **specific item** — the scan prompt keeps them in the same cell as that item, and the renderer draws them as inline chips instead of full-width banner rows. Each shelf/well/wing cell stays clean, items sit next to their flag, and boxes render as an aligned grid instead of overlapping.
+
+### Files
+- `index.html` — per-item flag guidance in the display-plan prompt + `spRawHTML` banner-row removal, and v5.53.0 markers
+- `manifest.json` — version URLs bumped to 5.53.0
+- `sw.js` — cache bumped to `pdp-v5.53.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.52.0] — 2026-09-10
 
 ### Fixed
