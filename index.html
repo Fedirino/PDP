@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.56.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.56.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.56.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.57.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.57.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.57.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2908,7 +2908,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.56.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.57.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -5439,21 +5439,64 @@ function spRawHTML(table){
   const headers=(table&&Array.isArray(table.headers))?table.headers:[];
   const rows=(table&&Array.isArray(table.rows))?table.rows:[];
   const width=Math.max(headers.length,...rows.map(r=>Array.isArray(r)?r.length:0),1);
-  const headRow=headers.length
-    ? '<tr>'+headers.map(h=>'<th class="dz">'+esc(h)+'</th>').join('')+'</tr>'
-    : '<tr><th class="dz" colspan="'+width+'">&nbsp;</th></tr>';
-  const body=rows.map(function(row){
+  const flat = rows.map(function(row){
     const cells=Array.from({length:width},(_,i)=>String(Array.isArray(row)?(row[i]??"") : (i===0?row:"")));
-    /* Promo flags (DEAL LOCK / SPOT BUY / TPR) and sign sizes (11x14) ride along
-       with the specific item they annotate — spTagHTML draws them as inline chips.
-       No separate full-width banner rows; that's what made boxes overlap. */
     return '<tr>'+cells.map(function(c,ci){
       const t=c.trim();
       if(!t) return '<td class="dc blank"></td>';
       return '<td'+(ci===0?' class="dc lab"':' class="dc"')+'>'+spTagHTML(t)+'</td>';
     }).join('')+'</tr>';
   }).join('');
-  return '<div class="sp-fix"><table class="sp-grid"><tbody>'+headRow+body+'</tbody></table></div>';
+
+  /* Fixture layout: when the header set is a Promo table zone row (wings + Shelf/Wells),
+     draw the Shelf deck on top and the Well deck below it, with wings as side bands —
+     matching the physical fixture. Zone labels look like: Power Wing, Shelf L, Shelf C,
+     Shelf R, Well L, Well C, Well R, Inside Wing (one row per printed line). */
+  const H=headers.map(h=>String(h||"").trim());
+  const wings=H.map((h,i)=>({h,i})).filter(x=>/wing/i.test(x.h));
+  const shelves=H.map((h,i)=>({h,i})).filter(x=>/^shelf/i.test(x.h));
+  const wells=H.map((h,i)=>({h,i})).filter(x=>/^well/i.test(x.h));
+  if((shelves.length||wells.length) && (shelves.length+wells.length)>=2){
+    // Gather each printed line's value per zone, by taking the first non-empty per column across rows
+    function colVals(grp){
+      const out=[];
+      grp.forEach(function(g,gi){
+        let v="";
+        for(let r=0;r<rows.length&&!v;r++){ const c=rows[r][g.i]; v=String(c==null?"":c).trim(); }
+        out.push(v);
+      });
+      return out;
+    }
+    const sVals=colVals(shelves), wVals=colVals(wells);
+    function deckHTML(label,vals){
+      if(!vals.length) return "";
+      const tds=vals.map(function(v){ return '<td class="dc'+(v?'':' blank')+'">'+(v?spTagHTML(v):"")+'</td>'; }).join("");
+      return '<tr><td class="dh" colspan="'+vals.length+'">'+esc(label)+'</td></tr><tr>'+tds+'</tr>';
+    }
+    const sRow=deckHTML("Shelf",sVals), wRow=deckHTML("Well",wVals);
+    // wings as bands (one item each)
+    const wingBand=wings.map(function(w){
+      let v="";
+      for(let r=0;r<rows.length&&!v;r++){ const c=rows[r][w.i]; v=String(c==null?"":c).trim(); }
+      if(/inside|back/i.test(w.h)) return '<div class="sp-wing2 bot"><span class="wl">'+esc(w.h)+'</span><span class="wv">'+(v?spTagHTML(v):'&mdash;')+'</span></div>';
+      return '<div class="sp-wing2"><span class="wl">'+esc(w.h)+'</span><span class="wv">'+(v?spTagHTML(v):'&mdash;')+'</span></div>';
+    }).join("");
+    const mid=[];
+    // Non-shelf/well/wing extra headers: render as a row appended under wells
+    const extra=H.filter(h=>!/wing|^shelf|^well/i.test(h));
+    extra.forEach(function(h){
+      let e="" ;
+      const idx=H.indexOf(h);
+      for(let r=0;r<rows.length&&!e;r++){ const c=rows[r][idx]; e=String(c==null?"":c).trim(); }
+      if(e) mid.push('<tr><td class="dlock" colspan="'+Math.max(sVals.length,wVals.length,1)+'">'+esc(h)+' &middot; '+spTagHTML(e)+'</td></tr>');
+    });
+    const n=Math.max(sVals.length,wVals.length,wings.length,1);
+        return '<div class="sp-fix">'+wingBand+'<table class="sp-grid"><tbody>'+sRow+wRow+mid.join("")+'</tbody></table></div>';
+  }
+  const headRow=headers.length
+    ? '<tr>'+headers.map(h=>'<th class="dz">'+esc(h)+'</th>').join('')+'</tr>'
+    : '<tr><th class="dz" colspan="'+width+'">&nbsp;</th></tr>';
+  return '<div class="sp-fix"><table class="sp-grid"><tbody>'+headRow+flat+'</tbody></table></div>';
 }
 function spSectionsHTML(doc){
   const sections=spOrder(doc&&doc.sections);

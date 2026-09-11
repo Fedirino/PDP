@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.57.0] — 2026-09-10
+
+### Improved
+- **Promo fixture boxes now put the Shelf deck on top and the Well deck below it, with wings as side bands** — matching the physical fixture instead of one flat row. Refrigerated / Veg Promo tables render as: Power Wing band, Shelf (Left/Center/Right) row, Well (Left/Center/Right) row, Inside Wing band. Non-fixture boxes (Dry Promo's 3 main boxes, end-caps, the berry island's left/right faces) keep their clean flat grid.
+
+### Files
+- `index.html` — fixture-aware spatial layout in `spRawHTML` (deck-on-top/well-below/wings-on-side), and v5.57.0 markers
+- `manifest.json` — version URLs bumped to 5.57.0
+- `sw.js` — cache bumped to `pdp-v5.57.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.56.0] — 2026-09-10
 
 ### Improved
