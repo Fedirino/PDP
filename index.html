@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.57.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.57.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.57.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.58.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.58.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.58.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2908,7 +2908,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.57.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.58.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -4319,32 +4319,55 @@ function orTextOf(data){
   if(Array.isArray(msg.content)) return msg.content.map(function(b){ return (b&&b.text)||""; }).join("");
   return "";
 }
+/* Keep the phone awake while any model scan is in flight, so a long
+   OpenRouter call isn't killed by the screen/CPU sleeping when the user
+   tabs out or the app loses focus. Refcounted: the lock stays held until
+   every in-flight scan request finishes. */
+let _wlReq=null, _wlN=0;
+async function wlAcquire(){
+  _wlN++;
+  try{
+    if(!_wlReq && navigator.wakeLock && navigator.wakeLock.request){
+      _wlReq=await navigator.wakeLock.request("screen");
+      _wlReq.addEventListener("release",()=>{ _wlReq=null; });
+    }
+  }catch(e){ _wlReq=null; }
+}
+function wlRelease(){
+  if(_wlN>0) _wlN--;
+  if(_wlN<=0 && _wlReq){ try{ _wlReq.release(); }catch(e){} _wlReq=null; _wlN=0; }
+}
 async function orFetch(body){
-  const key=getEffectiveKey();
-  if(!key) throw Object.assign(new Error("No API key set. Go to Tools → Settings and enter your OpenRouter API key."),{status:401});
-  const resp=await fetch("https://openrouter.ai/api/v1/chat/completions",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization":"Bearer "+key,
-      "HTTP-Referer":location.origin,
-      /* ASCII only. Header values must be Latin-1, and the em dash in the app's
-         real title made fetch() throw before the request ever left the browser. */
-      "X-Title":"PDP - Produce Department Portal"
-    },
-    body:JSON.stringify(body)
-  });
-  if(!resp.ok){
-    const err=await resp.json().catch(()=>({}));
-    const msg=(err.error&&err.error.message)||"Unknown error";
-    if(resp.status===401) throw Object.assign(new Error("Invalid API key. Update it in Tools → Settings."),{status:401});
-    if(resp.status===402) throw Object.assign(new Error("OpenRouter credits exhausted. Top up at openrouter.ai/credits."),{status:402});
-    throw Object.assign(new Error("API "+resp.status+": "+msg),{status:resp.status});
+  await wlAcquire();
+  try{
+    const key=getEffectiveKey();
+    if(!key) throw Object.assign(new Error("No API key set. Go to Tools → Settings and enter your OpenRouter API key."),{status:401});
+    const resp=await fetch("https://openrouter.ai/api/v1/chat/completions",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization":"Bearer "+key,
+        "HTTP-Referer":location.origin,
+        /* ASCII only. Header values must be Latin-1, and the em dash in the app's
+           real title made fetch() throw before the request ever left the browser. */
+        "X-Title":"PDP - Produce Department Portal"
+      },
+      body:JSON.stringify(body)
+    });
+    if(!resp.ok){
+      const err=await resp.json().catch(()=>({}));
+      const msg=(err.error&&err.error.message)||"Unknown error";
+      if(resp.status===401) throw Object.assign(new Error("Invalid API key. Update it in Tools → Settings."),{status:401});
+      if(resp.status===402) throw Object.assign(new Error("OpenRouter credits exhausted. Top up at openrouter.ai/credits."),{status:402});
+      throw Object.assign(new Error("API "+resp.status+": "+msg),{status:resp.status});
+    }
+    const data=await resp.json();
+    /* OpenRouter can return 200 with an error body when an upstream provider fails. */
+    if(data&&data.error) throw Object.assign(new Error("API: "+(data.error.message||"upstream error")),{status:data.error.code||500});
+    return data;
+  } finally {
+    wlRelease();
   }
-  const data=await resp.json();
-  /* OpenRouter can return 200 with an error body when an upstream provider fails. */
-  if(data&&data.error) throw Object.assign(new Error("API: "+(data.error.message||"upstream error")),{status:data.error.code||500});
-  return data;
 }
 let scanParsed=null;
 let scanMode="schedule"; /* "schedule" or "gev" */

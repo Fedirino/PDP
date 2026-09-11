@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.58.0] — 2026-09-10
+
+### Added
+- **The screen stays awake during scans** — no more killed mid-call when you tab out or the app loses focus. While any model scan is in flight, PDP holds a Screen Wake Lock (refcounted across the nested schedule/GEV/doc/verification calls), so the phone's screen and CPU stay on until the OpenRouter response returns. Gracefully no-ops on browsers without Wake Lock support.
+
+### Files
+- `index.html` — Wake Lock helper (`wlAcquire`/`wlRelease`) wrapped around every model call in `orFetch`, and v5.58.0 markers
+- `manifest.json` — version URLs bumped to 5.58.0
+- `sw.js` — cache bumped to `pdp-v5.58.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.57.0] — 2026-09-10
 
 ### Improved
