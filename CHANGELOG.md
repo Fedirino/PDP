@@ -4,6 +4,11 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.62.1] — 2026-09-11
+
+### Fixed
+- Raised the Home screen version label so it stays clear of the bottom navigation.
+
 ## [5.62.0] — 2026-09-11
 
 ### Added

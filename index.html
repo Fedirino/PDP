@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.62.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.62.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.62.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.62.1">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.62.1">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.62.1">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -925,6 +925,7 @@
 
   /* Home is intentionally short: its last card clears the dock, so it does not need list-screen scroll room. */
   body[data-view="home"] main{padding-bottom:18px;}
+  .home-version{margin:12px 0 6px;}
   @media (min-width:760px){body[data-view="home"] main{padding-bottom:22px;}}
 </style>
 </head>
@@ -2935,7 +2936,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.62.0</div></section>`;
+      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.62.1</div></section>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
