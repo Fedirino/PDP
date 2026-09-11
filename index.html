@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.50.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.50.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.50.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.51.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.51.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.51.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -815,6 +815,12 @@
     letter-spacing:.07em;text-transform:uppercase;padding:4px 8px;text-align:center;}
   .sp-grid .dc{padding:6px 7px;font-size:11.5px;line-height:1.4;color:var(--ink);}
   .sp-grid .dc.empty{color:var(--ink-3);text-align:center;}
+  .sp-grid .dc.lab{color:var(--ink-3);font-size:9px;font-weight:800;text-transform:uppercase;
+    letter-spacing:.05em;white-space:nowrap;width:70px;}
+  .sp-grid th.dz{background:var(--surface-2);color:var(--brand);font-size:9.5px;font-weight:800;
+    letter-spacing:.06em;text-transform:uppercase;padding:5px 8px;text-align:left;}
+  .sp-grid .dlock{background:var(--brand-tint);color:var(--brand);font-weight:800;
+    letter-spacing:.12em;text-transform:uppercase;text-align:center;padding:6px 8px;font-size:10px;}
   .sp-grid .cl{display:block;}
   .sp-grid .cl+.cl{margin-top:2px;}
   /* Display Plan — plain table (ends, islands, hero pods, lists) */
@@ -2902,7 +2908,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.50.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.51.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -5099,40 +5105,36 @@ async function readDocPages(){
     async function attempt(extra){
 const salesPlanPrompt=`You are transcribing a Stop & Shop produce "Display Plan" (weekly merchandising plan), photographed across ONE OR MORE pages in order. The pages are often landscape sheets photographed rotated 90 degrees. Mentally rotate EACH page so its printed text reads left-to-right before reading. Treat each page as its own layout, then combine the results in page order.
 
-Return ONE JSON object (no markdown, no backticks) with BOTH a structured record and a faithful HTML rendering:
-
+Return ONLY a valid JSON object (no markdown, no backticks):
 {
  "date":"","dateLabel":"",
  "sections":[
-   {"page":1,"boxOrder":1,"category":"<block title, verbatim>","subject":"","contact":"","bullets":["<any printed note>"],
-    "columns":0,"tables":[{"title":"","headers":["Position","Item"],"rows":[["<position>","<item(s)>"]]}]}
- ],
- "html":"<ONE self-contained HTML document string, escaped inside JSON>"
-}
+   {"page":1,"boxOrder":1,"category":"<box heading, verbatim>","kind":"fixture|endcap|table|list",
+    "bullets":["<any printed note, DEAL LOCK, SPOT BUY, or footer instruction, one string each>"],
+    "headers":["<spatial zone labels, left to right>"],
+    "rows":[["<position or blank>","<item(s) in that cell>"]]}]}
 
-STRUCTURED sections RULES (source of truth — used for editing/verification):
-- The user-provided page markers identify the exact page sequence. Never move a block from one page into another page's position.
-- These sheets contain many independent boxes. Use each box's printed heading as the section category; do not merge neighboring boxes just because they are on the same sheet.
-- The full page image defines layout and box boundaries. Detail tiles are zoomed references only: use them to verify faint item text, but never duplicate a box or change its position because it appears in more than one overlapping tile.
-- For every box, include page and boxOrder (top-to-bottom, then left-to-right on that page). If uncertain, keep the box in its observed position and use the next integer.
-- Preserve the printed layout inside each box as rows: keep the exact row label in column 1 and the exact item/cell text in the remaining columns. Do not turn a blank cell into a placement or combine separate rows.
-- Read every shelf/well plot strictly LEFT to RIGHT, and stacked positions TOP to BOTTOM.
-- Output each printed row as one table row; a blank slot is a row with "".
-- Keep size codes (2lb, 3ct, 6oz, 11x14) and flags like (DEAL LOCK), (SPOT BUY), (TPR) with the item/column where printed.
-- Include any separate sale-item/order-code/deal-lock tables on the page, verbatim.
-- Set "date":"" and "dateLabel":"" — the app assigns the display week itself.
+THE DOCUMENT IS A GRID OF BORDERED DISPLAY BOXES. Each bordered box is ONE section ("category"). Reproduce each box as its own table. Do not merge neighboring boxes.
 
-HTML "html" field RULES (faithful view - takes priority over styling):
-- Convert the photographed display plan into readable mobile HTML. Accuracy of text and placement takes priority over styling.
-- Orient each page so printed text reads upright. Identify every independently bordered display box and its exact heading.
-- Reproduce each box as a separate card, stacked vertically for a phone. Read each horizontal band left to right, then down.
-- Inside each card preserve the original two-dimensional grid: every row, column, blank cell, and merged cell. Use HTML tables with rowspan/colspan where needed. Keep each item in its original cell.
-- Preserve exact headings, item names, quantities, sizes, dates, promotional flags, and notes. Keep Shelf, Well, Power Wing, Inside Wing, Front Wing, and Back Wing labels attached to the areas they label. Keep repeated items repeated.
-- Do not merge neighboring boxes or move text between them. Do not substitute a familiar product or heading for uncertain text. Mark unreadable text as [unclear].
-- Only the arrangement of whole cards may change to fit a phone; never flatten the grid inside a card.
-- Use selectable text, readable typography, and horizontal scrolling for wide tables. Do not shrink the page into an image; do not output a picture of the document.
-- Before returning, compare every card with its source box: heading match, all items in correct cells, blank/merged cells preserved, notes/flags attached, no boxes missing or duplicated.
-- Return the HTML as a STRING inside the JSON "html" field, with all double-quotes and backslashes properly escaped for JSON (e.g. attribute quotes as \"). No JavaScript, no external assets, no explanatory prose outside the JSON.`;
+BOX TYPES AND HOW THEY LAY OUT:
+- MAIN FIXTURE BOXES (Refrigerated/Dry Promo Table, Hero Pod, Value Bin, 4 Block): a horizontal fixture. Put the fixture's zone labels in "headers" left-to-right — e.g. ["Power Wing","Well","Inside Wing"] or ["Power Wing","Center","Inside Wing"]. Each printed ROW of the fixture becomes a row in "rows". An item spanning the whole width appears in every zone of that row. A bold banner cell that spans the box (like DEAL LOCK) becomes a row where the banner text appears in the first zone and the others are "".
+- END-CAP BOXES (Avocado End, Organic Fruit End, Tomato End, Potato End, Apple End): a vertical grid. Put its zone labels in "headers" — e.g. ["Priority","Item"] when it has a numbered priority column, or ["Front Wing","Left","Center","Back Wing"] when it has spatial columns. Put each printed row's label (Front Wing 1, 2, 3, Shelf 1, Well 1, etc.) in column 1 and the item in the matching zone column. Blank slots stay "".
+- Nested fixture boxes (Refrigerated Veg Promo Table with a Shelf deck and a Well deck): keep the shelf rows together above the well rows, using the printed row labels (Shelf 1.., Well 1..) in column 1, blanks as "".
+
+RULES:
+- "headers" hold the ZONE LABELS (spatial positions), not a generic "Position/Item".
+- Each printed row/line stays in its own "rows" entry, left to right, top to bottom. Preserve merged spans as blanks in the cells the span covers.
+- Keep every item's text verbatim: brand, size (2lb, 3ct, 6oz, 11x14), and promo flags (DEAL LOCK, SPOT BUY, TPR) where printed.
+- Keep repeated items repeated. Do not invent or substitute; mark unreadable text as [unclear].
+- Preserve the box heading exactly as the section "category"; keep footer/instruction notes in "bullets".
+- Store exact wing/shelf/well/priority labels — they are the key to reconstructing the box.
+- The full page defines layout; detail tiles only verify faint text. Never duplicate a box.
+- Set page and boxOrder (top-to-bottom, then left-to-right). Keep observed box position if uncertain.
+- Include any separate sale-item/order-code/deal-lock tables verbatim as their own section.
+- Set "date":"" and "dateLabel":"" — the app assigns the display week itself.`;
+
+
+
 
       const promptText=scanMode==="salesplan"?salesPlanPrompt:(scanMode==="salesitems"?salesItemsPrompt:dailyNotesPrompt);
       const content=[];
@@ -5413,15 +5415,31 @@ function spPlainHTML(rows){
   return '<table class="sp-plain"><tbody>'+body+'</tbody></table>';
 }
 function spRawHTML(table){
-  const headers=Array.isArray(table&&table.headers)?table.headers:[];
-  const rows=Array.isArray(table&&table.rows)?table.rows:[];
+  const headers=(table&&Array.isArray(table.headers))?table.headers:[];
+  const rows=(table&&Array.isArray(table.rows))?table.rows:[];
   const width=Math.max(headers.length,...rows.map(r=>Array.isArray(r)?r.length:0),1);
-  const th=Array.from({length:width},(_,i)=>'<th>'+esc(headers[i]||("Column "+(i+1)))+'</th>').join("");
+  const isBanner=function(row){
+    if(!Array.isArray(row)) return false;
+    const filled=row.map(c=>String(c==null?"":c).trim()).filter(Boolean);
+    return filled.length===1 && /DEAL\s?LOCK|SPOT\s?BUY|TPR\b/i.test(filled[0]);
+  };
+  const headRow=headers.length
+    ? '<tr>'+headers.map(h=>'<th class="dz">'+esc(h)+'</th>').join('')+'</tr>'
+    : '<tr><th class="dz" colspan="'+width+'">&nbsp;</th></tr>';
   const body=rows.map(function(row){
     const cells=Array.from({length:width},(_,i)=>String(Array.isArray(row)?(row[i]??"") : (i===0?row:"")));
-    return '<tr>'+cells.map(c=>'<td class="'+(c.trim()?"":"blank")+'">'+(c.trim()?esc(c):"&nbsp;")+'</td>').join("")+'</tr>';
-  }).join("");
-  return '<div class="sp-raw-wrap"><table class="sp-raw"><thead><tr>'+th+'</tr></thead><tbody>'+body+'</tbody></table></div>';
+    if(isBanner(row)){
+      const txt=cells.map(c=>c.trim()).find(Boolean)||"";
+      return '<tr><td class="dlock" colspan="'+width+'">'+esc(txt)+'</td></tr>';
+    }
+    const hasContent=cells.some(c=>c.trim());
+    return '<tr>'+cells.map((c,ci)=>{
+      const t=c.trim();
+      if(!t) return '<td class="dc blank"></td>';
+      return '<td'+(ci===0?' class="dc lab"':' class="dc"')+'>'+spTagHTML(t)+'</td>';
+    }).join('')+'</tr>';
+  }).join('');
+  return '<div class="sp-fix"><table class="sp-grid"><tbody>'+headRow+body+'</tbody></table></div>';
 }
 function spSectionsHTML(doc){
   const sections=doc&&doc.preserveOrder

@@ -4,7 +4,22 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
-## [5.50.0] — 2026-09-09
+## [5.51.0] — 2026-09-10
+
+### Improved
+- **Scanned Display Plans now render like the real printed fixtures.** Each bordered display box is drawn as a spatial grid instead of a flat column dump: a header row of the fixture's zone labels (Power Wing / Well / Inside Wing, or Front Wing / Left / Center / Back Wing), the printed row labels (Shelf / Well / Priority) in their own column, blank cells preserved, and full-width **DEAL LOCK** / **SPOT BUY** banner rows.
+- **The scan prompt now outputs fixture-shaped structure.** Display plans are read box-by-box as `headers` (spatial zones) + `rows` (printed items), with the box heading as `category`, notes/instructions as `bullets`, and the freeform-HTML field dropped. Promo flags and size codes stay verbatim.
+
+### Files
+- `index.html` — fixture-grid display-plan prompt + `spRawHTML`-based spatial renderer (`.sp-grid`, `.dz` zone rows, `.dlock` banners), and v5.51.0 markers
+- `manifest.json` — version URLs bumped to 5.51.0
+- `sw.js` — cache bumped to `pdp-v5.51.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
+## [5.50.0] — 2026-09-10
 
 ### Added
 - **Display plans now keep a faithful HTML rendering alongside the structured data.** The scan prompt asks the model for both: the structured `sections` (source of truth — editing, verification, and copy-text still work) AND a self-contained HTML string that preserves the original 2D grid — every box as a card, exact rows/columns/merged cells, rowspan/colspan, headings, items, sizes, flags, and `[unclear]` for unreadable text.
