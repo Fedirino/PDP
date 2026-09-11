@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.53.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.53.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.53.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.54.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.54.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.54.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2908,7 +2908,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.53.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.54.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -5120,6 +5120,12 @@ BOX TYPES AND HOW THEY LAY OUT:
 - MAIN FIXTURE BOXES (Refrigerated/Dry Promo Table, Hero Pod, Value Bin, 4 Block): a horizontal fixture. Put the fixture's zone labels in "headers" left-to-right — e.g. ["Power Wing","Well","Inside Wing"] or ["Power Wing","Center","Inside Wing"]. Each printed ROW of the fixture becomes a row in "rows". An item spanning the whole width appears in every zone of that row.
 - END-CAP BOXES (Avocado End, Organic Fruit End, Tomato End, Potato End, Apple End): a vertical grid. Put its zone labels in "headers" — e.g. ["Priority","Item"] when it has a numbered priority column, or ["Front Wing","Left","Center","Back Wing"] when it has spatial columns. Put each printed row's label (Front Wing 1, 2, 3, Shelf 1, Well 1, etc.) in column 1 and the item in the matching zone column. Blank slots stay "".
 - Nested fixture boxes (Refrigerated Veg Promo Table with a Shelf deck and a Well deck): keep the shelf rows together above the well rows, using the printed row labels (Shelf 1.., Well 1..) in column 1, blanks as "".
+
+BOX BOUNDARIES — CRITICAL:
+- A bordered box with its own heading is its own section. Two side-by-side fixtures with DIFFERENT headings (e.g. a "Refrigerated Promo Table" next to a "Dry Promo Table") are TWO separate sections even if they touch — never merge them because they look similar or are adjacent.
+- Use the printed heading to tell fixtures apart. If a fixture has no printed heading, keep it separate from any neighboring fixture that DOES have a heading.
+- Conversely, a single fixture that is one connected bordered box — even if its interior is laid out in LEFT and RIGHT (or several) zones, like the back of a berry island — is ONE section. Do NOT split it into separate "left" and "right" categories. Put both zones in the SAME section's headers and rows.
+- When in doubt, one bordered box = one section. Two children of the same titled region (e.g. separate End-1 and End-2 sub-boxes under one heading) are separate sections only if each has its own border and purpose.
 
 RULES:
 - "headers" hold the ZONE LABELS (spatial positions), not a generic "Position/Item".

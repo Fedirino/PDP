@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.54.0] — 2026-09-10
+
+### Fixed
+- **Display Plan box boundaries are sharper.** The scan prompt now treats two side-by-side fixtures with different headings (e.g. a Refrigerated Promo Table next to a Dry Promo Table) as **separate sections** even when they touch — no more merging them because they look alike. Conversely, a single connected fixture whose interior is split into left/right (or several) zones — like the back of a berry island — stays **one section**, so it no longer splinters into separate "left" and "right" categories.
+
+### Files
+- `index.html` — explicit box-boundary rules in the display-plan prompt, and v5.54.0 markers
+- `manifest.json` — version URLs bumped to 5.54.0
+- `sw.js` — cache bumped to `pdp-v5.54.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.53.0] — 2026-09-10
 
 ### Fixed
