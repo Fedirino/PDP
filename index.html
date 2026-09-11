@@ -8,11 +8,10 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.50.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.50.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.50.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.49.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.49.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.49.0">
 <title>PDP — Produce Department Portal</title>
-<script src="plan-photos.js"></script>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
@@ -629,7 +628,6 @@
   .scan-overlay{position:fixed;inset:0;z-index:80;background:rgba(8,18,12,.96);display:none;flex-direction:column;
     overflow-y:auto;-webkit-overflow-scrolling:touch;}
   .scan-overlay.open{display:flex;}
-  .scan-overlay:has(.plan-crop){background:#0c1016;}
   .scan-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;
     padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;flex:none;}
   .scan-bar .t{color:#eef4f0;font-size:16px;font-weight:700;}
@@ -773,22 +771,6 @@
   .doc-empty .ei svg{width:28px;height:28px;}
   .doc-empty h3{margin:0 0 5px;font-size:17px;font-weight:700;letter-spacing:-.02em;}
   .doc-empty p{margin:0 auto 18px;font-size:13px;color:var(--ink-3);line-height:1.55;max-width:260px;}
-  .plan-photo{margin:12px 0;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;}
-  .plan-photo figcaption{padding:12px;font-weight:700;overflow-wrap:anywhere;}
-  .plan-photo small{display:block;font-weight:400;color:var(--ink-3);margin-top:4px;}
-  .plan-photo-window{position:relative;overflow:hidden;background:white;}
-  .plan-photo-window img{position:absolute;max-width:none;height:auto;display:block;}
-  .plan-photo summary{cursor:pointer;padding:14px;min-height:44px;color:var(--brand);}
-  .plan-photo-zoom{overflow:auto;max-height:65vh;background:white;}
-  .plan-photo-tools{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;}
-  .plan-photo-tools button{min-height:44px;}
-  .plan-crop{display:block;width:100%;height:auto;margin:12px 0;touch-action:none;border:1px solid var(--line);}
-  .plan-coordinates{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;}
-  .plan-coordinates input,.plan-title input{box-sizing:border-box;width:100%;min-width:0;min-height:44px;padding:8px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;}
-  .plan-title{display:block;margin:12px 0;}
-  .scan-body:has(.plan-crop){width:100%;max-width:960px;box-sizing:border-box;margin:0 auto;}
-  .scan-body:has(.plan-crop) select{min-height:44px;min-width:76px;padding:8px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;}
-  .plan-coordinates label{font-size:12px;}
   /* Display Plan — digital plan blocks */
   .sp-block{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
     box-shadow:var(--sh-sm);margin-bottom:11px;overflow:hidden;}
@@ -2910,7 +2892,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.50.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.49.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -4388,7 +4370,6 @@ function closeScanOverlay(){
   docScanSession++;
   scanOverlay.classList.remove("open");
   document.body.style.overflow="";
-  if(photoEditing){photoEditing=false;docEdit=false;render();}
 }
 
 function handleScanFile(file){
@@ -4927,9 +4908,8 @@ async function compressImageFile(file,rot){
     out.getContext("2d").drawImage(pc,left,top,cw,ch,0,0,cw,ch);
     return out.toDataURL("image/jpeg",.94);
   }
-  const photoMode=scanMode==="salesplan";
-  const apiURL=photoMode?draw(2400,0.88):await contentCrop(draw(2048,0.92));
-  const store=photoMode?apiURL:draw(900,0.65);
+  const apiURL=await contentCrop(draw(2048,0.92));
+  const store=draw(900,0.65);
   /* Deliberately tiny: the orientation probe only needs to see which way the
      text runs, and it is billed per image. */
   const probe=draw(512,0.55);
@@ -4962,7 +4942,7 @@ async function addDocPage(file){
   if(strip) strip.insertAdjacentHTML("beforeend",`<div class="pg-item" style="display:grid;place-items:center;color:var(--ink-3);font-size:10px">…</div>`);
   try{
     let p=await compressImageFile(file);
-    if(scanMode!=="salesplan" && getEffectiveKey()){
+    if(getEffectiveKey()){
       const rot=await askPageOrientation(p.probeB64);
       if(rot){ p=await compressImageFile(file,rot); p.auto=true; }
     }
@@ -5019,52 +4999,7 @@ function openDocScanCollect(){
     ev.preventDefault(); ev.stopPropagation();
     rotateDocPage(+this.dataset.pgr);
   }));
-  const rd=document.getElementById("docRead"); if(rd&&n) rd.onclick=scanMode==="salesplan"?openPhotoPlan:readDocPages;
-  if(scanMode==="salesplan"){
-    if(rd) rd.textContent="Arrange photo boxes";
-    const hint=scanBody.querySelector('.hintline');
-    if(hint) hint.textContent="Upload clear photos. Rotate sideways pages, then select each complete display box. No AI reads or rewrites the text.";
-  }
-}
-
-let photoPlanDraft=null;
-let photoEditing=false;
-function openPhotoPlan(){
-  const sources=docPages.map(p=>p.store);
-  if(!photoPlanDraft || photoPlanDraft.sources.length!==sources.length || sources.some((s,i)=>s!==photoPlanDraft.sources[i])){
-    if(photoPlanDraft && photoPlanDraft.draft.sections.length && !confirm("Pages changed. Start box selection again? Your original photos remain captured.")) return;
-    photoPlanDraft={sources,draft:{images:sources.slice(),sections:[],date:isoDate(upcomingFriday())}};
-  }
-  PlanPhotos.mount(scanBody,photoPlanDraft.draft,{back:openDocScanCollect,save:async draft=>{
-    await savePhotoPlan(draft);
-    photoPlanDraft=null;docPages=[];docDraftMode="";closeScanOverlay();
-    tab="docs";docView="salesplan";docEdit=false;render();window.scrollTo(0,0);
-  }});
-}
-
-async function savePhotoPlan(draft,editingId){
-  /* Stage locally first; retain the editor/draft on any failure. Never delete a
-     previous week during import. Additional uploads become separate parts. */
-  const old=docStore.salesplan;
-  editingId=editingId||draft.savedId;
-  const existing=editingId?old.find(d=>d.id===editingId):null;
-  const now=Date.now();
-  const part=old.filter(d=>d.photoPlan && d.date===draft.date).length+1;
-  const label=existing && existing.date===draft.date?existing.dateLabel:weekRangeLabel(draft.date)+" · Photo part "+part;
-  const doc={id:existing?existing.id:"photo_"+now,date:draft.date,dateLabel:label,created:existing?existing.created:now,updated:now,
-    images:draft.images.slice(),sections:JSON.parse(JSON.stringify(draft.sections)),preserveOrder:true,photoPlan:true};
-  if(new Blob([JSON.stringify(doc)]).size>850000) throw new Error("This photo plan is too large to sync safely. Keep fewer pages in this upload; save the remaining pages as another part of the same week. Your draft is still here.");
-  const next=existing?old.map(d=>d.id===editingId?doc:d):[doc,...old];
-  const staged={...docStore,salesplan:next};
-  if(!writeK(DOCS_KEY,JSON.stringify(staged))) throw new Error("Device storage is full. Nothing was replaced. Free space or export/delete an older document, then retry; your draft remains here.");
-  docStore.salesplan=next;docActiveId.salesplan=doc.id;draft.savedId=doc.id;
-  if(firebaseDb && cloudReady){
-    let timer;
-    try{await Promise.race([firebaseDb.collection('salesplan').doc(doc.id).set(docCloudEncode(doc)),new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('Sync timed out')),15000);})]);}
-    catch(e){throw new Error("Saved on this device, but cloud sync failed. Keep this screen open and retry Save to sync.");}
-    finally{clearTimeout(timer);}
-  }
-  toast(firebaseDb&&cloudReady?"Photo plan saved and synced":"Photo plan saved on this device");
+  const rd=document.getElementById("docRead"); if(rd&&n) rd.onclick=readDocPages;
 }
 
 const dailyNotesPrompt=`You are transcribing a grocery store "Produce Daily Notes" bulletin (Stop & Shop). It was photographed across ONE OR MORE pages, given to you in order. Transcribe EVERYTHING into structured JSON — do not summarize, do not skip anything.
@@ -5432,7 +5367,6 @@ function spSectionsHTML(doc){
     ?(doc.sections||[])
     :spOrder(doc&&doc.sections);
   return sections.map(function(s){
-    if(s.photo) return PlanPhotos.card(s,doc.images);
     var notes=(s.bullets||[]).filter(function(b){ return String(b).trim()!==""; })
       .map(function(b){ return '<div class="sp-note">'+esc(String(b).replace(/^>>\s?/,""))+'</div>'; }).join("");
     var tbls=(s.tables||[]).map(function(t){
@@ -5603,7 +5537,7 @@ function renderDocSection(type){
 
   const sel=document.getElementById("docSel");
   if(sel) sel.onchange=function(){ docActiveId[type]=this.value; render(); window.scrollTo(0,0); };
-  const ct=document.getElementById("docCopyTxt"); if(ct){ct.disabled=!!d.photoPlan;ct.textContent=d.photoPlan?"Photo plan · no text extraction":"Copy text";ct.onclick=()=>copyText(docToText(d),lbl+" copied");}
+  const ct=document.getElementById("docCopyTxt"); if(ct) ct.onclick=()=>copyText(docToText(d),lbl+" copied");
   const dl=document.getElementById("docDel"); if(dl) dl.onclick=()=>{
     if(!confirm(`Delete "${d.dateLabel||d.date}" from ${lbl}?`)) return;
     docStore[type]=arr.filter(x=>x.id!==d.id);
@@ -5615,16 +5549,6 @@ function renderDocSection(type){
 
 /* ---- Edit mode ---- */
 function renderDocEdit(type,d){
-  if(type==="salesplan" && d.photoPlan){
-    view.innerHTML='<p>Adjust the photo boxes in the open editor.</p>';
-    docEdit=false;
-    photoEditing=true;
-    scanMode="salesplan";scanOverlay.classList.add("open");document.body.style.overflow="hidden";
-    document.querySelector("#scanOverlay .scan-bar .t").textContent="Adjust photo boxes";
-    const draft=JSON.parse(JSON.stringify(d));
-    PlanPhotos.mount(scanBody,draft,{back:()=>{closeScanOverlay();render();},save:async edited=>{await savePhotoPlan(edited,d.id);closeScanOverlay();render();}});
-    return;
-  }
   const lbl=DOC_LABEL[type];
   const secHTML=(s,si)=>{
     const tbls=(s.tables||[]).map((t,ti)=>{
