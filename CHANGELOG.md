@@ -4,6 +4,11 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.63.0] — 2026-09-11
+
+### Changed
+- **Display Plan opens to the current week.** The saved plan for the Friday–Thursday week containing today is now selected by default, regardless of scan order. Other weeks remain selectable.
+
 ## [5.62.1] — 2026-09-11
 
 ### Fixed

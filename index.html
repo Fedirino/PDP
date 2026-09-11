@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.62.1">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.62.1">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.62.1">
+<link rel="apple-touch-icon" href="icon192.png?v=5.63.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.63.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.63.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2437,6 +2437,7 @@ function docPrune(){
   docStore.salesplan.forEach(markScannedSalesPlan);
   docPrune();
   DOC_TYPES.forEach(t=>{ if(docStore[t].length) docActiveId[t]=docStore[t][0].id; });
+  selectCurrentDisplayPlan();
 })();
 function markScannedSalesPlan(doc){ if(doc&&doc.id!=="seed_salesplan_v1") doc.preserveOrder=true; return doc; }
 function touchDoc(d){ if(d) d.updated=Date.now(); return d; }
@@ -2936,7 +2937,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.62.1</div></section>`;
+      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.63.0</div></section>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -4932,6 +4933,12 @@ function displayWeekFriday(anyISO){
   d.setDate(d.getDate()-((d.getDay()-5+7)%7));
   return isoDate(d);
 }
+function selectCurrentDisplayPlan(){
+  const currentWeek=displayWeekFriday(isoDate(new Date()));
+  const current=(docStore.salesplan||[]).find(d=>d.date===currentWeek);
+  if(current) docActiveId.salesplan=current.id;
+  else if(!activeDoc("salesplan")&&docStore.salesplan.length) docActiveId.salesplan=docStore.salesplan[0].id;
+}
 
 
 /* Compress a file: a high-quality copy for the API and a smaller copy for storage.
@@ -5352,6 +5359,7 @@ async function applyDocScan(){
             if(scanParsed.images&&scanParsed.images.length) existing.images=(existing.images||[]).concat(scanParsed.images);
       touchDoc(existing);
       docActiveId[type]=existing.id;
+      if(type==="salesplan") selectCurrentDisplayPlan();
       sortDocs(type); docPrune();
       var ok1=saveDocs();
       docPages=[]; docDraftMode="";
@@ -5369,6 +5377,7 @@ async function applyDocScan(){
 
   var doc={ id:"doc_"+Date.now(), date:date, dateLabel:scanParsed.dateLabel||scanParsed.date||date||"", created:Date.now(), updated:Date.now(), images:scanParsed.images||[], sections:scanParsed.sections, preserveOrder:type==="salesplan", html:scanParsed.html||"" };
   docStore[type].unshift(doc);
+  if(type==="salesplan") selectCurrentDisplayPlan();
   sortDocs(type);
   docPrune();
 
@@ -5691,7 +5700,7 @@ function renderDocHub(){
       </div>
     </div>
     <div class="hintline" style="text-align:center;margin-top:16px">Daily Notes keep the last two weeks; Display Plan and Sales Items keep recent weeks. Scanned documents are editable and deletable.</div>`;
-  view.querySelectorAll("[data-doctype]").forEach(b=>b.onclick=()=>{ docView=b.dataset.doctype; docEdit=false; render(); window.scrollTo(0,0); });
+  view.querySelectorAll("[data-doctype]").forEach(b=>b.onclick=()=>{ docView=b.dataset.doctype; if(docView==="salesplan") selectCurrentDisplayPlan(); docEdit=false; render(); window.scrollTo(0,0); });
 }
 
 function renderDocSection(type){
