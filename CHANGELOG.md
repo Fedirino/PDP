@@ -4,6 +4,12 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.68.0] — 2026-09-11
+
+### Changed
+- **Holes is now List.** The primary workflow opens directly to adding items, with stencil search, one-tap quick add, and manual entry; saved sections remain available for management.
+- **Polished the operations workspace.** Home now surfaces list progress, saved inventory checks, and today’s staffing. The List screen has a live progress summary and clearer, calmer completion states.
+
 ## [5.67.0] — 2026-09-11
 
 ### Changed

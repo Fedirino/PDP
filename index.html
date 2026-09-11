@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.67.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.67.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.67.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.68.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.68.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.68.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -335,6 +335,27 @@
   .item.on .tick svg{opacity:1;}
   .endbody .item{min-height:48px;}
 
+  .holes-intro{padding:5px 3px 15px;color:var(--ink-2);font-size:14px;line-height:1.45;}
+  .holes-search{position:relative;margin-bottom:12px;}
+  .holes-search .search{margin:0;}
+  .holes-results{display:flex;flex-direction:column;gap:7px;}
+  .hole-result{display:flex;align-items:center;gap:11px;width:100%;min-height:58px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 10px 8px 13px;color:var(--ink);font:inherit;cursor:pointer;box-shadow:var(--sh-sm);}
+  .hole-result:active{transform:scale(.99);}
+  .hole-result .hole-bd{flex:1;min-width:0;}
+  .hole-result .hole-name{font-size:14.5px;font-weight:650;line-height:1.25;}
+  .hole-result .hole-name mark{background:var(--brand-tint);color:var(--brand-ink);border-radius:3px;padding:0 2px;}
+  .hole-result .hole-meta{margin-top:3px;font-size:11.5px;color:var(--ink-3);font-variant-numeric:tabular-nums;}
+  .hole-result .quick-add{width:34px;height:34px;border-radius:10px;border:1px solid var(--brand);background:var(--brand);color:#fff;display:grid;place-items:center;flex:none;}
+  .hole-result .quick-add svg{width:18px;height:18px;}
+  .hole-result.on{background:var(--brand-tint-2);border-color:var(--brand);}
+  .hole-result.on .quick-add{background:var(--surface);color:var(--brand);}
+  .holes-manual{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);}
+  .holes-manual h2{font-size:13px;margin:0 0 8px;color:var(--ink);}
+  .holes-manual p{font-size:12.5px;color:var(--ink-3);margin:0 0 9px;line-height:1.4;}
+  .holes-manage{margin-top:18px;width:100%;font:inherit;font-size:13px;font-weight:600;color:var(--ink-2);border:0;background:none;padding:8px;cursor:pointer;}
+  .list-pulse{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 15px;padding:12px 14px;border:1px solid rgba(85,217,173,.2);border-radius:13px;background:linear-gradient(135deg,rgba(21,52,47,.82),rgba(18,41,37,.58));}
+  .list-pulse-copy{min-width:0;}.list-pulse-label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--brand-ink);}.list-pulse-value{margin-top:3px;font-size:14px;font-weight:650;color:var(--ink);}.list-pulse .btn{flex:none;padding:8px 11px;font-size:12px;}
+
   .addrow{display:flex;gap:9px;margin:8px 0 4px;}
   .addrow input{flex:1;font:inherit;font-size:15px;padding:13px 14px;border-radius:11px;border:1px solid var(--line-2);
     background:var(--surface);color:var(--ink);min-width:0;}
@@ -382,7 +403,7 @@
   .li.done .li-name{text-decoration:line-through;color:var(--ink-3);font-weight:500;}
   .li.done .li-check{background:var(--brand);border-color:var(--brand);}
   .li.done .li-check svg{opacity:1;}
-  .li.done{opacity:.55;}
+  .li.done{opacity:.62;background:color-mix(in srgb,var(--surface) 72%,var(--surface-3));}
   .li-act{appearance:none;border:none;background:var(--surface-2);color:var(--ink-2);width:36px;height:36px;
     border-radius:9px;cursor:pointer;flex:none;display:grid;place-items:center;transition:background .15s ease;}
   .li-act svg{width:17px;height:17px;}
@@ -2694,14 +2715,14 @@ function wireStencilSuggest(inputId, addFn){
 /* ======= App navigation ======= */
 let tab="home";
 let stencilState={ query:"", showAll:true };
-let ll={ screen:"sections", sectionId:null, open:{}, edit:false };
+let ll={ screen:"add", sectionId:null, open:{}, edit:false, query:"" };
 
 const topbar=document.getElementById("topbar");
 const view=document.getElementById("view");
 const tabbar=document.getElementById("tabbar");
 
 function setTab(t){ tab=t;
-  if(t==="loadlist"&&ll.screen==="section"&&!sectionById(ll.sectionId)) ll.screen="sections";
+  if(t==="loadlist"&&ll.screen==="section"&&!sectionById(ll.sectionId)) ll.screen="add";
   if(t!=="tools") toolView="hub";
   if(t!=="docs"){ docView="hub"; docEdit=false; }
   render(); window.scrollTo(0,0);
@@ -2721,8 +2742,8 @@ function renderTopbar(){
   let title="PDP", right="";
   if(tab==="stencil"){ title="Stencil";
     right=`<button class="tb-act" id="stencilEditAct">${stencilEdit?"Done":"Edit"}</button>`;
-  } else if(tab==="loadlist"){ title="Holes";
-    if(ll.screen!=="list"&&ll.screen!=="unfound") right=`<button class="tb-act" id="editAct">${ll.edit?"Done":"Edit"}</button>`;
+  } else if(tab==="loadlist"){ title="List";
+    if(ll.screen==="sections"||ll.screen==="section") right=`<button class="tb-act" id="editAct">${ll.edit?"Done":"Edit"}</button>`;
   } else if(tab==="schedule"){ title="Schedule";
     right=`<button class="tb-act" id="schScanAct" style="gap:4px;display:inline-flex;align-items:center"><span style="width:14px;height:14px;display:inline-flex">${I.scan}</span>Scan</button><button class="tb-act" id="schEditAct">${schEdit?"Done":"Edit"}</button>`;
   } else if(tab==="gev"){ title="GEV List";
@@ -2774,7 +2795,7 @@ function renderTopbar(){
 
 /* ---- Tab bar ---- */
 function renderTabbar(){
-  const tabs=[["home","Home",I.home],["stencil","Stencil",I.search],["loadlist","Holes",I.clip],["schedule","Schedule",I.cal],["docs","Docs",I.folder],["tools","Tools",I.tools]];
+  const tabs=[["home","Home",I.home],["stencil","Stencil",I.search],["loadlist","List",I.clip],["schedule","Schedule",I.cal],["docs","Docs",I.folder],["tools","Tools",I.tools]];
   tabbar.innerHTML=tabs.map(([id,label,ic])=>
     `<button class="tab${tab===id?" active":""}" data-tab="${id}"><span class="ic">${ic}</span><span>${label}</span></button>`).join("");
   tabbar.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
@@ -2914,7 +2935,7 @@ function renderHome(){
   let ni=null; try{ ni=nextEmployeeIn(); }catch(e){}
   const tiles=[
     {tab:"stencil",ic:I.search,cls:"",t:"Stencil"},
-    {tab:"loadlist",ic:I.clip,cls:"citrus",t:"Holes"},
+    {tab:"loadlist",ic:I.clip,cls:"citrus",t:"List"},
     {tab:"schedule",ic:I.cal,cls:"sky",t:"Schedule"},
     {tab:"docs",ic:I.folder,cls:"violet",t:"Documents"},
     {tab:"tools",ic:I.tools,cls:"amber",t:"Tools"}
@@ -2933,6 +2954,11 @@ function renderHome(){
          <span class="hero-next-go">${I.chev}</span>
        </button>
      </div>
+     <div class="hero-stats">
+       <button class="hstat" data-go="loadlist" data-listscreen="list"><div class="hv">${state.pull.filter(p=>!p.done).length}<small> / ${state.pull.length}</small></div><div class="hl">List remaining</div></button>
+       <button class="hstat" data-go="loadlist" data-listscreen="unfound"><div class="hv">${unfound.length}</div><div class="hl">Inventory checks</div></button>
+       <button class="hstat" data-go="schedule"><div class="hv">${countTodayScheduled()}</div><div class="hl">Scheduled today</div></button>
+     </div>
      <div class="lbl">Today</div>
      <button class="home-checklist-btn" id="homeGoChecklist">
        <div class="hcl-icon">${I.checklist}</div>
@@ -2950,8 +2976,8 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.67.0</div></section>`;
- view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
+      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.68.0</div></section>`;
+ view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{ if(b.dataset.listscreen) ll.screen=b.dataset.listscreen; setTab(b.dataset.go); });
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
   if(hclBtn){
@@ -3004,7 +3030,7 @@ function renderStencil(){
       body+=`<div class="empty"><div class="ei">${I.search}</div>No stencil items match <b>"${esc(q)}"</b>.<br>Try a shorter fragment.</div>`;
     } else {
       const cap=Math.min(hits.length,80);
-      body+=`<div class="smeta"><span><b>${hits.length}</b> match${hits.length!==1?"es":""}${hits.length>cap?` · showing ${cap}`:""}</span>${stencilEdit?"":`<span>Tap +/− holes list</span>`}</div>`;
+      body+=`<div class="smeta"><span><b>${hits.length}</b> match${hits.length!==1?"es":""}${hits.length>cap?` · showing ${cap}`:""}</span>${stencilEdit?"":`<span>Add from the List tab</span>`}</div>`;
       for(let i=0;i<cap;i++) body+=stencilRow(hits[i],q,true);
     }
   } else {
@@ -3015,7 +3041,7 @@ function renderStencil(){
       byCat[cat].push(it);
     }
     const totalCustom=stencilCustom.length;
-    body+=`<div class="smeta"><span><b>${STENCIL.length}</b> items · ${CAT_ORDER.length} categories${totalCustom?` · ${totalCustom} custom`:""}</span>${stencilEdit?"":`<span>Tap +/− holes list</span>`}</div>`;
+    body+=`<div class="smeta"><span><b>${STENCIL.length}</b> items · ${CAT_ORDER.length} categories${totalCustom?` · ${totalCustom} custom`:""}</span>${stencilEdit?"":`<span>Add from the List tab</span>`}</div>`;
     /* Show custom items first */
     if(byCat["★ Custom Items"]&&byCat["★ Custom Items"].length){
       body+=`<div class="grp">★ Custom Items<span class="gc tnum">${byCat["★ Custom Items"].length}</span></div>`;
@@ -3119,12 +3145,13 @@ function renderLoadList(){
   const n=state.pull.length;
   const un=unfound.length;
   const seg=`<div class="seg">
-      <button class="${ll.screen!=="list"&&ll.screen!=="unfound"?"on":""}" data-seg="browse">Sections</button>
+      <button class="${ll.screen==="add"?"on":""}" data-seg="add">Add items</button>
       <button class="${ll.screen==="list"?"on":""}" data-seg="list">List <span class="pill tnum">${n}</span></button>
       <button class="${ll.screen==="unfound"?"on":""}" data-seg="unfound">Inv. Check${un?` <span class="pill tnum">${un}</span>`:""}</button>
     </div>`;
   let body="";
-  if(ll.screen==="list") body=compiledListHTML();
+  if(ll.screen==="add") body=quickAddHTML();
+  else if(ll.screen==="list") body=compiledListHTML();
   else if(ll.screen==="unfound") body=unfoundHTML();
   else if(ll.screen==="section"){ const sec=sectionById(ll.sectionId);
     if(!sec){ ll.screen="sections"; return renderLoadList(); }
@@ -3133,13 +3160,55 @@ function renderLoadList(){
   view.innerHTML=seg+body;
 
   view.querySelectorAll("[data-seg]").forEach(b=>b.onclick=()=>{
-    ll.screen = b.dataset.seg==="list" ? "list" : b.dataset.seg==="unfound" ? "unfound" : "sections"; render(); window.scrollTo(0,0); });
+    ll.screen = b.dataset.seg==="list" ? "list" : b.dataset.seg==="unfound" ? "unfound" : "add"; render(); window.scrollTo(0,0); });
   const bk=document.getElementById("llBack"); if(bk) bk.onclick=()=>{ ll.screen="sections"; ll.edit=false; render(); window.scrollTo(0,0); };
 
-  if(ll.screen==="sections") wireSections();
+  if(ll.screen==="add") wireQuickAdd();
+  else if(ll.screen==="sections") wireSections();
   else if(ll.screen==="section"){ const sec=sectionById(ll.sectionId); isGrouped(sec)?wireGrouped(sec):wireProducts(sec,sec,null); }
   else if(ll.screen==="unfound") wireUnfound();
   else wireCompiledList();
+}
+
+function quickAddHTML(){
+  const q=ll.query||"";
+  let results="";
+  if(q.trim()){
+    const hits=searchStencil(q).slice(0,12);
+    results=hits.length ? `<div class="holes-results">${hits.map(it=>{
+      const on=isOnPLU(it.c), meta=metaStr(it.p,it.u);
+      return `<button class="hole-result${on?" on":""}" data-quickcode="${esc(it.c)}">
+        <div class="hole-bd"><div class="hole-name">${highlight(stencilName(it),q)}</div>
+          <div class="hole-meta">${it.c?`#${esc(it.c)}`:""}${meta?`${it.c?" · ":""}${esc(meta)}`:""}</div></div>
+        <span class="quick-add">${on?I.check:I.plus}</span></button>`;
+    }).join("")}</div>` : `<div class="empty" style="padding:25px 12px">No stencil items match <b>“${esc(q)}”</b>.<br>Add it manually below.</div>`;
+  } else results=`<div class="empty" style="padding:28px 16px">Start typing to search the stencil by item name or code.</div>`;
+  const remaining=state.pull.filter(p=>!p.done).length;
+  const pulse=state.pull.length?`<div class="list-pulse"><div class="list-pulse-copy"><div class="list-pulse-label">Today’s list</div><div class="list-pulse-value">${remaining} remaining · ${state.pull.length-remaining} found</div></div><button class="btn ghost" id="openCompiledList">View list</button></div>`:"";
+  return `${pulse}<div class="holes-intro">Search the stencil and tap an item to add it to today’s list.</div>
+    <div class="holes-search"><div class="search"><span class="si">${I.filter}</span>
+      <input id="holeSearch" type="search" inputmode="search" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Search stencil — name or code…" value="${esc(q)}">
+      <button class="clr${q?" show":""}" id="holeSearchClear" aria-label="Clear">${I.x}</button></div></div>
+    ${results}
+    <div class="holes-manual"><h2>Not on the stencil?</h2><p>Add a one-off item directly to this list.</p>
+      <div class="addrow"><input id="manualHole" placeholder="Enter item name…" autocomplete="off"><button id="addManualHole">Add</button></div></div>
+    <button class="holes-manage" id="manageSections">Manage saved sections</button>`;
+}
+function addManualHole(name){
+  name=(name||"").trim(); if(!name) return false;
+  state.pull.push({id:uid(),name,pack:"",unit:"",cat:"Other",note:"",done:false});
+  save(); return true;
+}
+function wireQuickAdd(){
+  const input=document.getElementById("holeSearch"), clear=document.getElementById("holeSearchClear");
+  if(input){ input.oninput=()=>{ ll.query=input.value; const pos=input.selectionStart; render(); const f=document.getElementById("holeSearch"); if(f){f.focus(); try{f.setSelectionRange(pos,pos);}catch(e){}} }; const focusQuery=ll.query||""; if(focusQuery){ input.focus(); try{input.setSelectionRange(focusQuery.length,focusQuery.length);}catch(e){} } }
+  if(clear) clear.onclick=()=>{ ll.query=""; render(); document.getElementById("holeSearch").focus(); };
+  view.querySelectorAll("[data-quickcode]").forEach(b=>b.onclick=()=>{ const it=STENCIL.find(x=>x.c===b.dataset.quickcode); if(it){ togglePLU(it); save(); render(); } });
+  const manual=document.getElementById("manualHole"), add=document.getElementById("addManualHole");
+  const run=()=>{ if(addManualHole(manual.value)){ toast("Added to list"); render(); const f=document.getElementById("manualHole"); if(f) f.focus(); } };
+  if(add) add.onclick=run; if(manual) manual.onkeydown=e=>{ if(e.key==="Enter") run(); };
+  const openList=document.getElementById("openCompiledList"); if(openList) openList.onclick=()=>{ ll.screen="list"; render(); window.scrollTo(0,0); };
+  const manage=document.getElementById("manageSections"); if(manage) manage.onclick=()=>{ ll.screen="sections"; ll.edit=false; render(); window.scrollTo(0,0); };
 }
 
 function sectionsHTML(){
@@ -3165,7 +3234,7 @@ function wireSections(){
   if(ll.edit){
     view.querySelectorAll("[data-rn]").forEach(inp=>inp.onchange=()=>{ const s=sectionById(inp.dataset.rn); s.name=inp.value.trim()||s.name; save(); render(); });
     view.querySelectorAll("[data-delsec]").forEach(b=>b.onclick=()=>{ const s=sectionById(b.dataset.delsec);
-      if(confirm(`Delete "${s.name}"? Its items leave the holes list too.`)){ state.pull=state.pull.filter(p=>p.sectionId!==s.id); state.sections=state.sections.filter(x=>x.id!==s.id); save(); render(); } });
+      if(confirm(`Delete "${s.name}"? Its items leave the list too.`)){ state.pull=state.pull.filter(p=>p.sectionId!==s.id); state.sections=state.sections.filter(x=>x.id!==s.id); save(); render(); } });
     const ns=document.getElementById("newSec"),as=document.getElementById("addSec");
     const add=()=>{ const v=ns.value.trim(); if(!v) return; state.sections.push({id:uid(),name:v,products:[]}); save(); render(); const f=document.getElementById("newSec"); if(f) f.focus(); };
     as.onclick=add; ns.onkeydown=e=>{ if(e.key==="Enter") add(); };
@@ -3301,7 +3370,7 @@ function liHTML(it){
 }
 function compiledListHTML(){
   if(!state.pull.length) return `<div class="empty"><div class="ei">${I.clip}</div>
-    Your holes list is empty.<br>Browse <b>Sections</b> or use the <b>Stencil</b> to add items.</div>`;
+    Your list is empty.<br>Use <b>Add items</b> to search the stencil or enter an item manually.</div>`;
   let h="";
   const notDone = state.pull.filter(p=>!p.done);
   const sectionItems = notDone.filter(p=>p.sectionId);
@@ -3354,7 +3423,7 @@ function wireCompiledList(){
   const su=document.getElementById("saveUnfound"); if(su) su.onclick=saveUnfoundItems;
   const ca=document.getElementById("clearAll"); if(ca) ca.onclick=clearList;
 }
-function clearList(){ if(!state.pull.length) return; if(confirm("Clear the entire holes list? This can't be undone.")){ state.pull=[]; save(); render(); } }
+function clearList(){ if(!state.pull.length) return; if(confirm("Clear the entire list? This can't be undone.")){ state.pull=[]; save(); render(); } }
 function saveUnfoundItems(){
   const unchecked=state.pull.filter(p=>!p.done);
   if(!unchecked.length){ alert("No unchecked items to save."); return; }
