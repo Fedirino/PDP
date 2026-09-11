@@ -919,6 +919,7 @@
     .home-view .tile.compact .chip{width:34px;height:34px;border-radius:10px;}
   }
 
+  @media (min-width:760px){body[data-view="home"] main{padding-bottom:22px;}}
 </style>
 </head>
 <body>
@@ -2684,7 +2685,7 @@ function setTab(t){ tab=t;
   if(t!=="docs"){ docView="hub"; docEdit=false; }
   render(); window.scrollTo(0,0);
 }
-function render(){ renderTopbar(); renderTabbar();
+function render(){ document.body.dataset.view=tab; renderTopbar(); renderTabbar();
   if(tab==="home") renderHome();
   else if(tab==="stencil") renderStencil();
   else if(tab==="loadlist") renderLoadList();
