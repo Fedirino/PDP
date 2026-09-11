@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.52.0] — 2026-09-10
+
+### Fixed
+- **Scanned Display Plans now keep the shelves, items, and wings inside each box.** The scan prompt returns each box's grid as top-level `headers`/`rows`, but the parser only read grids nested under `tables` — so boxes rendered with their heading but their contents were dropped. The parser now accepts both shapes, so a box's shelf/well/wing zones, items, and DEAL LOCK banners survive into the fixture render.
+
+### Files
+- `index.html` — section parser accepts top-level `headers`/`rows` (merged with nested tables), and v5.52.0 markers
+- `manifest.json` — version URLs bumped to 5.52.0
+- `sw.js` — cache bumped to `pdp-v5.52.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.51.0] — 2026-09-10
 
 ### Improved
