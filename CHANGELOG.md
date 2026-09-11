@@ -4,6 +4,11 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.64.0] — 2026-09-11
+
+### Changed
+- **Sales Items scans now follow the order-code sheet structure:** Item Number, Item, and NE Price only. Deal Lock Program pages are collected in a separate Deal Lock list within the same Sales Items document.
+
 ## [5.63.0] — 2026-09-11
 
 ### Changed

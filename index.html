@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.63.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.63.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.63.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.64.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.64.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.64.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2937,7 +2937,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.63.0</div></section>`;
+      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.64.0</div></section>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -5106,26 +5106,27 @@ RULES:
 - tables: reproduce EXACTLY as printed — same column headers (left to right) and same rows. Each row is an array of cell strings matching the header order. Use "" for blank cells. Keep all numbers, %, codes, and dates as written. If a section has no table, use [].
 - Do NOT invent, reorder, round, or summarize. Transcribe precisely. Accuracy matters more than anything.`;
 
-const salesItemsPrompt=`You are transcribing a grocery store weekly "Sales Items" sheet photographed across ONE OR MORE pages, given in order. The printed paper may be labeled "Order Code List" — that is the same document type. It is NOT the weekly display plan / sales plan. This is a flat item list, often with multiple pages. Some sheets are also labeled "Deal Lock Program" and use the same order-code table style. Transcribe EVERYTHING into structured JSON — do not summarize, do not skip anything.
-
-Each page or printed table becomes a SECTION. Preserve the printed title or week label in "category" when visible; otherwise use a short page title like "Page 1". If the sheet title says "Deal Lock Program", preserve that wording in the category/title.
+const salesItemsPrompt=`You are transcribing Stop & Shop produce weekly Sales Items sheets. The printed paper may say "Order Code List" — that is the Sales Items list. It is NOT a Display Plan. Pages may be photographed sideways; mentally rotate each page before reading. Some pages may instead say "Cycle [number] Deal Lock Program". Transcribe every item-code row precisely.
 
 Return ONLY valid JSON. No markdown, no backticks, no commentary.
 
-{"date":"","dateLabel":"Week 28 2026","sections":[
-  {"category":"Week 28 2026 Order Code List","subject":"","contact":"","bullets":[],
-   "tables":[{"title":"","headers":["Item Number","Description","Price","UOM"],"rows":[["133206","RED SALSA MEDIUM 12 OZ","$4.49","EA"]]}]}
-   ]}
+Create exactly these kinds of sections:
+- All Order Code List pages belong in a section with category "Sales Items".
+- All Deal Lock Program pages belong in a separate section with category "Deal Lock". Never mix Deal Lock rows into Sales Items.
+- Each section has one or more tables, all using exactly these headers: ["Item Number","Item","NE Price"].
 
-   RULES:
-   - date: leave as "" unless the page clearly shows a real calendar date. dateLabel: the printed week/title label exactly as shown, e.g. "Week 28 2026", "Week 28 2026 Order Code List", or "e 6 Deal Lock Program".
-   - Capture EVERY page in order. If a sheet spans multiple pages, keep the rows in printed order across all pages.
-   - Transcribe item code, description, price, and unit of measure exactly as printed. Return one row for each printed item-code row.
-   - PRICE RULE: if BOTH NE and NY prices are present, use the NE price in "Price" and ignore the NY price. If only one price is present, use it. If the page only shows one price column like "Retail", use that value for "Price".
-   - UOM RULE: preserve the printed UOM in a fourth "UOM" column, such as EA or LB. Never attach UOM text to the description or price.
-   - If the printed table includes only code/description/Retail, map them to Item Number / Description / Price and use "" for UOM.
-   - Keep every row aligned across columns. Do not shift a price or UOM into a neighboring item when a cell is faint or blank; use "" for that cell.
-   - Do NOT invent, reorder, round, or summarize. Accuracy matters more than anything.`;
+{"date":"","dateLabel":"Week 38 2026","sections":[
+  {"category":"Sales Items","subject":"","contact":"","bullets":[],"tables":[{"title":"Order Code List","headers":["Item Number","Item","NE Price"],"rows":[["260118","SB BAG COLLARDS 16Z","2/$5"]]}]},
+  {"category":"Deal Lock","subject":"","contact":"","bullets":[],"tables":[{"title":"Cycle 8 Deal Lock Program","headers":["Item Number","Item","NE Price"],"rows":[["3393","Fresh Figs 8oz","$3.99"]]}]}
+]}
+
+RULES:
+- date: leave as "" unless a real calendar date is printed. dateLabel: use the printed weekly label (for example "Week 38 2026").
+- Combine every Order Code List page into Sales Items, retaining the printed row order. Combine every Deal Lock page into Deal Lock, retaining its printed row order.
+- Every row is exactly [item code, item description, NE price]. Do not include NY or UOM columns.
+- PRICE RULE: when both NE and NY are printed, copy NE only. If only one price is printed, use it as NE Price. Keep price formats verbatim, including 2/$5, DC notes, and blanks.
+- Copy item number and item text verbatim. Keep repeated rows repeated. Do not invent, reorder, round, or summarize.
+- Keep cells aligned. If text is unreadable, use "[unclear]" only for that cell.`;
 
 function sanitizePlanHTML(raw){
   if(!raw||typeof raw!=="string") return "";
@@ -5796,7 +5797,7 @@ function renderDocEdit(type,d){
   const addSec=document.getElementById("docAddSec");
   if(addSec) addSec.onclick=()=>{ d.sections.push({category:"",subject:"",contact:"",bullets:[],tables:[]}); render(); };
   view.querySelectorAll("[data-delsec]").forEach(b=>b.onclick=()=>{ if(confirm("Delete this section?")){ d.sections.splice(+b.dataset.delsec,1); render(); } });
-  view.querySelectorAll("[data-addtbl]").forEach(b=>b.onclick=()=>{ d.sections[+b.dataset.addtbl].tables.push({title:"",headers:type==="salesitems"?["Item Number","Description","Price"]:["Position","Item"],rows:[type==="salesitems"?["", "", ""]:["",""]]}); render(); });
+  view.querySelectorAll("[data-addtbl]").forEach(b=>b.onclick=()=>{ d.sections[+b.dataset.addtbl].tables.push({title:"",headers:type==="salesitems"?["Item Number","Item","NE Price"]:["Position","Item"],rows:[type==="salesitems"?["", "", ""]:["",""]]}); render(); });
   view.querySelectorAll("[data-addrow]").forEach(b=>b.onclick=()=>{ const[si,ti]=b.dataset.addrow.split(".").map(Number); const t=d.sections[si].tables[ti]; const w=(t.headers||[]).length||(t.rows[0]?t.rows[0].length:2); t.rows.push(Array(w).fill("")); render(); });
   view.querySelectorAll("[data-delrow]").forEach(b=>b.onclick=()=>{ const[si,ti,ri]=b.dataset.delrow.split(".").map(Number); d.sections[si].tables[ti].rows.splice(ri,1); render(); });
     /* quick-entry bar removed — use inline table editing */
