@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.54.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.54.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.54.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.55.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.55.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.55.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2908,7 +2908,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.54.0</div>`;
+      <div style="text-align:center;margin:26px 0 6px;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.55.0</div>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>setTab(b.dataset.go));
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -5105,6 +5105,8 @@ async function readDocPages(){
     async function attempt(extra){
 const salesPlanPrompt=`You are transcribing a Stop & Shop produce "Display Plan" (weekly merchandising plan), photographed across ONE OR MORE pages in order. The pages are often landscape sheets photographed rotated 90 degrees. Mentally rotate EACH page so its printed text reads left-to-right before reading. Treat each page as its own layout, then combine the results in page order.
 
+PRIORITY FIXTURES — these are the most important to get exactly right, in this order: Refrigerated Promo, Dry Promo, Veg Promo (the weekly produce programing), then Back of Berry Island, Berry End, Grape End, Apple End (Power Side), then everything else. Read them carefully, do not merge or split boxes, and keep every item, shelf/well/wing zone, promo flag, and sign size verbatim.
+
 Return ONLY a valid JSON object (no markdown, no backticks):
 {
  "date":"","dateLabel":"",
@@ -5345,20 +5347,23 @@ function docSectionsHTML(doc,type){
 /* ---- Display Plan: render blocks like the printed plan ---- */
 function spRank(cat){
   const c=(cat||"").toLowerCase();
-  if(c.includes("refrigerated veg promo")||c.includes("veg promo")) return 1;
-  if(c.includes("refrigerated promo")) return 0;
-  if(c.includes("stone fruit")&&c.includes("power")) return 2;
-  if(c.includes("berry end")) return 3;
-  if(c.includes("grape end")) return 4;
-  return 100;
+  if(c.includes("refrigerated promo")) return 0;                 // Refrigerated Promo
+  if(c.includes("dry promo")) return 1;                          // Dry Promo
+  if(c.includes("veg promo")||c.includes("refrigerated veg promo")) return 2; // Veg Promo
+  if(c.includes("back of berry")||c.includes("berry island")) return 3;       // Back of Berry Island
+  if(c.includes("berry end")) return 4;                          // Berry End
+  if(c.includes("grape end")) return 5;                          // Grape End
+  if(c.includes("apple end")) return 6;                          // Apple End (Power Side)
+  return 100;                                                    // everything else by insertion
 }
 function spOrder(sections){
+  /* Fixed priority order (RefrigeratedPromo→DryPromo→VegPromo→BackBerry→BerryEnd→GrapeEnd→AppleEnd→rest),
+     then everything else stays in its scanned/reading order. Sorting is stable (tie = original index). */
   return (sections||[]).map((s,i)=>({s,i})).sort((a,b)=>{
     const ra=spRank(a.s.category),rb=spRank(b.s.category);
     return ra!==rb?ra-rb:a.i-b.i;
   }).map(x=>x.s);
-}
-/* Item-description tagging: promo flags (amber) + sign-size codes like 11x14 (grey). Takes RAW text, escapes internally. */
+}/* Item-description tagging: promo flags (amber) + sign-size codes like 11x14 (grey). Takes RAW text, escapes internally. */
 function spTagHTML(raw){
   var t=esc(String(raw==null?"":raw));
   t=t.replace(/\(?\b(DEAL LOCK|SPOT BUY|TPR)\b\)?/g,'<span class="sp-tag">$1</span>');
@@ -5448,9 +5453,7 @@ function spRawHTML(table){
   return '<div class="sp-fix"><table class="sp-grid"><tbody>'+headRow+body+'</tbody></table></div>';
 }
 function spSectionsHTML(doc){
-  const sections=doc&&doc.preserveOrder
-    ?(doc.sections||[])
-    :spOrder(doc&&doc.sections);
+  const sections=spOrder(doc&&doc.sections);
   return sections.map(function(s){
     var notes=(s.bullets||[]).filter(function(b){ return String(b).trim()!==""; })
       .map(function(b){ return '<div class="sp-note">'+esc(String(b).replace(/^>>\s?/,""))+'</div>'; }).join("");

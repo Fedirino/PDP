@@ -4,6 +4,21 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.55.0] — 2026-09-10
+
+### Improved
+- **Display Plans now render in a fixed priority order** regardless of scan order: Refrigerated Promo → Dry Promo → Veg Promo → Back of Berry Island → Berry End → Grape End → Apple End (Power Side) → everything else (in reading order). The weekly Promo fixtures are the most important, and they now lead every plan.
+- **The scan prompt flags Refrigerated / Dry / Veg Promo as the highest-priority correctness targets** — read carefully, never merged or split, every shelf/well/wing zone, item, promo flag, and sign size verbatim.
+
+### Files
+- `index.html` — `spRank` rewritten with the fixed priority order, `spOrder` applied to scanned plans too (stable sort with reading-order tiebreak), priority-emphasis prompt section, and v5.55.0 markers
+- `manifest.json` — version URLs bumped to 5.55.0
+- `sw.js` — cache bumped to `pdp-v5.55.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this file
+
+---
+
 ## [5.54.0] — 2026-09-10
 
 ### Fixed
