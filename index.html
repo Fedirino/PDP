@@ -3152,16 +3152,15 @@ function stencilRow(it,q,useHighlight){
 
 /* ================= LOAD LIST ================= */
 function renderLoadList(){
+  if(ll.screen==="list") ll.screen="add";
   const n=state.pull.length;
   const un=unfound.length;
   const seg=`<div class="seg">
-      <button class="${ll.screen==="add"?"on":""}" data-seg="add">Add items</button>
-      <button class="${ll.screen==="list"?"on":""}" data-seg="list">List <span class="pill tnum">${n}</span></button>
+      <button class="${ll.screen==="add"?"on":""}" data-seg="add">Add items <span class="pill tnum">${n}</span></button>
       <button class="${ll.screen==="unfound"?"on":""}" data-seg="unfound">Inv. Check${un?` <span class="pill tnum">${un}</span>`:""}</button>
     </div>`;
   let body="";
   if(ll.screen==="add") body=quickAddHTML();
-  else if(ll.screen==="list") body=compiledListHTML();
   else if(ll.screen==="unfound") body=unfoundHTML();
   else if(ll.screen==="section"){ const sec=sectionById(ll.sectionId);
     if(!sec){ ll.screen="sections"; return renderLoadList(); }
@@ -3170,10 +3169,10 @@ function renderLoadList(){
   view.innerHTML=seg+body;
 
   view.querySelectorAll("[data-seg]").forEach(b=>b.onclick=()=>{
-    ll.screen = b.dataset.seg==="list" ? "list" : b.dataset.seg==="unfound" ? "unfound" : "add"; render(); window.scrollTo(0,0); });
+    ll.screen = b.dataset.seg==="unfound" ? "unfound" : "add"; render(); window.scrollTo(0,0); });
   const bk=document.getElementById("llBack"); if(bk) bk.onclick=()=>{ ll.screen="sections"; ll.edit=false; render(); window.scrollTo(0,0); };
 
-  if(ll.screen==="add") wireQuickAdd();
+  if(ll.screen==="add"){ wireQuickAdd(); wireCompiledList(); }
   else if(ll.screen==="sections") wireSections();
   else if(ll.screen==="section"){ const sec=sectionById(ll.sectionId); isGrouped(sec)?wireGrouped(sec):wireProducts(sec,sec,null); }
   else if(ll.screen==="unfound") wireUnfound();
@@ -3194,7 +3193,9 @@ function quickAddHTML(){
     }).join("")}</div>` : `<div class="empty" style="padding:25px 12px">No stencil items match <b>“${esc(q)}”</b>.<br>Add it manually below.</div>`;
   } else results=`<div class="empty" style="padding:28px 16px">Start typing to search the stencil by item name or code.</div>`;
   const remaining=state.pull.filter(p=>!p.done).length;
-  const pulse=state.pull.length?`<div class="list-pulse"><div class="list-pulse-copy"><div class="list-pulse-label">Today’s list</div><div class="list-pulse-value">${remaining} remaining · ${state.pull.length-remaining} found</div></div><button class="btn ghost" id="openCompiledList">View list</button></div>`:"";
+  const pulse=state.pull.length?`<div class="list-pulse"><div class="list-pulse-copy"><div class="list-pulse-label">Today’s list</div><div class="list-pulse-value">${remaining} remaining · ${state.pull.length-remaining} found</div></div></div>`:"";
+  const list=state.pull.length?`<div style="height:14px"></div>${compiledListHTML()}`:`<div class="empty" style="margin-top:16px"><div class="ei">${I.clip}</div>
+    Your list is empty.<br>Search the stencil or enter an item manually.</div>`;
   return `${pulse}<div class="holes-intro">Search the stencil and tap an item to add it to today’s list.</div>
     <div class="holes-search"><div class="search"><span class="si">${I.filter}</span>
       <input id="holeSearch" type="search" inputmode="search" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Search stencil — name or code…" value="${esc(q)}">
@@ -3202,7 +3203,8 @@ function quickAddHTML(){
     ${results}
     <div class="holes-manual"><h2>Not on the stencil?</h2><p>Add a one-off item directly to this list.</p>
       <div class="addrow"><input id="manualHole" placeholder="Enter item name…" autocomplete="off"><button id="addManualHole">Add</button></div></div>
-    <button class="holes-manage" id="manageSections">Manage saved sections</button>`;
+    <button class="holes-manage" id="manageSections">Manage saved sections</button>
+    ${list}`;
 }
 function addManualHole(name){
   name=(name||"").trim(); if(!name) return false;
@@ -3217,7 +3219,6 @@ function wireQuickAdd(){
   const manual=document.getElementById("manualHole"), add=document.getElementById("addManualHole");
   const run=()=>{ if(addManualHole(manual.value)){ toast("Added to list"); render(); const f=document.getElementById("manualHole"); if(f) f.focus(); } };
   if(add) add.onclick=run; if(manual) manual.onkeydown=e=>{ if(e.key==="Enter") run(); };
-  const openList=document.getElementById("openCompiledList"); if(openList) openList.onclick=()=>{ ll.screen="list"; render(); window.scrollTo(0,0); };
   const manage=document.getElementById("manageSections"); if(manage) manage.onclick=()=>{ ll.screen="sections"; ll.edit=false; render(); window.scrollTo(0,0); };
 }
 
