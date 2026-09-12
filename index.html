@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.68.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.68.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.68.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.69.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.69.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.69.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -156,6 +156,12 @@
   .hero-next-value{font-size:15px;font-weight:750;letter-spacing:-.01em;margin-top:3px;}
   .hero-next-go{width:30px;height:30px;border-radius:10px;background:rgba(255,255,255,.09);display:grid;place-items:center;flex:none;}
   .hero-next-go svg{width:16px;height:16px;}
+  .hero-actions{position:relative;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(122px,.9fr);gap:9px;margin-top:14px;}
+  .hero-actions .hero-next{margin-top:0;}
+  .hero-list{appearance:none;border:1px solid rgba(255,255,255,.14);border-radius:15px;background:rgba(7,16,18,.28);color:#effbf7;padding:12px 13px;text-align:left;font:inherit;cursor:pointer;display:flex;flex-direction:column;justify-content:center;}
+  .hero-list-label{font-size:9.5px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;opacity:.62;}
+  .hero-list-value{font-size:15px;font-weight:750;letter-spacing:-.01em;margin-top:4px;white-space:nowrap;}
+  .hero-list-value small{font-size:11px;font-weight:650;opacity:.7;letter-spacing:0;}
   @media(max-width:430px){
     .hero{padding:18px;border-radius:20px;}
     .hero-grid{grid-template-columns:minmax(0,1.05fr) minmax(125px,.95fr);gap:10px;}
@@ -165,6 +171,9 @@
     .hero .date{font-size:11px;}
     .hero-fact{padding:5px 0 4px 11px;}
     .hero-fact-text{font-size:10.5px;line-height:1.4;margin-top:8px;}
+    .hero-actions{grid-template-columns:minmax(0,1.4fr) minmax(110px,.85fr);gap:7px;margin-top:10px;}
+    .hero-list{border-radius:13px;padding:10px 11px;}
+    .hero-list-value{font-size:13px;}
   }
   .hero-stats{position:relative;display:flex;gap:8px;margin-top:18px;}
   .hstat{flex:1;appearance:none;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.22);
@@ -2949,15 +2958,16 @@ function renderHome(){
          </div>
          <div class="hero-fact"><div class="hero-fact-label">Did you know?</div><div class="hero-fact-text" id="homeFact">${esc(getDailyFact())}</div></div>
        </div>
-       <button class="hero-next${ni?"":" zero"}" data-go="schedule">
-         <span><span class="hero-next-label">Next in${ni&&ni.label?" · "+ni.label:""}</span><span class="hero-next-value">${ni?`${esc(ni.name)} · <span class="tnum">${esc(ni.time)}</span>`:"No upcoming shift"}</span></span>
-         <span class="hero-next-go">${I.chev}</span>
-       </button>
-     </div>
-     <div class="hero-stats">
-       <button class="hstat" data-go="loadlist" data-listscreen="list"><div class="hv">${state.pull.filter(p=>!p.done).length}<small> / ${state.pull.length}</small></div><div class="hl">List remaining</div></button>
-       <button class="hstat" data-go="loadlist" data-listscreen="unfound"><div class="hv">${unfound.length}</div><div class="hl">Inventory checks</div></button>
-       <button class="hstat" data-go="schedule"><div class="hv">${countTodayScheduled()}</div><div class="hl">Scheduled today</div></button>
+       <div class="hero-actions">
+         <button class="hero-next${ni?"":" zero"}" data-go="schedule">
+           <span><span class="hero-next-label">Next in${ni&&ni.label?" · "+ni.label:""}</span><span class="hero-next-value">${ni?`${esc(ni.name)} · <span class="tnum">${esc(ni.time)}</span>`:"No upcoming shift"}</span></span>
+           <span class="hero-next-go">${I.chev}</span>
+         </button>
+         <button class="hero-list" data-go="loadlist" data-listscreen="list">
+           <span class="hero-list-label">List</span>
+           <span class="hero-list-value">${state.pull.filter(p=>!p.done).length} left <small>· ${state.pull.filter(p=>p.done).length} found</small></span>
+         </button>
+       </div>
      </div>
      <div class="lbl">Today</div>
      <button class="home-checklist-btn" id="homeGoChecklist">
@@ -2976,7 +2986,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.68.0</div></section>`;
+      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.69.0</div></section>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{ if(b.dataset.listscreen) ll.screen=b.dataset.listscreen; setTab(b.dataset.go); });
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");

@@ -4,6 +4,11 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.69.0] — 2026-09-11
+
+### Changed
+- **Homepage focus is simplified.** List progress now sits beside Next In; the Inventory Check and staffing shortcuts are removed from the homepage only. Their underlying features remain available and unchanged.
+
 ## [5.68.0] — 2026-09-11
 
 ### Changed
