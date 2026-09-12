@@ -345,8 +345,11 @@
   .endbody .item{min-height:48px;}
 
   .holes-intro{padding:5px 3px 15px;color:var(--ink-2);font-size:14px;line-height:1.45;}
-  .holes-search{position:relative;margin-bottom:12px;}
-  .holes-search .search{margin:0;}
+  .holes-search{position:relative;margin-bottom:12px;display:flex;align-items:stretch;gap:10px;}
+  .holes-search .search{margin:0;flex:1;min-width:0;}
+  .hole-search-add{width:54px;border:1px solid var(--brand);border-radius:13px;background:var(--brand);color:#06210f;display:grid;place-items:center;flex:none;box-shadow:var(--sh-sm);font:inherit;font-weight:800;cursor:pointer;}
+  .hole-search-add svg{width:22px;height:22px;}
+  .hole-search-add:active{transform:scale(.98);}
   .holes-results{display:flex;flex-direction:column;gap:7px;}
   .hole-result{display:flex;align-items:center;gap:11px;width:100%;min-height:58px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 10px 8px 13px;color:var(--ink);font:inherit;cursor:pointer;box-shadow:var(--sh-sm);}
   .hole-result:active{transform:scale(.99);}
@@ -358,9 +361,6 @@
   .hole-result .quick-add svg{width:18px;height:18px;}
   .hole-result.on{background:var(--brand-tint-2);border-color:var(--brand);}
   .hole-result.on .quick-add{background:var(--surface);color:var(--brand);}
-  .holes-manual{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);}
-  .holes-manual h2{font-size:13px;margin:0 0 8px;color:var(--ink);}
-  .holes-manual p{font-size:12.5px;color:var(--ink-3);margin:0 0 9px;line-height:1.4;}
   .holes-manage{margin-top:18px;width:100%;font:inherit;font-size:13px;font-weight:600;color:var(--ink-2);border:0;background:none;padding:8px;cursor:pointer;}
   .list-pulse{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 15px;padding:12px 14px;border:1px solid rgba(85,217,173,.2);border-radius:13px;background:linear-gradient(135deg,rgba(21,52,47,.82),rgba(18,41,37,.58));}
   .list-pulse-copy{min-width:0;}.list-pulse-label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--brand-ink);}.list-pulse-value{margin-top:3px;font-size:14px;font-weight:650;color:var(--ink);}.list-pulse .btn{flex:none;padding:8px 11px;font-size:12px;}
@@ -966,10 +966,9 @@
     .home-view .tile.compact .chip{width:34px;height:34px;border-radius:10px;}
   }
 
-  /* Home is intentionally short: its last card clears the dock, so it does not need list-screen scroll room. */
-  body[data-view="home"] main{padding-bottom:18px;}
-  .home-version{margin:12px 0 6px;}
-  @media (min-width:760px){body[data-view="home"] main{padding-bottom:22px;}}
+  body[data-view="home"] main{padding-bottom:calc(102px + env(safe-area-inset-bottom));}
+  .home-version{margin:14px 0 0;}
+  @media (min-width:760px){body[data-view="home"] main{padding-bottom:112px;}}
 </style>
 </head>
 <body>
@@ -2963,7 +2962,7 @@ function renderHome(){
            <span><span class="hero-next-label">Next in${ni&&ni.label?" · "+ni.label:""}</span><span class="hero-next-value">${ni?`${esc(ni.name)} · <span class="tnum">${esc(ni.time)}</span>`:"No upcoming shift"}</span></span>
            <span class="hero-next-go">${I.chev}</span>
          </button>
-         <button class="hero-list" data-go="loadlist" data-listscreen="list">
+         <button class="hero-list" data-go="loadlist" data-listscreen="add">
            <span class="hero-list-label">List</span>
            <span class="hero-list-value">${state.pull.filter(p=>!p.done).length} left <small>· ${state.pull.filter(p=>p.done).length} found</small></span>
          </button>
@@ -3190,7 +3189,7 @@ function quickAddHTML(){
         <div class="hole-bd"><div class="hole-name">${highlight(stencilName(it),q)}</div>
           <div class="hole-meta">${it.c?`#${esc(it.c)}`:""}${meta?`${it.c?" · ":""}${esc(meta)}`:""}</div></div>
         <span class="quick-add">${on?I.check:I.plus}</span></button>`;
-    }).join("")}</div>` : `<div class="empty" style="padding:25px 12px">No stencil items match <b>“${esc(q)}”</b>.<br>Add it manually below.</div>`;
+    }).join("")}</div>` : `<div class="empty" style="padding:25px 12px">No stencil items match <b>“${esc(q)}”</b>.<br>Tap the plus button to add it.</div>`;
   } else results=`<div class="empty" style="padding:28px 16px">Start typing to search the stencil by item name or code.</div>`;
   const remaining=state.pull.filter(p=>!p.done).length;
   const pulse=state.pull.length?`<div class="list-pulse"><div class="list-pulse-copy"><div class="list-pulse-label">Today’s list</div><div class="list-pulse-value">${remaining} remaining · ${state.pull.length-remaining} found</div></div></div>`:"";
@@ -3199,10 +3198,9 @@ function quickAddHTML(){
   return `${pulse}<div class="holes-intro">Search the stencil and tap an item to add it to today’s list.</div>
     <div class="holes-search"><div class="search"><span class="si">${I.filter}</span>
       <input id="holeSearch" type="search" inputmode="search" autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Search stencil — name or code…" value="${esc(q)}">
-      <button class="clr${q?" show":""}" id="holeSearchClear" aria-label="Clear">${I.x}</button></div></div>
+      <button class="clr${q?" show":""}" id="holeSearchClear" aria-label="Clear">${I.x}</button></div>
+      ${q.trim()?`<button class="hole-search-add" id="addSearchText" aria-label="Add typed item">${I.plus}</button>`:""}</div>
     ${results}
-    <div class="holes-manual"><h2>Not on the stencil?</h2><p>Add a one-off item directly to this list.</p>
-      <div class="addrow"><input id="manualHole" placeholder="Enter item name…" autocomplete="off"><button id="addManualHole">Add</button></div></div>
     <button class="holes-manage" id="manageSections">Manage saved sections</button>
     ${list}`;
 }
@@ -3213,12 +3211,12 @@ function addManualHole(name){
 }
 function wireQuickAdd(){
   const input=document.getElementById("holeSearch"), clear=document.getElementById("holeSearchClear");
-  if(input){ input.oninput=()=>{ ll.query=input.value; const pos=input.selectionStart; render(); const f=document.getElementById("holeSearch"); if(f){f.focus(); try{f.setSelectionRange(pos,pos);}catch(e){}} }; const focusQuery=ll.query||""; if(focusQuery){ input.focus(); try{input.setSelectionRange(focusQuery.length,focusQuery.length);}catch(e){} } }
+  const addSearch=document.getElementById("addSearchText");
+  const addTyped=()=>{ if(addManualHole(ll.query)){ toast("Added to list"); ll.query=""; render(); const f=document.getElementById("holeSearch"); if(f) f.focus(); } };
+  if(input){ input.oninput=()=>{ ll.query=input.value; const pos=input.selectionStart; render(); const f=document.getElementById("holeSearch"); if(f){f.focus(); try{f.setSelectionRange(pos,pos);}catch(e){}} }; input.onkeydown=e=>{ if(e.key==="Enter"&&ll.query&&searchStencil(ll.query).length===0){ e.preventDefault(); addTyped(); } }; const focusQuery=ll.query||""; if(focusQuery){ input.focus(); try{input.setSelectionRange(focusQuery.length,focusQuery.length);}catch(e){} } }
   if(clear) clear.onclick=()=>{ ll.query=""; render(); document.getElementById("holeSearch").focus(); };
+  if(addSearch) addSearch.onclick=addTyped;
   view.querySelectorAll("[data-quickcode]").forEach(b=>b.onclick=()=>{ const it=STENCIL.find(x=>x.c===b.dataset.quickcode); if(it){ togglePLU(it); save(); render(); } });
-  const manual=document.getElementById("manualHole"), add=document.getElementById("addManualHole");
-  const run=()=>{ if(addManualHole(manual.value)){ toast("Added to list"); render(); const f=document.getElementById("manualHole"); if(f) f.focus(); } };
-  if(add) add.onclick=run; if(manual) manual.onkeydown=e=>{ if(e.key==="Enter") run(); };
   const manage=document.getElementById("manageSections"); if(manage) manage.onclick=()=>{ ll.screen="sections"; ll.edit=false; render(); window.scrollTo(0,0); };
 }
 
