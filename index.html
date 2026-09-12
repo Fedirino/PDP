@@ -4963,6 +4963,7 @@ function applyScanResults(){
         w.employees.push({name:emp.name,shifts:{...emp.shifts},meals:{...emp.meals},kinds:{...(emp.kinds||{})}});
       });
       if(!w.employees.length) w.photos=[];
+  saveSched();
   const remaining=(window._scanQueue||[]).length;
   if(remaining>0){
     const next=window._scanQueue.shift();
