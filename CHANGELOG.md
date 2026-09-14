@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.73.0] — 2026-09-14
+
+### Changed
+- **Manual Out of Stock now adds onto the selected list.** When an Out of Stock report already exists, Manual entry appends a blank row to that scanned report and opens edit mode instead of creating a separate document. The empty state still creates the first manual list.
+
+### Files
+- `index.html` — append-row manual entry flow and v5.73.0 markers
+- `manifest.json` — version URLs bumped to 5.73.0
+- `sw.js` — cache bumped to `pdp-v5.73.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this entry
+
+---
+
 ## [5.72.0] — 2026-09-14
 
 ### Added

@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.72.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.72.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.72.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.73.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.73.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.73.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2526,6 +2526,27 @@ async function createManualOutOfStock(){
   render(); window.scrollTo(0,0);
   toast("Manual Out of Stock list created");
 }
+function addManualOutOfStockRow(doc){
+  doc=doc||activeDoc("outofstock");
+  if(!doc) return createManualOutOfStock();
+  if(!Array.isArray(doc.sections)||!doc.sections.length){
+    doc.sections=[{category:"Out of Stock",subject:"Order Allocation Report",contact:"",bullets:[],tables:[]}];
+  }
+  let section=doc.sections.find(function(s){ return s&&Array.isArray(s.tables)&&s.tables.length; })||doc.sections[0];
+  if(!Array.isArray(section.tables)) section.tables=[];
+  let table=section.tables.find(function(t){ return t&&Array.isArray(t.headers)&&t.headers.length; })||section.tables[0];
+  if(!table){
+    table={title:"Order Allocation Report",headers:OUT_OF_STOCK_HEADERS.slice(),rows:[]};
+    section.tables.push(table);
+  }
+  if(!Array.isArray(table.headers)||!table.headers.length) table.headers=OUT_OF_STOCK_HEADERS.slice();
+  if(!Array.isArray(table.rows)) table.rows=[];
+  table.rows.push(table.headers.map(function(){ return ""; }));
+  touchDoc(doc); saveDocs();
+  docView="outofstock"; docActiveId.outofstock=doc.id; docEdit=true;
+  render(); window.scrollTo(0,0);
+  toast("Blank row added");
+}
 /* one-time seed: example Display Plan from the printed plan (pages 8 & 10) */
 (function seedSalesPlan(){
   var FLAG="pdp_seed_salesplan_v1";
@@ -3025,7 +3046,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.72.0</div></section>`;
+      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.73.0</div></section>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{ if(b.dataset.listscreen) ll.screen=b.dataset.listscreen; setTab(b.dataset.go); });
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -5947,7 +5968,7 @@ function renderDocSection(type){
   const sel=document.getElementById("docSel");
   if(sel) sel.onchange=function(){ docActiveId[type]=this.value; render(); window.scrollTo(0,0); };
   const ct=document.getElementById("docCopyTxt"); if(ct) ct.onclick=()=>copyText(docToText(d),lbl+" copied");
-  const ma=document.getElementById("docManualAdd"); if(ma) ma.onclick=createManualOutOfStock;
+  const ma=document.getElementById("docManualAdd"); if(ma) ma.onclick=()=>addManualOutOfStockRow(d);
   const dl=document.getElementById("docDel"); if(dl) dl.onclick=()=>{
     if(!confirm(`Delete "${d.dateLabel||d.date}" from ${lbl}?`)) return;
     docStore[type]=arr.filter(x=>x.id!==d.id);
