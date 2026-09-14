@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.72.0] — 2026-09-14
+
+### Added
+- **Manual Out of Stock entry.** The Out of Stock document section now has a Manual entry button that creates a blank Order Allocation Report table with the same columns used by scans, then opens it directly in edit mode for quick typing.
+
+### Files
+- `index.html` — manual Out of Stock document creation, buttons, shared allocation-report headers, and v5.72.0 markers
+- `manifest.json` — version URLs bumped to 5.72.0
+- `sw.js` — cache bumped to `pdp-v5.72.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this entry
+
+---
+
 ## [5.71.0] — 2026-09-14
 
 ### Added

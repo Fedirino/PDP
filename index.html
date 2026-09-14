@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.71.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.71.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.71.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.72.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.72.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.72.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2421,6 +2421,7 @@ const DOCS_KEY="pdp_documents_v2";
 const DOC_TYPES=["dailynotes","salesplan","salesitems","outofstock"];
 const DOC_LABEL={dailynotes:"Daily Notes",salesplan:"Display Plan",salesitems:"Sales Items",outofstock:"Out of Stock"};
 const DOC_RETAIN_DAYS={dailynotes:14,salesplan:70,salesitems:70,outofstock:70};
+const OUT_OF_STOCK_HEADERS=["Item Number","Item Description","Bill Dept","Inv Class","Class Description","Order Date","Deliv Date","Original Qty Ordered","Order Qty After Allocation"];
 let docStore={dailynotes:[],salesplan:[],salesitems:[],outofstock:[]};
 let docActiveId={dailynotes:null,salesplan:null,salesitems:null,outofstock:null};
 
@@ -2496,6 +2497,35 @@ function touchDoc(d){ if(d) d.updated=Date.now(); return d; }
 function saveDocs(){ DOC_TYPES.forEach(t=>{ (docStore[t]||[]).forEach(d=>{ if(d&&!d.updated) d.updated=d.created||Date.now(); }); }); const ok=writeK(DOCS_KEY,JSON.stringify(docStore)); if(firebaseDb&&cloudReady){ cloudSyncDocCollection("dailynotes",docStore.dailynotes).catch(function(e){ console.error("dailynotes sync:",e); }); cloudSyncDocCollection("salesplan",docStore.salesplan).catch(function(e){ console.error("salesplan sync:",e); }); cloudSyncDocCollection("salesitems",docStore.salesitems).catch(function(e){ console.error("salesitems sync:",e); }); cloudSyncDocCollection("outofstock",docStore.outofstock).catch(function(e){ console.error("outofstock sync:",e); }); } return ok; }
 function sortDocs(t){ docStore[t].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.created||0)-(a.created||0)); }
 function activeDoc(t){ return docStore[t].find(d=>d.id===docActiveId[t])||docStore[t][0]||null; }
+async function createManualOutOfStock(){
+  const today=new Date(), pad=function(n){ return String(n).padStart(2,"0"); };
+  const iso=today.getFullYear()+"-"+pad(today.getMonth()+1)+"-"+pad(today.getDate());
+  const printed=pad(today.getMonth()+1)+"/"+pad(today.getDate())+"/"+String(today.getFullYear()).slice(-2);
+  const label=await askInput("New Out of Stock List",{value:printed,placeholder:"09/13/26 · Store 02606",okText:"Create"});
+  if(label==null) return;
+  const doc={
+    id:"doc_"+Date.now(),
+    date:iso+"_"+Date.now(),
+    dateLabel:(label.trim()||printed),
+    created:Date.now(),
+    updated:Date.now(),
+    images:[],
+    sections:[{
+      category:"Out of Stock",
+      subject:"Order Allocation Report",
+      contact:"",
+      bullets:[],
+      tables:[{title:"Order Allocation Report",headers:OUT_OF_STOCK_HEADERS.slice(),rows:[OUT_OF_STOCK_HEADERS.map(function(){ return ""; })]}]
+    }]
+  };
+  docStore.outofstock.unshift(doc);
+  docActiveId.outofstock=doc.id;
+  sortDocs("outofstock");
+  saveDocs();
+  tab="docs"; docView="outofstock"; docEdit=true;
+  render(); window.scrollTo(0,0);
+  toast("Manual Out of Stock list created");
+}
 /* one-time seed: example Display Plan from the printed plan (pages 8 & 10) */
 (function seedSalesPlan(){
   var FLAG="pdp_seed_salesplan_v1";
@@ -2995,7 +3025,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.71.0</div></section>`;
+      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.72.0</div></section>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{ if(b.dataset.listscreen) ll.screen=b.dataset.listscreen; setTab(b.dataset.go); });
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -5875,8 +5905,10 @@ function renderDocSection(type){
         <h3>No ${lbl.toLowerCase()} yet</h3>
         <p>Scan the printed ${lbl.toLowerCase()} and Claude turns it into a clean digital copy — text, exact tables, and the original photo, stored by date.</p>
         <button class="btn" id="docScanEmpty" style="margin:0 auto;min-width:210px">${I.scan} Scan ${lbl}</button>
+        ${type==="outofstock"?`<button class="btn ghost" id="docManualEmpty" style="margin:10px auto 0;min-width:210px">${I.plus} Manual entry</button>`:""}
       </div>`;
     const b=document.getElementById("docScanEmpty"); if(b) b.onclick=()=>openScanOverlay(type);
+    const mb=document.getElementById("docManualEmpty"); if(mb) mb.onclick=createManualOutOfStock;
     return;
   }
   const d=activeDoc(type);
@@ -5892,6 +5924,7 @@ function renderDocSection(type){
     </div>
     <div class="doc-actions">
       <button class="btn ghost" id="docCopyTxt">${I.copy} Copy text</button>
+      ${type==="outofstock"?`<button class="btn ghost" id="docManualAdd">${I.plus} Manual entry</button>`:""}
       <button class="btn ghost danger-txt" id="docDel">${I.trash} Delete</button>
     </div>
     <div class="doc-meta">Saved ${esc(savedStr)} · ${d.sections.length} section${d.sections.length===1?"":"s"}</div>
@@ -5914,6 +5947,7 @@ function renderDocSection(type){
   const sel=document.getElementById("docSel");
   if(sel) sel.onchange=function(){ docActiveId[type]=this.value; render(); window.scrollTo(0,0); };
   const ct=document.getElementById("docCopyTxt"); if(ct) ct.onclick=()=>copyText(docToText(d),lbl+" copied");
+  const ma=document.getElementById("docManualAdd"); if(ma) ma.onclick=createManualOutOfStock;
   const dl=document.getElementById("docDel"); if(dl) dl.onclick=()=>{
     if(!confirm(`Delete "${d.dateLabel||d.date}" from ${lbl}?`)) return;
     docStore[type]=arr.filter(x=>x.id!==d.id);
@@ -5969,7 +6003,7 @@ function renderDocEdit(type,d){
   const addSec=document.getElementById("docAddSec");
   if(addSec) addSec.onclick=()=>{ d.sections.push({category:"",subject:"",contact:"",bullets:[],tables:[]}); render(); };
   view.querySelectorAll("[data-delsec]").forEach(b=>b.onclick=()=>{ if(confirm("Delete this section?")){ d.sections.splice(+b.dataset.delsec,1); render(); } });
-  view.querySelectorAll("[data-addtbl]").forEach(b=>b.onclick=()=>{ const oos=type==="outofstock"; const headers=type==="salesitems"?["Item Number","Item","NE Price"]:(oos?["Item Number","Item Description","Bill Dept","Inv Class","Class Description","Order Date","Deliv Date","Original Qty Ordered","Order Qty After Allocation"]:["Position","Item"]); d.sections[+b.dataset.addtbl].tables.push({title:oos?"Order Allocation Report":"",headers,rows:[headers.map(function(){ return ""; })]}); render(); });
+  view.querySelectorAll("[data-addtbl]").forEach(b=>b.onclick=()=>{ const oos=type==="outofstock"; const headers=type==="salesitems"?["Item Number","Item","NE Price"]:(oos?OUT_OF_STOCK_HEADERS.slice():["Position","Item"]); d.sections[+b.dataset.addtbl].tables.push({title:oos?"Order Allocation Report":"",headers,rows:[headers.map(function(){ return ""; })]}); render(); });
   view.querySelectorAll("[data-addrow]").forEach(b=>b.onclick=()=>{ const[si,ti]=b.dataset.addrow.split(".").map(Number); const t=d.sections[si].tables[ti]; const w=(t.headers||[]).length||(t.rows[0]?t.rows[0].length:2); t.rows.push(Array(w).fill("")); render(); });
   view.querySelectorAll("[data-delrow]").forEach(b=>b.onclick=()=>{ const[si,ti,ri]=b.dataset.delrow.split(".").map(Number); d.sections[si].tables[ti].rows.splice(ri,1); render(); });
     /* quick-entry bar removed — use inline table editing */
