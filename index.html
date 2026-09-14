@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.74.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.74.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.74.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.74.1">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.74.1">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.74.1">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -3055,7 +3055,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.74.0</div></section>`;
+      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.74.1</div></section>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{ if(b.dataset.listscreen) ll.screen=b.dataset.listscreen; setTab(b.dataset.go); });
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -5613,7 +5613,19 @@ function oosRow4(row,headers){
   const h=headers.map(function(x){ return String(x||"").toLowerCase(); });
   function pick(names,fallback){
     for(let i=0;i<h.length;i++){
+      if(names.some(function(n){ return h[i]===n; })) return String(row[i]||"");
+    }
+    for(let i=0;i<h.length;i++){
       if(names.some(function(n){ return h[i].includes(n); })) return String(row[i]||"");
+    }
+    return String(row[fallback]||"");
+  }
+  function pickItem(fallback){
+    for(let i=0;i<h.length;i++){
+      if(h[i]==="item"||h[i]==="item description"||h[i]==="description") return String(row[i]||"");
+    }
+    for(let i=0;i<h.length;i++){
+      if((h[i].includes("item description")||h[i].includes("description"))&&!h[i].includes("number")) return String(row[i]||"");
     }
     return String(row[fallback]||"");
   }
@@ -5621,14 +5633,14 @@ function oosRow4(row,headers){
   if(long||row.length>=9){
     return [
       pick(["item number"],0),
-      pick(["item description","item"],1),
+      pickItem(1),
       pick(["original qty","ordered"],7),
       pick(["after allocation"],8)
     ];
   }
   return [
     pick(["item number"],0),
-    pick(["item"],1),
+    pickItem(1),
     pick(["ordered","original"],2),
     pick(["after allocation","after"],3)
   ];

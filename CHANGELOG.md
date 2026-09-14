@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.74.1] — 2026-09-14
+
+### Fixed
+- **Out of Stock item descriptions no longer duplicate item numbers.** The four-column normalizer now treats `Item Number` and `Item` / `Item Description` as separate columns instead of matching both from the word "item."
+
+### Files
+- `index.html` — stricter Out of Stock column matching and v5.74.1 markers
+- `manifest.json` — version URLs bumped to 5.74.1
+- `sw.js` — cache bumped to `pdp-v5.74.1`
+- `README.md` — current version
+- `CHANGELOG.md` — this entry
+
+---
+
 ## [5.74.0] — 2026-09-14
 
 ### Changed
