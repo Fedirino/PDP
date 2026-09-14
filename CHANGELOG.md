@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.71.0] — 2026-09-14
+
+### Added
+- **Out of Stock documents.** The Documents hub now has an Out of Stock section for scanning produce Order Allocation Reports, preserving item number, description, department/class fields, order/delivery dates, original quantity, and after-allocation quantity across multi-page reports.
+
+### Files
+- `index.html` — Out of Stock document type, scan prompt, rendering/routing, Firestore sync, and v5.71.0 markers
+- `manifest.json` — version URLs bumped to 5.71.0
+- `sw.js` — cache bumped to `pdp-v5.71.0`
+- `README.md` — current version and Documents list updated
+- `CHANGELOG.md` — this entry
+
+---
+
 ## [5.70.0] — 2026-09-12
 
 ### Added

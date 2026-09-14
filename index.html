@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.70.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.70.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.70.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.71.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.71.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.71.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2037,19 +2037,22 @@ async function cloudHydrateSchedule() {
 async function cloudHydrateDocs() {
   if (!firebaseDb) return;
   try {
-    const [dnSnap, spSnap, siSnap] = await Promise.all([
+    const [dnSnap, spSnap, siSnap, oosSnap] = await Promise.all([
       firebaseDb.collection("dailynotes").orderBy("created", "desc").get(),
       firebaseDb.collection("salesplan").orderBy("created", "desc").get(),
-      firebaseDb.collection("salesitems").orderBy("created", "desc").get()
+      firebaseDb.collection("salesitems").orderBy("created", "desc").get(),
+      firebaseDb.collection("outofstock").orderBy("created", "desc").get()
     ]);
     const remoteDN = dnSnap.docs.map(function (d) { return docCloudDecode(d.data()); }).filter(Boolean);
     const remoteSP = spSnap.docs.map(function (d) { return docCloudDecode(d.data()); }).filter(Boolean);
     const remoteSI = siSnap.docs.map(function (d) { return docCloudDecode(d.data()); }).filter(Boolean);
-    if (remoteDN.length || remoteSP.length || remoteSI.length) {
+    const remoteOOS = oosSnap.docs.map(function (d) { return docCloudDecode(d.data()); }).filter(Boolean);
+    if (remoteDN.length || remoteSP.length || remoteSI.length || remoteOOS.length) {
       docStore.dailynotes = mergeDocLists(docStore.dailynotes, remoteDN);
       docStore.salesplan = mergeDocLists(docStore.salesplan, remoteSP);
       docStore.salesplan.forEach(markScannedSalesPlan);
       docStore.salesitems = mergeDocLists(docStore.salesitems, remoteSI);
+      docStore.outofstock = mergeDocLists(docStore.outofstock, remoteOOS);
       DOC_TYPES.forEach(function (t) { if (!Array.isArray(docStore[t])) docStore[t] = []; });
       docPrune();
       DOC_TYPES.forEach(function (t) { if (docStore[t].length) docActiveId[t] = docStore[t][0].id; });
@@ -2057,7 +2060,8 @@ async function cloudHydrateDocs() {
       await Promise.all([
         cloudSyncDocCollection("dailynotes", docStore.dailynotes),
         cloudSyncDocCollection("salesplan", docStore.salesplan),
-        cloudSyncDocCollection("salesitems", docStore.salesitems)
+        cloudSyncDocCollection("salesitems", docStore.salesitems),
+        cloudSyncDocCollection("outofstock", docStore.outofstock)
       ]);
       render();
       return;
@@ -2065,7 +2069,8 @@ async function cloudHydrateDocs() {
     await Promise.all([
       cloudSyncDocCollection("dailynotes", docStore.dailynotes),
       cloudSyncDocCollection("salesplan", docStore.salesplan),
-      cloudSyncDocCollection("salesitems", docStore.salesitems)
+      cloudSyncDocCollection("salesitems", docStore.salesitems),
+      cloudSyncDocCollection("outofstock", docStore.outofstock)
     ]);
   } catch (e) { console.error("cloudHydrateDocs:",e); }
 }
@@ -2411,13 +2416,13 @@ function clCounts(){
   return {total,done};
 }
 
-/* ===== Documents store (subsections: Daily Notes, Display Plan, Sales Items) ===== */
+/* ===== Documents store (subsections: Daily Notes, Display Plan, Sales Items, Out of Stock) ===== */
 const DOCS_KEY="pdp_documents_v2";
-const DOC_TYPES=["dailynotes","salesplan","salesitems"];
-const DOC_LABEL={dailynotes:"Daily Notes",salesplan:"Display Plan",salesitems:"Sales Items"};
-const DOC_RETAIN_DAYS={dailynotes:14,salesplan:70,salesitems:70};
-let docStore={dailynotes:[],salesplan:[],salesitems:[]};
-let docActiveId={dailynotes:null,salesplan:null,salesitems:null};
+const DOC_TYPES=["dailynotes","salesplan","salesitems","outofstock"];
+const DOC_LABEL={dailynotes:"Daily Notes",salesplan:"Display Plan",salesitems:"Sales Items",outofstock:"Out of Stock"};
+const DOC_RETAIN_DAYS={dailynotes:14,salesplan:70,salesitems:70,outofstock:70};
+let docStore={dailynotes:[],salesplan:[],salesitems:[],outofstock:[]};
+let docActiveId={dailynotes:null,salesplan:null,salesitems:null,outofstock:null};
 
 function docPrune(){
   DOC_TYPES.forEach(t=>{
@@ -2475,7 +2480,7 @@ function docPrune(){
 (function loadDocs(){
   let raw=null; try{ raw=JSON.parse(readK(DOCS_KEY)); }catch(e){ raw=null; }
   if(raw&&typeof raw==="object"&&!Array.isArray(raw)){
-    docStore={dailynotes:raw.dailynotes||[],salesplan:raw.salesplan||[],salesitems:raw.salesitems||[]};
+    docStore={dailynotes:raw.dailynotes||[],salesplan:raw.salesplan||[],salesitems:raw.salesitems||[],outofstock:raw.outofstock||[]};
   } else {
     /* migrate from v1 (a plain array of daily-notes docs) */
     try{ const old=JSON.parse(readK("pdp_documents_v1")); if(Array.isArray(old)) docStore.dailynotes=old; }catch(e){}
@@ -2488,7 +2493,7 @@ function docPrune(){
 })();
 function markScannedSalesPlan(doc){ if(doc&&doc.id!=="seed_salesplan_v1") doc.preserveOrder=true; return doc; }
 function touchDoc(d){ if(d) d.updated=Date.now(); return d; }
-function saveDocs(){ DOC_TYPES.forEach(t=>{ (docStore[t]||[]).forEach(d=>{ if(d&&!d.updated) d.updated=d.created||Date.now(); }); }); const ok=writeK(DOCS_KEY,JSON.stringify(docStore)); if(firebaseDb&&cloudReady){ cloudSyncDocCollection("dailynotes",docStore.dailynotes).catch(function(e){ console.error("dailynotes sync:",e); }); cloudSyncDocCollection("salesplan",docStore.salesplan).catch(function(e){ console.error("salesplan sync:",e); }); cloudSyncDocCollection("salesitems",docStore.salesitems).catch(function(e){ console.error("salesitems sync:",e); }); } return ok; }
+function saveDocs(){ DOC_TYPES.forEach(t=>{ (docStore[t]||[]).forEach(d=>{ if(d&&!d.updated) d.updated=d.created||Date.now(); }); }); const ok=writeK(DOCS_KEY,JSON.stringify(docStore)); if(firebaseDb&&cloudReady){ cloudSyncDocCollection("dailynotes",docStore.dailynotes).catch(function(e){ console.error("dailynotes sync:",e); }); cloudSyncDocCollection("salesplan",docStore.salesplan).catch(function(e){ console.error("salesplan sync:",e); }); cloudSyncDocCollection("salesitems",docStore.salesitems).catch(function(e){ console.error("salesitems sync:",e); }); cloudSyncDocCollection("outofstock",docStore.outofstock).catch(function(e){ console.error("outofstock sync:",e); }); } return ok; }
 function sortDocs(t){ docStore[t].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.created||0)-(a.created||0)); }
 function activeDoc(t){ return docStore[t].find(d=>d.id===docActiveId[t])||docStore[t][0]||null; }
 /* one-time seed: example Display Plan from the printed plan (pages 8 & 10) */
@@ -2570,7 +2575,7 @@ function requestNotifPermission(){
 }
 
 let toolView="hub"; /* hub | notes | noteEdit | calendar | calculator | checklist */
-let docView="hub"; /* hub | dailynotes | salesplan | salesitems */
+let docView="hub"; /* hub | dailynotes | salesplan | salesitems | outofstock */
 let docEdit=false;
 let editingNoteId=null;
 
@@ -2793,7 +2798,7 @@ function renderTopbar(){
   const sea=document.getElementById("schEditAct"); if(sea) sea.onclick=()=>{ schEdit=!schEdit; render(); };
   const ssa=document.getElementById("schScanAct"); if(ssa) ssa.onclick=()=>openScanOverlay("schedule");
   const gsa=document.getElementById("gevScanAct"); if(gsa) gsa.onclick=()=>openScanOverlay("gev");
-  const dsa=document.getElementById("docScanAct"); if(dsa) dsa.onclick=()=>{ const target=docView==="salesitems"?"salesitems":(docView==="salesplan"?"salesplan":"dailynotes"); openScanOverlay(target); };
+  const dsa=document.getElementById("docScanAct"); if(dsa) dsa.onclick=()=>{ const target=DOC_TYPES.includes(docView)?docView:"dailynotes"; openScanOverlay(target); };
   const dea=document.getElementById("docEditAct"); if(dea) dea.onclick=()=>{ if(docEdit){ touchDoc(activeDoc(docView)); saveDocs(); } docEdit=!docEdit; render(); };
   const dba=document.getElementById("docBack"); if(dba) dba.onclick=()=>{ if(docEdit){ touchDoc(activeDoc(docView)); saveDocs(); docEdit=false; } docView="hub"; render(); window.scrollTo(0,0); };
 
@@ -2990,7 +2995,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.70.0</div></section>`;
+      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.71.0</div></section>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{ if(b.dataset.listscreen) ll.screen=b.dataset.listscreen; setTab(b.dataset.go); });
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -4504,7 +4509,7 @@ document.getElementById("scanClose").onclick=closeScanOverlay;
 function openScanOverlay(mode){
   scanParsed=null;
   scanMode=mode||"schedule";
-  if(scanMode==="dailynotes"||scanMode==="salesplan"||scanMode==="salesitems"){
+  if(scanMode==="dailynotes"||scanMode==="salesplan"||scanMode==="salesitems"||scanMode==="outofstock"){
     docScanSession++;
     if(docDraftMode!==scanMode){ docPages=[]; docDraftMode=scanMode; }
     scanOverlay.classList.add("open");
@@ -4828,7 +4833,7 @@ RULES:
 scanFileInput.onchange=function(){
   const files=scanFileInput.files;
   if(!files||!files.length){ scanFileInput.value=""; return; }
-  if(scanMode==="dailynotes"||scanMode==="salesplan"||scanMode==="salesitems"){
+  if(scanMode==="dailynotes"||scanMode==="salesplan"||scanMode==="salesitems"||scanMode==="outofstock"){
     /* Orientation probing is asynchronous. Await each page so the saved
        document order always matches the user's selected file order. */
     if(docScanAdding){
@@ -5179,7 +5184,7 @@ function openDocScanCollect(){
       <button class="btn ghost block" id="docUpload" style="flex:1">${I.upload||I.plus} Upload</button>
     </div>
     <div class="pg-strip" id="pgStrip">${docPages.map((p,i)=>pgItemHTML(p,i)).join("")}</div>
-    <div class="hintline" style="text-align:center">${(scanMode==="salesplan"||scanMode==="salesitems")?"Hold the page straight and fill the frame. For a dense weekly sheet, scan it in 2–3 close-ups (top / middle / bottom) rather than one far shot — sharper text means items land in the right spot. Each shot adds to this week.":"Scan one page at a time. Each scan adds to the current "+lbl.toLowerCase()+"."}</div>
+    <div class="hintline" style="text-align:center">${(scanMode==="salesplan"||scanMode==="salesitems"||scanMode==="outofstock")?"Hold the page straight and fill the frame. For a dense report, scan it in 2–3 close-ups (top / middle / bottom) rather than one far shot — sharper text means items land in the right spot. Each shot adds to this document.":"Scan one page at a time. Each scan adds to the current "+lbl.toLowerCase()+"."}</div>
     <div class="scan-actions" style="margin-top:14px">
       <button class="btn block" id="docRead" style="${n?"":"opacity:.4;pointer-events:none"}">${I.scan} Read page</button>
     </div>`;
@@ -5241,6 +5246,27 @@ RULES:
 - PRICE RULE: when both NE and NY are printed, copy NE only. If only one price is printed, use it as NE Price. Keep price formats verbatim, including 2/$5, DC notes, and blanks.
 - Copy item number and item text verbatim. Keep repeated rows repeated. Do not invent, reorder, round, or summarize.
 - Keep cells aligned. If text is unreadable, use "[unclear]" only for that cell.`;
+
+const outOfStockPrompt=`You are transcribing a Stop & Shop produce "Order Allocation Report" used as an Out of Stock list. Pages may be photographed sideways or at an angle; mentally rotate each page so the report text reads left-to-right before reading. Transcribe every item row precisely.
+
+Return ONLY valid JSON. No markdown, no backticks, no commentary.
+
+Create exactly one section with category "Out of Stock" unless the upload contains multiple separate allocation reports for different dates or stores. Each section has one table titled "Order Allocation Report" with exactly these headers:
+["Item Number","Item Description","Bill Dept","Inv Class","Class Description","Order Date","Deliv Date","Original Qty Ordered","Order Qty After Allocation"]
+
+{"date":"2026-09-13","dateLabel":"09/13/26 · Store 02606","sections":[
+  {"category":"Out of Stock","subject":"Order Allocation Report","contact":"Store 02606 · FAC 54","bullets":["Job: XPNBI170","Page 1 of 2"],
+   "tables":[{"title":"Order Allocation Report","headers":["Item Number","Item Description","Bill Dept","Inv Class","Class Description","Order Date","Deliv Date","Original Qty Ordered","Order Qty After Allocation"],"rows":[["007244","NASOYA SF SPRTD TOFU16Z","530","06","PRODUCE","20260913","20260914","1","0"]]}]}
+]}
+
+RULES:
+- date: ISO YYYY-MM-DD from the printed report date. dateLabel: use the printed report date plus store number when visible, for example "09/13/26 · Store 02606".
+- Capture EVERY item row across ALL pages, IN PRINTED ORDER. A second page with one row is still part of the same table.
+- Copy item number and item description verbatim, including leading zeroes, plus signs, abbreviations, sizes, and punctuation.
+- Copy numeric fields verbatim. Do not convert report dates like 20260913 to a formatted date inside table cells.
+- Original Qty Ordered and Order Qty After Allocation are the two rightmost quantity columns. Keep zeros as "0".
+- Header details such as JOB, STORE NUMBER, FAC, and page count may go in contact/bullets, but do not let them replace item rows.
+- Do NOT invent, reorder, round, or summarize. Keep repeated rows repeated. If text is unreadable, use "[unclear]" only for that cell.`;
 
 function sanitizePlanHTML(raw){
   if(!raw||typeof raw!=="string") return "";
@@ -5326,7 +5352,7 @@ RULES:
 
 
 
-      const promptText=scanMode==="salesplan"?salesPlanPrompt:(scanMode==="salesitems"?salesItemsPrompt:dailyNotesPrompt);
+      const promptText=scanMode==="salesplan"?salesPlanPrompt:(scanMode==="salesitems"?salesItemsPrompt:(scanMode==="outofstock"?outOfStockPrompt:dailyNotesPrompt));
       const content=[];
       docPages.forEach(function(p,i){
         content.push(orText("DOCUMENT PAGE "+(i+1)+" OF "+docPages.length+" — process this page in its entirety before moving to the next."));
@@ -5385,12 +5411,16 @@ RULES:
       scanParsed.dateLabel=salesItemsListLabel(scanParsed.dateLabel||scanParsed.date);
       scanParsed.date=salesItemsStorageKey(scanParsed.dateLabel);
     }
+    if(scanMode==="outofstock"){
+      scanParsed.dateLabel=scanParsed.dateLabel||scanParsed.date||new Date().toLocaleDateString();
+      scanParsed.date=scanParsed.date||("oos_"+Date.now());
+    }
     let issues=[], verifyHTML="";
     if(getEffectiveKey()){
       const statusEl=document.getElementById("scanStatus");
       if(statusEl) statusEl.textContent="Verifying with a second model\u2026";
       issues=await verifyDocScan(docPages.map(pg=>pg.b64),{date:scanParsed.date||"",sections:scanParsed.sections});
-      const scanSubject=scanMode==="salesplan"?"display plan":(scanMode==="salesitems"?"sales items list":"daily notes");
+      const scanSubject=scanMode==="salesplan"?"display plan":(scanMode==="salesitems"?"sales items list":(scanMode==="outofstock"?"out of stock list":"daily notes"));
       verifyHTML=renderVerifyIssues(issues,{subject:scanSubject,clean:"Second check did not flag missing sections or obvious text mismatches."});
     }
 
@@ -5411,9 +5441,9 @@ RULES:
       ${weekUI}
       ${listUI}
       ${verifyHTML}
-      <div style="max-height:46vh;overflow:auto;margin:4px 0 2px">${docSectionsHTML(scanParsed,scanMode==="salesplan"?"salesplan":(scanMode==="salesitems"?"salesitems":"dailynotes"))}</div>
+      <div style="max-height:46vh;overflow:auto;margin:4px 0 2px">${docSectionsHTML(scanParsed,scanMode==="salesplan"?"salesplan":(scanMode==="salesitems"?"salesitems":(scanMode==="outofstock"?"outofstock":"dailynotes")))}</div>
       <div class="scan-step"><div class="num">3</div>Save this ${scanMode==="salesplan"?"week":"page"}</div>
-      <div style="font-size:11px;color:var(--ink-3);text-align:center;line-height:1.5;padding:0 8px;">${scanMode==="salesplan"?"Saved under this display week. Re-scanning a week you already have lets you add to it or replace it.":(scanMode==="salesitems"?"Saved as Sales Items only — it should never fall through to Daily Notes.":"If a document for this date already exists, you can add these sections to it.")} ⚠️ Check against the printout — AI can make mistakes.</div>
+      <div style="font-size:11px;color:var(--ink-3);text-align:center;line-height:1.5;padding:0 8px;">${scanMode==="salesplan"?"Saved under this display week. Re-scanning a week you already have lets you add to it or replace it.":(scanMode==="salesitems"?"Saved as Sales Items only — it should never fall through to Daily Notes.":(scanMode==="outofstock"?"Saved as Out of Stock only — pages from the same report stay together by report date.":"If a document for this date already exists, you can add these sections to it."))} ⚠️ Check against the printout — AI can make mistakes.</div>
 
         <button class="btn ghost" id="scanRetry">Retry</button>
         <button class="btn" id="scanApply">${I.check} Save ${scanMode==="salesplan"?"Week":"Page"}</button>
@@ -5446,7 +5476,7 @@ RULES:
 
 async function applyDocScan(){
   if(!scanParsed||!scanParsed.sections) return;
-  const type=(scanMode==="salesplan")?"salesplan":(scanMode==="salesitems"?"salesitems":"dailynotes");
+  const type=(scanMode==="salesplan")?"salesplan":(scanMode==="salesitems"?"salesitems":(scanMode==="outofstock"?"outofstock":"dailynotes"));
   const today=new Date(), pad=function(n){ return String(n).padStart(2,"0"); };
   const date=scanParsed.date||((type==="salesitems")?salesItemsStorageKey(scanParsed.dateLabel):today.getFullYear()+"-"+pad(today.getMonth()+1)+"-"+pad(today.getDate()));
 
@@ -5803,12 +5833,11 @@ _ivImg.addEventListener("pointerdown",function(e){
 
 /* ================= DOCUMENTS TAB ================= */
 function renderDocs(){
-  if(docView==="dailynotes"||docView==="salesplan"||docView==="salesitems") return renderDocSection(docView);
+  if(docView==="dailynotes"||docView==="salesplan"||docView==="salesitems"||docView==="outofstock") return renderDocSection(docView);
   return renderDocHub();
 }
 
 function renderDocHub(){
-  const dn=docStore.dailynotes.length, sp=docStore.salesplan.length, si=docStore.salesitems.length;
   const card=(type,ic,sub)=>{
     const n=docStore[type].length;
     return `<button class="tile compact" data-doctype="${type}" style="flex-direction:row;align-items:center;gap:12px;padding:13px 14px">
@@ -5823,6 +5852,7 @@ function renderDocHub(){
       ${card("dailynotes",I.note,"Scan the daily bulletin")}
       ${card("salesplan",I.clip,"Scan the weekly display plan")}
       ${card("salesitems",I.clip,"Scan the weekly sales item sheet")}
+      ${card("outofstock",I.clip,"Scan the allocation report")}
     </div>
     <div class="lbl">Coming Soon</div>
     <div class="tiles">
@@ -5832,7 +5862,7 @@ function renderDocHub(){
         <div class="badge">SOON</div>
       </div>
     </div>
-    <div class="hintline" style="text-align:center;margin-top:16px">Daily Notes keep the last two weeks; Display Plan and Sales Items keep recent weeks. Scanned documents are editable and deletable.</div>`;
+    <div class="hintline" style="text-align:center;margin-top:16px">Daily Notes keep the last two weeks; Display Plan, Sales Items, and Out of Stock keep recent weeks. Scanned documents are editable and deletable.</div>`;
   view.querySelectorAll("[data-doctype]").forEach(b=>b.onclick=()=>{ docView=b.dataset.doctype; if(docView==="salesplan") selectCurrentDisplayPlan(); docEdit=false; render(); window.scrollTo(0,0); });
 }
 
@@ -5841,7 +5871,7 @@ function renderDocSection(type){
   if(!arr.length){
     view.innerHTML=`
       <div class="doc-empty">
-        <div class="ei">${type==="salesplan"||type==="salesitems"?I.clip:I.note}</div>
+        <div class="ei">${type==="salesplan"||type==="salesitems"||type==="outofstock"?I.clip:I.note}</div>
         <h3>No ${lbl.toLowerCase()} yet</h3>
         <p>Scan the printed ${lbl.toLowerCase()} and Claude turns it into a clean digital copy — text, exact tables, and the original photo, stored by date.</p>
         <button class="btn" id="docScanEmpty" style="margin:0 auto;min-width:210px">${I.scan} Scan ${lbl}</button>
@@ -5939,7 +5969,7 @@ function renderDocEdit(type,d){
   const addSec=document.getElementById("docAddSec");
   if(addSec) addSec.onclick=()=>{ d.sections.push({category:"",subject:"",contact:"",bullets:[],tables:[]}); render(); };
   view.querySelectorAll("[data-delsec]").forEach(b=>b.onclick=()=>{ if(confirm("Delete this section?")){ d.sections.splice(+b.dataset.delsec,1); render(); } });
-  view.querySelectorAll("[data-addtbl]").forEach(b=>b.onclick=()=>{ d.sections[+b.dataset.addtbl].tables.push({title:"",headers:type==="salesitems"?["Item Number","Item","NE Price"]:["Position","Item"],rows:[type==="salesitems"?["", "", ""]:["",""]]}); render(); });
+  view.querySelectorAll("[data-addtbl]").forEach(b=>b.onclick=()=>{ const oos=type==="outofstock"; const headers=type==="salesitems"?["Item Number","Item","NE Price"]:(oos?["Item Number","Item Description","Bill Dept","Inv Class","Class Description","Order Date","Deliv Date","Original Qty Ordered","Order Qty After Allocation"]:["Position","Item"]); d.sections[+b.dataset.addtbl].tables.push({title:oos?"Order Allocation Report":"",headers,rows:[headers.map(function(){ return ""; })]}); render(); });
   view.querySelectorAll("[data-addrow]").forEach(b=>b.onclick=()=>{ const[si,ti]=b.dataset.addrow.split(".").map(Number); const t=d.sections[si].tables[ti]; const w=(t.headers||[]).length||(t.rows[0]?t.rows[0].length:2); t.rows.push(Array(w).fill("")); render(); });
   view.querySelectorAll("[data-delrow]").forEach(b=>b.onclick=()=>{ const[si,ti,ri]=b.dataset.delrow.split(".").map(Number); d.sections[si].tables[ti].rows.splice(ri,1); render(); });
     /* quick-entry bar removed — use inline table editing */

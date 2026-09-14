@@ -1,6 +1,6 @@
 # PDP — Produce Department Portal
 
-**Current version: v5.70.0**
+**Current version: v5.71.0**
 
 So here's the thing: I work in a produce department, not a software company. I didn't set out to "build an app." I set out to stop rewriting the same pull list on a crumpled piece of paper every morning. One thing led to another, and now my phone runs the whole department.
 
@@ -12,7 +12,7 @@ This is that app.
 - **Stencil** — A master item log (item codes, pack sizes, units) built by photographing every price stencil in the back room. Searchable in two keystrokes, editable when the warehouse changes things on us. Includes AI-assisted search over normalized item names.
 - **Schedule** — Point the camera at the printed wall schedule and AI reads the whole grid: every employee, every shift, net hours calculated after meal breaks. Keeps This Week and Next Week, with a one-tap **Push Next Week → This Week** when the new sheet goes up.
 - **GEV Lists** — Scannable, checkable Guaranteed Everyday Variety lists. Tap to cross off, keep multiple named lists.
-- **Documents** — Department paperwork: **Daily Notes**, **Display Plan**, and **Sales Items**. Scan the printed sheets and AI rebuilds them digitally — blocks, bullets, and tables reproduced cell-for-cell. Original photo kept alongside, full edit mode, one-tap copy.
+- **Documents** — Department paperwork: **Daily Notes**, **Display Plan**, **Sales Items**, and **Out of Stock**. Scan the printed sheets and AI rebuilds them digitally — blocks, bullets, and tables reproduced cell-for-cell. Original photo kept alongside, full edit mode, one-tap copy.
 - **Tools** — Notes, date/time reminders, checklists, and a claims calculator, because pockets only hold so many sticky notes.
 
 ## Architecture
