@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.70.0] — 2026-09-12
+
+### Added
+- **Scan review cards now make AI verification visible.** Schedule, GEV, Daily Notes, Display Plan, and Sales Items scans show a clean second-check result when no issues are flagged, or an attention card with the mismatched spots when the reviewer disagrees.
+
+### Files
+- `index.html` — shared scan review UI, clean/attention verification states, and v5.70.0 markers
+- `manifest.json` — version URLs bumped to 5.70.0
+- `sw.js` — cache bumped to `pdp-v5.70.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this entry
+
+---
+
 ## [5.69.0] — 2026-09-11
 
 ### Changed

@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.69.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.69.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.69.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.70.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.70.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.70.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -758,12 +758,17 @@
   .scan-shift .sv-o{color:var(--ink-3);background:rgba(120,140,130,.15);opacity:.8;}
   .scan-actions{display:flex;gap:8px;flex:none;padding-bottom:env(safe-area-inset-bottom);}
   .scan-actions .btn{flex:1;}
-  /* cross-model verification findings */
-  .scan-verify{background:var(--amber-tint);border:1px solid var(--amber);border-radius:var(--r);padding:12px;margin-bottom:6px;}
-  .scan-verify-t{font-size:13px;font-weight:700;color:var(--amber);display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+  /* cross-model verification review */
+  .scan-verify{background:var(--brand-tint-2);border:1px solid rgba(85,217,173,.24);border-radius:var(--r);padding:12px;margin-bottom:6px;}
+  .scan-verify.warn{background:var(--amber-tint);border-color:var(--amber);}
+  .scan-verify-t{font-size:13px;font-weight:800;color:var(--brand-ink);display:flex;align-items:center;gap:7px;margin-bottom:5px;}
+  .scan-verify.warn .scan-verify-t{color:var(--amber);}
   .scan-verify-t svg{width:15px;height:15px;flex:none;}
+  .scan-verify-sub{font-size:11px;color:var(--ink-3);line-height:1.5;margin-bottom:9px;}
+  .scan-verify-clean{display:flex;align-items:center;gap:8px;background:rgba(85,217,173,.08);border:1px solid rgba(85,217,173,.18);border-radius:9px;padding:9px 10px;color:var(--ink-2);font-size:12px;font-weight:650;}
+  .scan-verify-clean svg{width:14px;height:14px;color:var(--brand);flex:none;}
   .scan-issue{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:12px;color:var(--ink);line-height:1.5;}
-  .scan-issue:last-child{margin-bottom:8px;}
+  .scan-issue:last-of-type{margin-bottom:9px;}
   .scan-issue .iv{color:var(--amber);font-weight:700;text-transform:uppercase;}
   .scan-issue .iv-note{font-size:11px;color:var(--ink-3);}
 
@@ -2985,7 +2990,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.69.0</div></section>`;
+      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.70.0</div></section>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{ if(b.dataset.listscreen) ll.screen=b.dataset.listscreen; setTab(b.dataset.go); });
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -4685,13 +4690,13 @@ RULES:
         /* GEV mode: expect {categories:[...]} */
         if(!parsed.categories||!parsed.categories.length) throw new Error("No GEV categories found.");
         scanParsed=parsed;
-        let issues=[];
+        let issues=[], verifyHTML="";
         if(getEffectiveKey()){
           const statusEl=document.getElementById("scanStatus");
           if(statusEl) statusEl.textContent="Verifying with a second model…";
           issues=await verifyGevScan(b64,{categories:parsed.categories});
+          verifyHTML=renderVerifyIssues(issues,{subject:"GEV list",clean:"Second check did not flag category or item mismatches."});
         }
-        const verifyHTML=renderVerifyIssues(issues);
         let preview="";
         parsed.categories.forEach(cat=>{
           preview+=`<div class="scan-emp"><div class="scan-emp-name">${esc(cat.name)} (${cat.items.length})</div>
@@ -4759,24 +4764,22 @@ RULES:
 
       /* Cross-model verification: have a different model family audit the
          candidate against the photo. Advisory only — never blocks Apply. */
-      let issues=[];
+      let issues=[], verifyHTML="";
       if(getEffectiveKey()){
         const statusEl=document.getElementById("scanStatus");
         if(statusEl) statusEl.textContent="Verifying with a second model…";
         issues=await verifyScheduleScan(b64, scanParsed);
+        verifyHTML=renderVerifyIssues(issues,{
+          subject:"schedule",
+          clean:"Second check did not flag employee or shift mismatches.",
+          formatter:function(i){
+            return `<b>${esc(i.emp||"")}</b> <span class="iv">${esc(i.day||"")}</span> - ${esc(i.got||"")} <span class="iv">to</span> ${esc(i.should||"")}<div class="iv-note">${esc(i.note||"")}</div>`;
+          }
+        });
       }
 
       /* Show results */
       let preview="";
-      let verifyHTML="";
-      if(issues&&issues.length){
-        const issueRows=issues.map(i=>`<div class="scan-issue"><b>${esc(i.emp||"")}</b> <span class="iv">${esc(i.day||"")}</span> — ${esc(i.got||"")} <span class="iv">→</span> ${esc(i.should||"")}<div class="iv-note">${esc(i.note||"")}</div></div>`).join("");
-        verifyHTML=`<div class="scan-verify">
-          <div class="scan-verify-t">${I.bell} ${issues.length} possible ${issues.length!==1?"discrepancies":"discrepancy"} flagged by second check</div>
-          ${issueRows}
-          <div style="font-size:11px;color:var(--ink-3);line-height:1.5;">The extractor (Gemini) and a second model (GPT) disagree on these. Review before applying — you can still Apply as-is.</div>
-        </div>`;
-      }
       scanParsed.forEach(emp=>{
         preview+=`<div class="scan-emp"><div class="scan-emp-name">${esc(emp.name)}</div>
           <div class="scan-emp-shifts">
@@ -4927,18 +4930,26 @@ If everything matches, return {"issues":[]}. Empty array = the candidate is corr
 async function verifyGevScan(b64,payload){ return verifyScanAgainstPhoto(b64,"gev",payload); }
 async function verifyDocScan(b64s,payload){ return verifyScanAgainstPhoto(b64s,"doc",payload); }
 
-/* Shared verification issues panel (used by schedule, GEV, and doc modes). */
-function renderVerifyIssues(issues){
-  if(!issues||!issues.length) return "";
-  const lack=!issues||!issues.length;
-  const rows=lack?"":issues.map(function(it){
-    const note=(it&&it.note)?String(it.note):String(it);
-    return `<div class="scan-issue"><span class="iv">!</span> ${esc(note)}</div>`;
+/* Shared verification review panel (used by schedule, GEV, and doc modes). */
+function renderVerifyIssues(issues,opts){
+  opts=opts||{};
+  const subject=opts.subject||"scan";
+  const clean=opts.clean||("Second check did not flag obvious "+subject+" mismatches.");
+  if(!issues||!issues.length){
+    return `<div class="scan-verify">
+      <div class="scan-verify-t">${I.check} Review looks clean</div>
+      <div class="scan-verify-clean">${I.check}<span>${esc(clean)}</span></div>
+      <div class="scan-verify-sub">Still compare the result to the photo before saving if anything looks unusual.</div>
+    </div>`;
+  }
+  const rows=issues.map(function(it){
+    const body=opts.formatter?opts.formatter(it):`<span class="iv">!</span> ${esc((it&&it.note)?String(it.note):String(it))}`;
+    return `<div class="scan-issue">${body}</div>`;
   }).join("");
-  return `<div class="scan-verify">
-    <div class="scan-verify-t">${I.bell} ${issues.length} possible ${issues.length!==1?"discrepancies":"discrepancy"} flagged by second check</div>
+  return `<div class="scan-verify warn">
+    <div class="scan-verify-t">${I.bell} Review ${issues.length} possible ${issues.length!==1?"mismatches":"mismatch"}</div>
+    <div class="scan-verify-sub">The first read and second check disagree on this ${esc(subject)}. Review these spots before applying; you can still save as-is.</div>
     ${rows}
-    <div style="font-size:11px;color:var(--ink-3);line-height:1.5;">The extractor and a second model (GPT) disagree on these. Review before applying.</div>
   </div>`;
 }
 
@@ -5374,13 +5385,14 @@ RULES:
       scanParsed.dateLabel=salesItemsListLabel(scanParsed.dateLabel||scanParsed.date);
       scanParsed.date=salesItemsStorageKey(scanParsed.dateLabel);
     }
-    let issues=[];
+    let issues=[], verifyHTML="";
     if(getEffectiveKey()){
       const statusEl=document.getElementById("scanStatus");
       if(statusEl) statusEl.textContent="Verifying with a second model\u2026";
       issues=await verifyDocScan(docPages.map(pg=>pg.b64),{date:scanParsed.date||"",sections:scanParsed.sections});
+      const scanSubject=scanMode==="salesplan"?"display plan":(scanMode==="salesitems"?"sales items list":"daily notes");
+      verifyHTML=renderVerifyIssues(issues,{subject:scanSubject,clean:"Second check did not flag missing sections or obvious text mismatches."});
     }
-    const verifyHTML=renderVerifyIssues(issues);
 
     const weekUI=scanMode==="salesplan"?`
       <div class="sp-week">
