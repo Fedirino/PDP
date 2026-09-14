@@ -4,6 +4,21 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.74.0] — 2026-09-14
+
+### Changed
+- **Out of Stock is now a simple four-column list.** Scans, manual rows, saved display, and edit mode now use only Item Number, Item, Ordered, and After Allocation, with a compact phone-friendly row layout instead of the full allocation-report table.
+- Existing saved Out of Stock scans with the older long report columns are normalized into the four-column view automatically.
+
+### Files
+- `index.html` — simplified Out of Stock schema, compact renderer, old-row normalization, and v5.74.0 markers
+- `manifest.json` — version URLs bumped to 5.74.0
+- `sw.js` — cache bumped to `pdp-v5.74.0`
+- `README.md` — current version
+- `CHANGELOG.md` — this entry
+
+---
+
 ## [5.73.0] — 2026-09-14
 
 ### Changed

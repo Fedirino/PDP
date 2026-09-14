@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.73.0">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.73.0">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.73.0">
+<link rel="apple-touch-icon" href="icon192.png?v=5.74.0">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.74.0">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.74.0">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -813,6 +813,14 @@
   .sales-item-meta .price{color:var(--brand-ink);margin-left:7px;}
   .sales-order-field{display:flex;flex-direction:column;gap:3px;align-items:center;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);}
   .sales-order{width:54px;}
+  .oos-list{margin-top:10px;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+  .oos-row{display:grid;grid-template-columns:64px minmax(0,1fr) 44px 44px;gap:7px;align-items:center;padding:9px 10px;border-bottom:1px solid var(--line);}
+  .oos-row:last-child{border-bottom:none;}
+  .oos-row:nth-child(even){background:var(--surface-2);}
+  .oos-code{font-size:11px;font-weight:800;color:var(--ink-2);font-variant-numeric:tabular-nums;overflow-wrap:anywhere;}
+  .oos-item{font-size:13px;font-weight:700;line-height:1.28;color:var(--ink);min-width:0;overflow-wrap:anywhere;}
+  .oos-qty{display:flex;flex-direction:column;gap:3px;align-items:center;font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);}
+  .oos-qty b{display:block;min-width:32px;padding:5px 4px;border:1px solid var(--line-2);border-radius:7px;background:var(--surface-3);color:var(--brand-ink);font-size:13px;text-align:center;font-variant-numeric:tabular-nums;}
   .doc-empty{text-align:center;padding:44px 20px 30px;}
   .doc-empty .ei{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;margin:0 auto 14px;
     background:var(--violet-tint);color:var(--violet);}
@@ -2421,7 +2429,7 @@ const DOCS_KEY="pdp_documents_v2";
 const DOC_TYPES=["dailynotes","salesplan","salesitems","outofstock"];
 const DOC_LABEL={dailynotes:"Daily Notes",salesplan:"Display Plan",salesitems:"Sales Items",outofstock:"Out of Stock"};
 const DOC_RETAIN_DAYS={dailynotes:14,salesplan:70,salesitems:70,outofstock:70};
-const OUT_OF_STOCK_HEADERS=["Item Number","Item Description","Bill Dept","Inv Class","Class Description","Order Date","Deliv Date","Original Qty Ordered","Order Qty After Allocation"];
+const OUT_OF_STOCK_HEADERS=["Item Number","Item","Ordered","After Allocation"];
 let docStore={dailynotes:[],salesplan:[],salesitems:[],outofstock:[]};
 let docActiveId={dailynotes:null,salesplan:null,salesitems:null,outofstock:null};
 
@@ -2529,6 +2537,7 @@ async function createManualOutOfStock(){
 function addManualOutOfStockRow(doc){
   doc=doc||activeDoc("outofstock");
   if(!doc) return createManualOutOfStock();
+  normalizeOutOfStockDoc(doc);
   if(!Array.isArray(doc.sections)||!doc.sections.length){
     doc.sections=[{category:"Out of Stock",subject:"Order Allocation Report",contact:"",bullets:[],tables:[]}];
   }
@@ -2539,7 +2548,7 @@ function addManualOutOfStockRow(doc){
     table={title:"Order Allocation Report",headers:OUT_OF_STOCK_HEADERS.slice(),rows:[]};
     section.tables.push(table);
   }
-  if(!Array.isArray(table.headers)||!table.headers.length) table.headers=OUT_OF_STOCK_HEADERS.slice();
+  table.headers=OUT_OF_STOCK_HEADERS.slice();
   if(!Array.isArray(table.rows)) table.rows=[];
   table.rows.push(table.headers.map(function(){ return ""; }));
   touchDoc(doc); saveDocs();
@@ -3046,7 +3055,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.73.0</div></section>`;
+      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.74.0</div></section>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{ if(b.dataset.listscreen) ll.screen=b.dataset.listscreen; setTab(b.dataset.go); });
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -5303,19 +5312,20 @@ const outOfStockPrompt=`You are transcribing a Stop & Shop produce "Order Alloca
 Return ONLY valid JSON. No markdown, no backticks, no commentary.
 
 Create exactly one section with category "Out of Stock" unless the upload contains multiple separate allocation reports for different dates or stores. Each section has one table titled "Order Allocation Report" with exactly these headers:
-["Item Number","Item Description","Bill Dept","Inv Class","Class Description","Order Date","Deliv Date","Original Qty Ordered","Order Qty After Allocation"]
+["Item Number","Item","Ordered","After Allocation"]
 
 {"date":"2026-09-13","dateLabel":"09/13/26 · Store 02606","sections":[
   {"category":"Out of Stock","subject":"Order Allocation Report","contact":"Store 02606 · FAC 54","bullets":["Job: XPNBI170","Page 1 of 2"],
-   "tables":[{"title":"Order Allocation Report","headers":["Item Number","Item Description","Bill Dept","Inv Class","Class Description","Order Date","Deliv Date","Original Qty Ordered","Order Qty After Allocation"],"rows":[["007244","NASOYA SF SPRTD TOFU16Z","530","06","PRODUCE","20260913","20260914","1","0"]]}]}
+   "tables":[{"title":"Order Allocation Report","headers":["Item Number","Item","Ordered","After Allocation"],"rows":[["007244","NASOYA SF SPRTD TOFU16Z","1","0"]]}]}
 ]}
 
 RULES:
 - date: ISO YYYY-MM-DD from the printed report date. dateLabel: use the printed report date plus store number when visible, for example "09/13/26 · Store 02606".
 - Capture EVERY item row across ALL pages, IN PRINTED ORDER. A second page with one row is still part of the same table.
 - Copy item number and item description verbatim, including leading zeroes, plus signs, abbreviations, sizes, and punctuation.
-- Copy numeric fields verbatim. Do not convert report dates like 20260913 to a formatted date inside table cells.
-- Original Qty Ordered and Order Qty After Allocation are the two rightmost quantity columns. Keep zeros as "0".
+- Copy only the needed row fields: item number, item description, Original Qty Ordered, and Order Qty After Allocation.
+- Ordered and After Allocation are the two rightmost quantity columns. Keep zeros as "0".
+- Ignore Bill Dept, Inv Class, Class Description, Order Date, and Deliv Date in the output table.
 - Header details such as JOB, STORE NUMBER, FAC, and page count may go in contact/bullets, but do not let them replace item rows.
 - Do NOT invent, reorder, round, or summarize. Keep repeated rows repeated. If text is unreadable, use "[unclear]" only for that cell.`;
 
@@ -5597,6 +5607,43 @@ async function applyDocScan(){
 }
 
 /* ---- Render document sections (shared by preview + tab) ---- */
+function oosRow4(row,headers){
+  row=Array.isArray(row)?row:[];
+  headers=Array.isArray(headers)?headers:[];
+  const h=headers.map(function(x){ return String(x||"").toLowerCase(); });
+  function pick(names,fallback){
+    for(let i=0;i<h.length;i++){
+      if(names.some(function(n){ return h[i].includes(n); })) return String(row[i]||"");
+    }
+    return String(row[fallback]||"");
+  }
+  const long=h.some(function(x){ return x.includes("bill dept")||x.includes("inv class")||x.includes("class description")||x.includes("deliv"); });
+  if(long||row.length>=9){
+    return [
+      pick(["item number"],0),
+      pick(["item description","item"],1),
+      pick(["original qty","ordered"],7),
+      pick(["after allocation"],8)
+    ];
+  }
+  return [
+    pick(["item number"],0),
+    pick(["item"],1),
+    pick(["ordered","original"],2),
+    pick(["after allocation","after"],3)
+  ];
+}
+function normalizeOutOfStockDoc(doc){
+  if(!doc||!Array.isArray(doc.sections)) return doc;
+  doc.sections.forEach(function(s){
+    (s.tables||[]).forEach(function(t){
+      t.rows=(t.rows||[]).map(function(r){ return oosRow4(r,t.headers); });
+      t.headers=OUT_OF_STOCK_HEADERS.slice();
+      if(!t.title) t.title="Order Allocation Report";
+    });
+  });
+  return doc;
+}
 function docSectionsHTML(doc,type){
   if(type==="salesplan"){
     /* If the scan produced a faithful HTML rendering, show it (sanitized);
@@ -5615,6 +5662,13 @@ function docSectionsHTML(doc,type){
       if(showOrderColumns){
         const rows=(t.rows||[]).map((r,ri)=>{ const order=(t.orders&&t.orders[ri])||{}; const item=String(r[1]||r[0]||"Item"); const code=String(r[0]||""); const price=String(r[2]||""); return `<div class="sales-item-row"><div class="sales-item-main"><div class="sales-item-name">${esc(item)}</div><div class="sales-item-meta">${code?"#"+esc(code):""}${price?`<span class="price">${esc(price)}</span>`:""}</div></div><label class="sales-order-field">Tue<input class="sales-order" data-sales-order="tue" data-si="${si}" data-ti="${ti}" data-ri="${ri}" type="number" min="0" inputmode="numeric" value="${esc(String(order.tue||""))}" aria-label="Tuesday order for ${esc(item)}"></label><label class="sales-order-field">Thu<input class="sales-order" data-sales-order="thu" data-si="${si}" data-ti="${ti}" data-ri="${ri}" type="number" min="0" inputmode="numeric" value="${esc(String(order.thu||""))}" aria-label="Thursday order for ${esc(item)}"></label></div>`; }).join("");
         return `${t.title?`<div class="doc-tbl-title">${esc(t.title)}</div>`:""}<div class="sales-list">${rows}</div>`;
+      }
+      if(type==="outofstock"){
+        const rows=(t.rows||[]).map(function(r){
+          const v=oosRow4(r,t.headers);
+          return `<div class="oos-row"><div class="oos-code">${esc(v[0])}</div><div class="oos-item">${esc(v[1]||"Item")}</div><div class="oos-qty">Ord<b>${esc(v[2])}</b></div><div class="oos-qty">After<b>${esc(v[3])}</b></div></div>`;
+        }).join("");
+        return `${t.title?`<div class="doc-tbl-title">${esc(t.title)}</div>`:""}<div class="oos-list">${rows}</div>`;
       }
       const head=(t.headers||[]).length?`<thead><tr>${t.headers.map(h=>`<th>${esc(h)}</th>`).join("")}${orderHeads}</tr></thead>`:"";
       const body=`<tbody>${(t.rows||[]).map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody>`;
@@ -5980,6 +6034,7 @@ function renderDocSection(type){
 
 /* ---- Edit mode ---- */
 function renderDocEdit(type,d){
+  if(type==="outofstock") normalizeOutOfStockDoc(d);
   const lbl=DOC_LABEL[type];
   const secHTML=(s,si)=>{
     const tbls=(s.tables||[]).map((t,ti)=>{
