@@ -4,6 +4,20 @@ All notable changes to the Produce Department Portal are documented here.
 
 ---
 
+## [5.74.2] — 2026-09-15
+
+### Fixed
+- **Schedule photos now move when pushing Next Week to This Week.** The push action carries the saved source photo gallery along with employees and the week date, then clears the old Next Week photos so they do not linger.
+
+### Files
+- `index.html` — schedule photo normalization, push-photo transfer, and v5.74.2 markers
+- `manifest.json` — version URLs bumped to 5.74.2
+- `sw.js` — cache bumped to `pdp-v5.74.2`
+- `README.md` — current version
+- `CHANGELOG.md` — this entry
+
+---
+
 ## [5.74.1] — 2026-09-14
 
 ### Fixed

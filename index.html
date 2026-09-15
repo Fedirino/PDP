@@ -8,9 +8,9 @@
 <meta name="apple-mobile-web-app-title" content="PDP">
 <meta name="theme-color" content="#0c1016">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icon192.png?v=5.74.1">
-<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.74.1">
-<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.74.1">
+<link rel="apple-touch-icon" href="icon192.png?v=5.74.2">
+<link rel="icon" type="image/png" sizes="192x192" href="icon192.png?v=5.74.2">
+<link rel="icon" type="image/png" sizes="512x512" href="icon512.png?v=5.74.2">
 <title>PDP — Produce Department Portal</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -2350,6 +2350,9 @@ function seedSched(){ return { weeks:[
   { label:"This Week", startDate:"", employees:[] },
   { label:"Next Week", startDate:"", employees:[] }
 ]}; }
+function schedulePhotos(w){
+  return (w&&Array.isArray(w.photos)&&w.photos.length)?w.photos.slice():(w&&w.photo?[w.photo]:[]);
+}
 let sched;
 (function loadSched(){
   const raw=readK(SCHKEY);
@@ -3055,7 +3058,7 @@ function renderHome(){
            <div class="tx"><div class="tt">${x.t}</div></div>
          </button>`).join("")}
      </div>
-      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.74.1</div></section>`;
+      <div class="home-version" style="text-align:center;font-size:11px;color:var(--ink-3);font-weight:500;letter-spacing:.02em;">PDP v5.74.2</div></section>`;
  view.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{ if(b.dataset.listscreen) ll.screen=b.dataset.listscreen; setTab(b.dataset.go); });
   // Checklist button
   const hclBtn=document.getElementById("homeGoChecklist");
@@ -3619,12 +3622,13 @@ function renderSchedule(){
   } else {
     /* View mode: compact table — everyone on one screen */
     const dateLine=w.startDate?getWeekDates(w.startDate):null;
+    const schPhotos=schedulePhotos(w);
     body+=`<div style="display:flex;align-items:center;gap:8px;margin:0 2px 10px;">
       <span style="font-size:11px;font-weight:600;color:var(--ink-3)">Week of</span>
       <input type="date" id="schDate" value="${w.startDate||""}" style="font:inherit;font-size:13px;font-weight:600;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px;color:var(--ink);flex:1;">
-          ${(w.photos&&w.photos.length)||w.photo?`<div class="sch-photos" id="schPhotos">
-                      ${(w.photos&&w.photos.length?w.photos:w.photo?[w.photo]:[]).map((ph,i)=>`<button class="sch-photo" data-photo="${i}" title="Source photo ${(w.photos&&w.photos.length>1)?(i+1):""} (zoom to check)">${I.scan}</button>`).join("")}
-                      ${(w.photos&&w.photos.length>1)?`<span class="sch-photo-n">${w.photos.length} photos</span>`:""}
+          ${schPhotos.length?`<div class="sch-photos" id="schPhotos">
+                      ${schPhotos.map((ph,i)=>`<button class="sch-photo" data-photo="${i}" title="Source photo ${(schPhotos.length>1)?(i+1):""} (zoom to check)">${I.scan}</button>`).join("")}
+                      ${(schPhotos.length>1)?`<span class="sch-photo-n">${schPhotos.length} photos</span>`:""}
                     </div>`:""}
           </div>`;
     body+=`<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;"><table class="sch-table"><thead><tr>
@@ -3664,7 +3668,7 @@ function renderSchedule(){
   view.querySelectorAll("[data-schw]").forEach(b=>b.onclick=()=>{ schWeek=parseInt(b.dataset.schw); render(); });
   const dateInp=document.getElementById("schDate");
   if(dateInp) dateInp.onchange=()=>{ w.startDate=dateInp.value; saveSched(); render(); };
-  const photos=(w.photos&&w.photos.length)?w.photos:(w.photo?[w.photo]:[]);
+  const photos=schedulePhotos(w);
     if(photos.length){
       const photoBtns=document.querySelectorAll("#schPhotos .sch-photo");
       photoBtns.forEach((btn,bi)=>btn.onclick=()=>{ openImgViewer(photos[parseInt(btn.dataset.photo,10)]||photos[bi]); });
@@ -3679,7 +3683,9 @@ function renderSchedule(){
     if(!confirm("Replace This Week's schedule with Next Week's data?")) return;
     sched.weeks[0].employees=JSON.parse(JSON.stringify(next.employees));
     sched.weeks[0].startDate=next.startDate;
-    next.employees=[]; next.startDate="";
+    sched.weeks[0].photos=schedulePhotos(next);
+    sched.weeks[0].photo=null;
+    next.employees=[]; next.startDate=""; next.photos=[]; next.photo=null;
     schWeek=0; saveSched(); toast("Pushed Next Week → This Week"); render();
   };
 
